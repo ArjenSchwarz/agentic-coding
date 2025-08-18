@@ -20,7 +20,7 @@ The framework provides specialized AI agents for different aspects of developmen
 - **`design-critic`** - Provides critical review of design documents and architecture proposals
 - **`efficiency-optimizer`** - Analyzes code for performance optimization opportunities
 - **`peer-review-validator`** - Validates decisions by consulting with external AI systems
-- **`research-agent`** - Conducts comprehensive research and generates structured reports
+- **`research-agent`** - Conducts comprehensive research and generates structured reports (stolen from @sammcj)
 - **`ui-ux-reviewer`** - Evaluates user interfaces for usability and accessibility improvements
 
 ## Workflow

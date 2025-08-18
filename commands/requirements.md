@@ -14,7 +14,7 @@ a design.
 - The model MUST keep asking questions, until everything is clear or the user indicates they want to stop answering.
 - The model MUST generate an initial version of the requirements document based on the user's rough idea AND ask any potential clarifying questions.
 - The model MUST format the initial requirements.md document with:
-  - A clear introduction section that summarizes the feature
+  - A clear introduction section that summarises the feature
   - A hierarchical numbered list of requirements where each contains:
     - A user story in the format "As a [role], I want [feature], so that [benefit]"
     - A numbered list of acceptance criteria in EARS format (Easy Approach to Requirements Syntax)

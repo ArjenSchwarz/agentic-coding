@@ -16,7 +16,8 @@ The tasks document should be based on the requirement and design documents, so e
 - The model MUST use the following specific instructions when creating the implementation plan:
   ```
   Convert the feature design into a series of prompts for a code-generation LLM that will implement each step in a test-driven manner. Prioritize best practices, incremental progress, and early testing, ensuring no big jumps in complexity at any stage. Make sure that each prompt builds on the previous prompts, and ends with wiring things together. There should be no hanging or orphaned code that isn't integrated into a previous step. Focus ONLY on tasks that involve writing, modifying, or testing code.
-  ```
+  
+```
 - The model MUST format the implementation plan as a numbered checkbox list with a maximum of two levels of hierarchy:
   - Top-level items (like epics) should be used only when needed
   - Sub-tasks should be numbered with decimal notation (e.g., 1.1, 1.2, 2.1)
@@ -31,7 +32,7 @@ The tasks document should be based on the requirement and design documents, so e
 - The model MUST NOT include excessive implementation details that are already covered in the design document
 - The model MUST assume that all context documents (feature requirements, design) will be available during implementation
 - The model MUST ensure each step builds incrementally on previous steps
-- The model MUST prioritize test-driven development where appropriate. This means that the model MUST schedule subtasks for the tests before those for the implementation. For example, 1.1 would create the unit tests, and 1.2 would do the implementation.
+- The model MUST prioritise test-driven development where appropriate. This means that the model MUST schedule subtasks for the tests before those for the implementation. For example, 1.1 would create the unit tests, and 1.2 would do the implementation.
 - The model MUST ensure the plan covers all aspects of the design that can be implemented through code
 - The model SHOULD sequence steps to validate core functionality early through code
 - The model MUST ensure that all requirements are covered by the implementation tasks
@@ -51,7 +52,7 @@ The tasks document should be based on the requirement and design documents, so e
   - Performance metrics gathering or analysis
   - Running the application to test end to end flows. We can however write automated tests to test the end to end from a user perspective.
   - User training or documentation creation
-  - Business process changes or organizational changes
+  - Business process changes or organisational changes
   - Marketing or communication activities
   - Any task that cannot be completed through writing, modifying, or testing code
 - After updating the tasks document, the model MUST ask the user "Do the tasks look good?"
@@ -61,7 +62,7 @@ The tasks document should be based on the requirement and design documents, so e
 - The model MUST continue the feedback-revision cycle until explicit approval is received.
 - The model MUST stop once the task document has been approved.
 
-**This workflow is ONLY for creating design and planning artifacts. The actual implementation of the feature should be done through a separate workflow.**
+**This workflow is ONLY for creating design and planning artefacts. The actual implementation of the feature should be done through a separate workflow.**
 
 - The model MUST NOT attempt to implement the feature as part of this workflow
-- The model MUST clearly communicate to the user that this workflow is complete once the design and planning artifacts are created
+- The model MUST clearly communicate to the user that this workflow is complete once the design and planning artefacts are created

@@ -156,7 +156,7 @@ flowchart TD
 - Always start with the requirements command for new features
 - Use the current git branch name as the feature name when possible
 - Ensure each phase is fully approved before moving to the next
-- The workflow creates planning artifacts only - implementation is separate
+- The workflow creates planning artefacts only - implementation is separate
 - Tasks should be concrete and actionable by coding agents
 - Each task group should be reviewed before proceeding to the next
 

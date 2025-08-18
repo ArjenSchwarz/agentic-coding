@@ -18,5 +18,5 @@ Implement the next unfinished group of tasks from the tasks list. A group of tas
 - The model MUST implement the selected main task and all of its subtasks.
 - Once a subtask or task is completed, the model MUST mark it as done in the tasks.md file.
 - The model MUST NOT proceed past the selected task. Once a task is done, it needs to be put up for review by the user
-- Use tools and sub agents as appropriate while implementing the task. For example, if you need to know the capabilities of a library, use context7, and if you want to verify your code is efficient, use the efficiency-optimizer sub agent.
+- Use tools and sub agents as appropriate while implementing the task. For example, if you need to know the capabilities of a library, use context7, and if you want to verify your code is efficient, use the efficiency-optimiser sub agent.
 

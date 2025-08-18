@@ -14,11 +14,11 @@ The framework includes commands for a complete feature development workflow (det
 
 ## Agents
 
-The framework provides specialized AI agents for different aspects of development. These are defined for use in Claude Code, and not every tool supports sub-agents like this. So there may be some requirements here that don't work well in other tools, or have other dependencies like peer-review-validator that requires Gemini CLI to be installed and configured.
+The framework provides specialised AI agents for different aspects of development. These are defined for use in Claude Code, and not every tool supports sub-agents like this. So there may be some requirements here that don't work well in other tools, or have other dependencies like peer-review-validator that requires Gemini CLI to be installed and configured.
 
 - **`code-simplifier`** - Reviews code for complexity reduction and maintainability improvements
 - **`design-critic`** - Provides critical review of design documents and architecture proposals
-- **`efficiency-optimizer`** - Analyzes code for performance optimization opportunities
+- **`efficiency-optimiser`** - Analyses code for performance optimisation opportunities
 - **`peer-review-validator`** - Validates decisions by consulting with external AI systems
 - **`research-agent`** - Conducts comprehensive research and generates structured reports (stolen from @sammcj)
 - **`ui-ux-reviewer`** - Evaluates user interfaces for usability and accessibility improvements
@@ -35,7 +35,7 @@ Each phase requires explicit user approval before proceeding to ensure quality a
 
 ## File Structure
 
-Feature work is organized in `agents/{feature_name}/` directories containing:
+Feature work is organised in `agents/{feature_name}/` directories containing:
 - `requirements.md` - Feature requirements in EARS format
 - `design.md` - Comprehensive design document
 - `tasks.md` - Implementation task checklist

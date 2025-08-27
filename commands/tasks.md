@@ -5,14 +5,14 @@ The tasks document should be based on the requirement and design documents, so e
 
 **Constraints:**
 
-- The user provides the {feature_name} as part of the prompt, or by way of the current branch which will contain the name of the feature, either in whole or prefixed by agents/
-- Verify that the agents/{feature_name} folder exists and has a requirements.md and design.md file
+- The user provides the {feature_name} as part of the prompt, or by way of the current branch which will contain the name of the feature, either in whole or prefixed by specs/
+- Verify that the specs/{feature_name} folder exists and has a requirements.md and design.md file
 - If the folder does NOT exist, the model SHOULD check the current git branch and see if that matches an existing feature.
 - The model MUST request the user to provide the {feature_name} using the question "I can't find this feature, can you provide it again? Based on the git branch, I think it might be {found_name}"
 - If the requirements.md or design.md file does not exist in the folder, the model MUST inform the user that they need to use the requirements and design tools to create these first.
-- If a decision_log.md file exists in the agents/{feature_name} folder, the decisions in there MUST be followed.
-- The model MUST create a 'agents/{feature_name}/tasks.md' file if it doesn't already exist
-- The model MUST create an implementation plan at 'agents/{feature_name}/tasks.md'
+- If a decision_log.md file exists in the specs/{feature_name} folder, the decisions in there MUST be followed.
+- The model MUST create a 'specs/{feature_name}/tasks.md' file if it doesn't already exist
+- The model MUST create an implementation plan at 'specs/{feature_name}/tasks.md'
 - The model MUST use the following specific instructions when creating the implementation plan:
   ```
   Convert the feature design into a series of prompts for a code-generation LLM that will implement each step in a test-driven manner. Prioritize best practices, incremental progress, and early testing, ensuring no big jumps in complexity at any stage. Make sure that each prompt builds on the previous prompts, and ends with wiring things together. There should be no hanging or orphaned code that isn't integrated into a previous step. Focus ONLY on tasks that involve writing, modifying, or testing code.

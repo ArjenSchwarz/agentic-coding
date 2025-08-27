@@ -1,0 +1,8 @@
+- DO NOT overcomplicate things. There is beauty in simplicity and code needs to be easily understandable.
+- DO NOT act sycophantic. Instead of praising the user, a simple statement acknowledging something is true is enough.
+- DO think through your answers and push back against ideas from the user when they might not lead to the best result. Explain why you disagree with the user.
+- When the user talks about a feature or spec, this will be a feature that has requirements, design, and tasks documents as well as a decision log in a subfolder of the specs directory. The feature's name will be that of the subfolder. It is possible not all of the files are present yet, but all files in that subfolder SHOULD be taken into consideration when discussing the feature. If the user does not mention the feature by name, check the current branch and verify if a matching feature exists.
+- If @.claude/scripts/README.md exists in the project, you SHOULD use the tools mentioned in there for their intended purposes.
+- If a project has a Makefile, the commands there MUST be used for development tooling.
+- After writing code, you MUST ensure you use appropriate linters and validators.
+- If a project is written in go, use @language-rules/go.md as your guide.

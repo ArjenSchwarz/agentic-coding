@@ -7,9 +7,9 @@ a design.
 
 **Constraints:**
 
-- The model MUST first propose a {feature_name} based on the prompt, but let the user override this.
+- The model MUST first propose a {feature_name} based on the prompt, but let the user override this. If the current branch is not a default branch like main or develop, consider that name as a likely option.
 - The model MUST wait for the user's answer to the {feature_name} question.
-- The model MUST create a 'agents/{feature_name}/requirements.md' file if it doesn't already exist
+- The model MUST create a 'specs/{feature_name}/requirements.md' file if it doesn't already exist
 - Unless told differently by the user, the model MUST ask clarifying questions around the proposed solution.
 - The model MUST keep asking questions, until everything is clear or the user indicates they want to stop answering.
 - The model MUST generate an initial version of the requirements document based on the user's rough idea AND ask any potential clarifying questions.
@@ -38,7 +38,7 @@ a design.
 - The model MUST make modifications to the requirements document if the user requests changes or does not explicitly approve
 - The model MUST ask for explicit approval after every iteration of edits to the requirements document
 - The model MUST continue the feedback-revision cycle until explicit approval is received
-- The model MUST highlight decisions and their rationales in a decision log document at agents/{feature_name}/decision_log.md. This includes answers to the questions the model asks.
+- The model MUST highlight decisions and their rationales in a decision log document at specs/{feature_name}/decision_log.md. This includes answers to the questions the model asks.
 - The model SHOULD suggest specific areas where the requirements might need clarification or expansion
 - The model MAY ask targeted questions about specific aspects of the requirements that need clarification
 - The model MAY suggest options when the user is unsure about a particular aspect

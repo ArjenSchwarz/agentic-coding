@@ -10,7 +10,7 @@ The framework includes commands for a complete feature development workflow (det
 - **`design`** - Create comprehensive design documents based on approved requirements
 - **`tasks`** - Convert designs into actionable implementation task lists
 - **`next-task`** - Execute the next group of tasks from the implementation plan
-- **`commits`** - Format, stage, and commit changes with proper changelog management
+- **`commit`** - Format, stage, and commit changes with proper changelog management
 
 ## Agents
 
@@ -29,16 +29,32 @@ The framework provides specialized AI agents for different aspects of developmen
 2. Use `design` to plan the architecture and approach
 3. Generate implementation steps with `tasks`
 4. Execute incrementally using `next-task`
-5. Commit progress using `commits`
+5. Commit progress using `commit`
 
 Each phase requires explicit user approval before proceeding to ensure quality and alignment.
 
 ## File Structure
 
-Feature work is organized in `agents/{feature_name}/` directories containing:
+Feature work is organized in `specs/{feature_name}/` directories containing:
 - `requirements.md` - Feature requirements in EARS format
 - `design.md` - Comprehensive design document
 - `tasks.md` - Implementation task checklist
 - `decision_log.md` - Decisions and rationales
+
+## Scripts Directory
+
+The `scripts/` directory contains helper scripts for AI-assisted development. To use these scripts in your projects:
+
+1. Create a symlink in your project:
+   ```bash
+   ln -s ~/code/agentic-coding/scripts .claude/scripts
+   ```
+
+2. Add to your project's `.gitignore`:
+   ```
+   .claude/scripts
+   ```
+
+This approach allows you to use the scripts across multiple projects without committing them to each repository, keeping them centralized and easy to update.
 
 This framework is designed to work with various AI coding tools including Claude Code, GitHub Copilot, and Cline.

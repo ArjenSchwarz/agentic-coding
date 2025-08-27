@@ -24,10 +24,11 @@ This is constantly being worked on, and will evolve over time. Each step also wo
 
 **Process**:
 - Generate initial requirements based on user's feature idea
-- Create `agents/{feature_name}/requirements.md` file
+- Create `specs/{feature_name}/requirements.md` file
 - Use hierarchical numbered lists with user stories and acceptance criteria
 - Iterate with user through clarifying questions until requirements are complete
-- Use design-critic and peer-review-validator sub-agents for review
+- Use design-critic sub-agent to critically review requirements
+- Use peer-review-validator sub-agent for external validation
 - Continue feedback-revision cycle until explicit user approval
 
 **Key Constraints**:
@@ -43,7 +44,7 @@ This is constantly being worked on, and will evolve over time. Each step also wo
 **Process**:
 - Verify requirements.md exists
 - Conduct research using available tools (context7, web search)
-- Create detailed `agents/{feature_name}/design.md` with required sections:
+- Create detailed `specs/{feature_name}/design.md` with required sections:
   - Overview
   - Architecture
   - Components and Interfaces
@@ -51,7 +52,8 @@ This is constantly being worked on, and will evolve over time. Each step also wo
   - Error Handling
   - Testing Strategy
 - Include Mermaid diagrams when appropriate
-- Use sub-agents for design review
+- Use design-critic sub-agent to challenge design decisions
+- Use peer-review-validator sub-agent for second opinion
 - Get explicit user approval
 
 **Key Constraints**:
@@ -67,7 +69,7 @@ This is constantly being worked on, and will evolve over time. Each step also wo
 **Process**:
 - Verify requirements.md and design.md exist
 - Convert design into series of prompts for code-generation
-- Create numbered checkbox list in `agents/{feature_name}/tasks.md`
+- Create numbered checkbox list in `specs/{feature_name}/tasks.md`
 - Focus on test-driven development and incremental progress
 - Reference specific requirements for each task
 - Ensure tasks build incrementally
@@ -96,9 +98,9 @@ This is constantly being worked on, and will evolve over time. Each step also wo
 
 ## File Structure
 
-All feature-related files are stored in `agents/{feature_name}/`:
+All feature-related files are stored in `specs/{feature_name}/`:
 ```
-agents/
+specs/
 └── {feature_name}/
     ├── requirements.md    # EARS format requirements
     ├── design.md         # Comprehensive design document
@@ -110,36 +112,54 @@ agents/
 
 ```mermaid
 flowchart TD
-    A[Start: Feature Idea] --> B[Requirements Command]
-    B --> C{Requirements<br/>Approved?}
-    C -->|No| D[Refine Requirements]
-    D --> C
-    C -->|Yes| E[Design Command]
-    E --> F[Research & Analysis]
-    F --> G[Create Design Document]
-    G --> H{Design<br/>Approved?}
-    H -->|No| I[Refine Design]
-    I --> H
-    H -->|Yes| J[Tasks Command]
-    J --> K[Create Implementation Plan]
-    K --> L{Tasks<br/>Approved?}
-    L -->|No| M[Refine Tasks]
-    M --> L
-    L -->|Yes| N[Next-Task Command]
-    N --> O[Find Next Incomplete Task Group]
-    O --> P[Implement Task Group]
-    P --> Q[Mark Tasks Complete]
-    Q --> R{More Tasks<br/>Remaining?}
-    R -->|Yes| S[User Review]
-    S --> N
-    R -->|No| T[Feature Complete]
+A([Start: Feature Idea]) --> B([Requirements Command])
+B --> B1[Generate Initial Requirements]
+B1 --> B2[Design-Critic Review]
+B2 --> B3[Peer-Review Validation]
+B3 --> C{Requirements<br/>Approved?}
+C -->|No| D((Refine<br/>Requirements))
+D --> B2
+C -->|Yes| E([Design Command])
+E --> F[Research & Analysis]
+F --> G[Create Design Document]
+G --> G1[Design-Critic Review]
+G1 --> G2[Peer-Review Validation]
+G2 --> H{Design<br/>Approved?}
+H -->|No| I((Refine Design))
+I --> G1
+H -->|Yes| J([Tasks Command])
+J --> K[Create Implementation Plan]
+K --> L{Tasks<br/>Approved?}
+L -->|No| M((Refine Tasks))
+M --> L
+L -->|Yes| N([Next-Task Command])
+N --> O[Find Next Incomplete Task Group]
+O --> P[Implement Task Group]
+P --> Q[Mark Tasks Complete]
+Q --> R{More Tasks<br/>Remaining?}
+R -->|Yes| S[/User Review/]
+S --> N
+R -->|No| T([Feature Complete])
 
-    style A fill:#e1f5fe
-    style T fill:#c8e6c9
-    style C fill:#fff3e0
-    style H fill:#fff3e0
-    style L fill:#fff3e0
-    style R fill:#fff3e0
+%% --- Styling ---
+style A fill:#FF7377,color:#FFFFFF,stroke:#6C6A6A,stroke-width:1px
+style T fill:#FF7377,color:#FFFFFF,stroke:#6C6A6A,stroke-width:1px
+
+style C fill:#FFF0CC,color:#000000,stroke:#6C6A6A,stroke-width:1px
+style H fill:#FFF0CC,color:#000000,stroke:#6C6A6A,stroke-width:1px
+style L fill:#FFF0CC,color:#000000,stroke:#6C6A6A,stroke-width:1px
+style R fill:#FFF0CC,color:#000000,stroke:#6C6A6A,stroke-width:1px
+
+style D fill:#FFD6D7,color:#000000,stroke:#6C6A6A,stroke-width:1px
+style I fill:#FFD6D7,color:#000000,stroke:#6C6A6A,stroke-width:1px
+style M fill:#FFD6D7,color:#000000,stroke:#6C6A6A,stroke-width:1px
+
+style S fill:#E0F7FA,color:#000000,stroke:#6C6A6A,stroke-width:1px
+
+classDef process fill:#FCFBFB,color:#000000,stroke:#6C6A6A,stroke-width:1px
+classDef subagent fill:#E8F5E9,color:#000000,stroke:#4CAF50,stroke-width:2px
+class B,E,F,G,J,K,N,O,P,Q,B1,G process
+class B2,B3,G1,G2 subagent
 ```
 
 ## Key Principles

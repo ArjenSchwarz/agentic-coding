@@ -4,9 +4,9 @@ Implement the next unfinished group of tasks from the tasks list. A group of tas
 
 **Constraints:**
 
-- The user provides the {feature_name} as part of the prompt, or by way of the current branch which will contain the name of the feature, either in whole or prefixed by agents/. When there are multiple features that could match, go for the one that most closely matches the branch name.
-- Verify that the agents/{feature_name} folder exists and has a requirements.md, design.md, and tasks.md file
-- Optionally a decision_log.md file will exist in the agents/{feature_name} folder. The model MUST adhere to any decisions logged in there. If any decisions block work, the model MUST raise this before continuing.
+- The user provides the {feature_name} as part of the prompt, or by way of the current branch which will contain the name of the feature, either in whole or prefixed by specs/. When there are multiple features that could match, go for the one that most closely matches the branch name.
+- Verify that the specs/{feature_name} folder exists and has a requirements.md, design.md, and tasks.md file
+- Optionally a decision_log.md file will exist in the specs/{feature_name} folder. The model MUST adhere to any decisions logged in there. If any decisions block work, the model MUST raise this before continuing.
 - If any of these files are missing, or the {feature_name} is unknown, the model MUST NOT continue
 - The model MUST read all 3 of these files.
 - A task is defined as a main task, consisting of a description, prefixed by a whole digit.

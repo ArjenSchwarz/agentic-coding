@@ -65,3 +65,58 @@ The tasks document should be based on the requirement and design documents, so e
 
 - The model MUST NOT attempt to implement the feature as part of this workflow
 - The model MUST clearly communicate to the user that this workflow is complete once the design and planning artifacts are created
+
+- The model MUST use the rune CLI command to create the tasks. This is done as per the below instructions, exactly following the format of the json file. The model MUST define details and references separately:
+
+#### 1. Create the batch operations file
+
+```bash
+cat > create-tasks.json << 'EOF'
+{
+  "file": "project-tasks.md",
+  "operations": [
+    {
+      "type": "add",
+      "title": "Security Implementation",
+      "details": [
+        "Implement authentication system",
+        "Add authorization middleware",
+        "Security audit and testing"
+      ]
+    },
+    {
+      "type": "add",
+      "parent": "1",
+      "title": "OAuth Integration",
+      "details": [
+        "Research OAuth providers",
+        "Implement OAuth flow",
+        "Add social login options"
+      ],
+      "references": ["Requirements 6.1, 6.2"]
+    },
+    {
+      "type": "add",
+      "parent": "1",
+      "title": "Session Management",
+      "details": [
+        "Design session storage",
+        "Implement session middleware",
+        "Add session timeout handling"
+      ],
+      "references": ["Requirements 4.1, 4.2"]
+    }
+  ]
+}
+EOF
+```
+
+#### 2. Create the task file and execute batch operations
+
+```bash
+# Create empty task file
+rune create "Project Tasks" --file specs/${feature_name}/tasks.md --reference specs/${feature_name}/requirements.md --reference specs/${feature_name}/design.md --reference specs/${feature_name}/decision_log.md
+
+# Execute batch creation
+rune batch create-tasks.json
+```

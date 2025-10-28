@@ -1,3 +1,6 @@
+---
+mode: agent
+---
 ### 3. Create Task List
 
 Create an actionable implementation plan with a checklist of coding tasks based on the requirements and design.
@@ -125,6 +128,18 @@ The model MUST use the rune CLI command to create the tasks, following the forma
 # Create empty task file
 rune create specs/${feature_name}/tasks.md --title "Project Tasks" --reference specs/${feature_name}/requirements.md --reference specs/${feature_name}/design.md --reference specs/${feature_name}/decision_log.md
 
-# Execute batch creation (replace the JSON string with the actual JSON structure from step 1)
-rune batch create-tasks.json --input '<paste JSON structure here>'
+# Execute batch creation (either by supplying the JSON string as in the first example, or providing the filename containing the JSON structure from step 1)
+rune batch --input '<paste JSON structure here>'
+rune batch create-tasks.json
 ```
+
+#### 3. Verify the task file was created correctly by reading its contents and confirming it matches the intended structure and content.
+
+At times the model MAY NOT receive confirmation that the file or tasks were created correctly. In such cases, the model MUST perform the following verification step:
+- The model MUST read back the contents of the created 'specs/{feature_name}/tasks.md' file
+- The model MUST compare the contents of the file against the intended task structure and content
+- If discrepancies are found, the model MUST correct them by updating the file using the rune CLI
+
+#### 4. Cleanup
+
+If at any point the model created temporary files for the purpose of task creation, it MUST delete those files to maintain a clean working environment.

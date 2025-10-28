@@ -50,7 +50,14 @@ def move_code_section(source_file, start_line, end_line, dest_file, create_if_mi
     else:
         if create_if_missing:
             # Create new file with Go package header
-            package_line = "package output\n\n"
+            # Extract package name from source file
+            package_name = "config"  # default
+            for line in remaining_source:
+                if line.strip().startswith("package "):
+                    package_name = line.strip().split()[1]
+                    break
+            
+            package_line = f"package {package_name}\n\n"
             
             # Find imports from source file
             imports_start = -1

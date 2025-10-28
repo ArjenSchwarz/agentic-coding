@@ -1,6 +1,6 @@
 # Feature Development Workflow
 
-This document describes the structured workflow for developing features using the requirements, design, tasks, and next-tasks commands. This workflow ensures proper planning, design, and implementation phases.
+This document describes the structured workflow for developing features using the requirements, design, tasks, and next-task commands. This workflow ensures proper planning, design, and implementation phases with built-in quality checks and review processes.
 
 ## Overview
 
@@ -32,14 +32,17 @@ This is constantly being worked on, and will evolve over time. Each step also wo
 - Continue feedback-revision cycle until explicit user approval
 
 **Key Constraints**:
-- Must propose feature name and wait for user confirmation
+- Must propose feature name based on user preference, branch name, or prompt content
+- Must wait for user confirmation of feature name
+- Must ask general questions important to requirements (e.g., backwards compatibility)
+- Must use AskUserQuestion tool when offering options to the user
 - Must ask clarifying questions until everything is clear
 - Must get explicit approval before proceeding
 - Must document decisions in `decision_log.md`
 
 ### Phase 2: Design (`design` command)
 
-**Purpose**: Develop comprehensive design document based on approved requirements.
+**Purpose**: Develop design document based on approved requirements.
 
 **Process**:
 - Verify requirements.md exists
@@ -60,6 +63,7 @@ This is constantly being worked on, and will evolve over time. Each step also wo
 - Must follow decisions from decision_log.md
 - Must address all requirements
 - Must incorporate research findings
+- Must use AskUserQuestion tool when asking for input on technical decisions
 - Cannot proceed without user approval
 
 ### Phase 3: Task Planning (`tasks` command)
@@ -85,16 +89,18 @@ This is constantly being worked on, and will evolve over time. Each step also wo
 **Purpose**: Implement the next unfinished group of tasks from the task list.
 
 **Process**:
-- Read all three documents (requirements.md, design.md, tasks.md)
-- Find first main task with incomplete subtasks
+- Use `rune next --format json` to retrieve the next unfinished task group
+- Read all referenced files from front_matter_references
 - Implement selected main task and ALL subtasks
-- Mark completed tasks in tasks.md
-- Stop after completing one main task group for user review
+- Mark completed tasks using `rune complete {task_id}`
+- Stop after completing the task group for user review
 
 **Key Constraints**:
-- Must implement entire task group (e.g., all 1.x tasks)
+- Must use rune CLI for task retrieval and completion tracking
+- If only a single top-level task is returned, must re-run with `--phase` flag to get the full phase
+- Must implement entire task group (all selected tasks and subtasks)
 - Cannot proceed past selected task without user review
-- Must mark tasks as done in tasks.md
+- Should use appropriate tools and sub-agents during implementation
 
 ## File Structure
 
@@ -180,9 +186,64 @@ class B2,B3,G1,G2 subagent
 - Tasks should be concrete and actionable by coding agents
 - Each task group should be reviewed before proceeding to the next
 
+## Additional Commands
+
+### Commit Management (`commit` command)
+
+**Purpose**: Format, stage, and commit changes with proper changelog management.
+
+**Process**:
+- Run all formatting and test commands
+- Stage all changes (or review already staged changes)
+- Create a concise summary in keepachangelog.com format
+- Update CHANGELOG.md with the summary
+- Extract ticket number from branch name (JIRA or GitHub issue)
+- Create a multi-line commit message with appropriate prefix
+- Commit the changes
+
+**Key Constraints**:
+- Must not revert code changes unless specifically asked
+- Must exclude changelog changes from the summary
+- Must use proper commit message prefixes ([feat], [bug], [doc], or ticket number)
+- Must not include co-authored-by information
+
+### Release Preparation (`release-prep` command)
+
+**Purpose**: Prepare the project for a new release with quality checks and documentation updates.
+
+**Process**:
+- Run all tests and linting checks
+- Check for unresolved TODO/FIXME comments
+- Verify dependencies are up to date
+- Update version numbers across all relevant files
+- Condense unreleased changelog entries into focused release notes
+- Update documentation for new features
+- Prepare structured release notes with breaking changes highlighted
+
+**Key Constraints**:
+- Must not commit, tag, or create releases (user handles these)
+- Must condense internal changes in changelog to focus on final user-facing results
+- Must highlight breaking changes prominently
+- Must verify CI/CD pipelines are passing
+
+### Code Review (`pre-push-code-reviewer` agent)
+
+**Purpose**: Critical review of unpushed commits before pushing to remote.
+
+**Process**:
+- Identify commits not yet pushed to remote
+- Locate relevant specifications for the feature
+- Review code for spec adherence, quality, testing, and documentation
+- Run validation tools (linters, formatters)
+- Provide actionable feedback categorized by severity
+
+**Usage**: Invoke this agent when you want to review local commits before pushing to ensure quality.
+
 ## Command Usage
 
 - `requirements {feature_name}` - Start requirements gathering
 - `design {feature_name}` - Create design document
 - `tasks {feature_name}` - Generate implementation plan
 - `next-task {feature_name}` - Implement next task group
+- `commit` - Stage and commit changes with changelog updates
+- `release-prep {version}` - Prepare for a new release

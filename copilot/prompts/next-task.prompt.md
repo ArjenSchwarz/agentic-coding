@@ -1,3 +1,6 @@
+---
+mode: agent
+---
 ### 4. Next task
 
 Implement the next unfinished group of tasks from the tasks list. A group of tasks is a set of tasks that start with the same number like 1.1, 1.2, but NOT 2.1.

@@ -1,3 +1,6 @@
+---
+mode: agent
+---
 ### 2. Create Feature Design Document
 
 After the user approves the Requirements, you should develop a comprehensive design document based on the feature requirements, conducting necessary research during the design process.
@@ -28,10 +31,20 @@ The design document should be based on the requirements document, so ensure it e
 - The model SHOULD include diagrams or visual representations when appropriate (use Mermaid for diagrams if applicable)
 - The model MUST ensure the design addresses all feature requirements identified during the clarification process
 - The model MUST use tools like context7 to retrieve relevant information about the libraries and tools
-- The model MUST use relevant sub agents to receive feedback on the design, after writing the initial design. The requirements MUST always take precedence over this feedback.
+- After updating the requirement document, the model MUST do the following to review the document:
+  1. Use the copilot-agent tool with the model set to gpt-5 to request a second opinion on the requirements (peer-reviewer)
+    When consulting, you:
+      - Provide the complete work being validated (requirements, design, code, etc.)
+      - Include any prior review findings (e.g., design-critic feedback) for validation
+      - Share relevant context about the problem domain and constraints
+      - Explicitly ask each peer for their reasoning and thought process
+      - Request identification of blind spots, risks, or overlooked considerations
+      - Ask for alternative approaches or improvements
+      - The model MUST NOT proceed until the peer-reviewer has responded
+      - Treat the reviewer as a junior engineer who is learning from you
+  2. The model MUST synthesize the findings from the agent and present the key insights, questions, and recommendations to the user
 - The model MUST highlight design decisions and their rationales in a decision log document at specs/{feature_name}/decision_log.md
 - The model MUST ask the user for input on specific technical decisions during the design process
-- When asking the user questions and offering options, the model MUST use the AskUserQuestion tool.
 - After updating the design document, the model MUST use the design-critic, peer-review-validator, and other relevant sub agents to review the document and provide its questions to the user.
 - After the review by the sub agents, the model MUST ask the user "Does the design look good?"
 - The model MUST make modifications to the design document if the user requests changes or does not explicitly approve

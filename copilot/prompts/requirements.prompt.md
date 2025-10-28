@@ -1,3 +1,6 @@
+---
+mode: agent
+---
 ### 1. Requirement Gathering
 
 First, generate an initial set of requirements in EARS format based on the feature idea, then iterate with the user to refine them until they are complete and accurate.
@@ -28,19 +31,26 @@ a design.
 
 **Acceptance Criteria:**
 
-1. <a name="1.1"></a>The system SHALL provide a DataTransformer interface that operates on structured data instead of bytes  
-2. <a name="1.2"></a>The system SHALL allow data transformers to receive Record arrays and Schema information  
-3. <a name="1.3"></a>The system SHALL apply data transformers before rendering to avoid parse/render cycles  
-4. <a name="1.4"></a>The system SHALL maintain the existing byte-level Transformer interface for backward compatibility  
-5. <a name="1.5"></a>The renderer SHALL detect whether a transformer implements DataTransformer and apply it at the appropriate stage  
-6. <a name="1.6"></a>The system SHALL preserve the original document data when transformations are not applied  
+1. <a name="1.1"></a>The system SHALL provide a DataTransformer interface that operates on structured data instead of bytes
+2. <a name="1.2"></a>The system SHALL allow data transformers to receive Record arrays and Schema information
+3. <a name="1.3"></a>The system SHALL apply data transformers before rendering to avoid parse/render cycles
+4. <a name="1.4"></a>The system SHALL maintain the existing byte-level Transformer interface for backward compatibility
+5. <a name="1.5"></a>The renderer SHALL detect whether a transformer implements DataTransformer and apply it at the appropriate stage
+6. <a name="1.6"></a>The system SHALL preserve the original document data when transformations are not applied
 ```
-- When asking the user questions and offering options, the model MUST use the AskUserQuestion tool.
 - The model SHOULD consider edge cases, user experience, technical constraints, and success criteria in the initial requirements
-- After updating the requirement document, the model MUST use BOTH the design-critic and peer-review-validator sub agents sequentially to review the document:
-  1. FIRST: Use the design-critic agent to perform a critical review that challenges assumptions, identifies gaps, and questions necessity
-  2. SECOND: Use the peer-review-validator agent to validate the requirements and critical review findings by consulting external AI systems (Gemini, Codex, Q Developer)
-  3. The model MUST synthesize the findings from both agents and present the key insights, questions, and recommendations to the user
+- After updating the requirement document, the model MUST do the following to review the document:
+  1. Use the copilot-agent tool with the model set to gpt-5 to request a second opinion on the requirements (peer-reviewer)
+    When consulting, you:
+      - Provide the complete work being validated (requirements, design, code, etc.)
+      - Include any prior review findings (e.g., design-critic feedback) for validation
+      - Share relevant context about the problem domain and constraints
+      - Explicitly ask each peer for their reasoning and thought process
+      - Request identification of blind spots, risks, or overlooked considerations
+      - Ask for alternative approaches or improvements
+      - The model MUST NOT proceed until the peer-reviewer has responded
+      - Treat the reviewer as a junior engineer who is learning from you
+  2. The model MUST synthesize the findings from the agent and present the key insights, questions, and recommendations to the user
 - After presenting the synthesized review findings, the model MUST ask the user "Do the requirements look good or do you want additional changes?"
 - If the user responds with affirmations like "yes", "looks good", "approved", or similar, consider this explicit approval and proceed to the next phase
 - If the user provides feedback or requests changes, the model MUST make the modifications and repeat the review cycle (design-critic → peer-review-validator → user approval)

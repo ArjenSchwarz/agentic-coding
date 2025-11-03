@@ -8,6 +8,7 @@ The framework now includes cross-platform support with GitHub Copilot prompt fil
 
 The framework includes commands for a complete feature development workflow (detailed in [spec-workflow](spec-workflow.md)):
 
+- **`catchup`** - Get up to speed on branch changes by analyzing commits and modified files (inspired by [Shrivu Shankar](https://blog.sshh.io/p/how-i-use-every-claude-code-feature))
 - **`requirements`** - Generate and refine feature requirements in EARS format
 - **`design`** - Create design documents based on approved requirements
 - **`tasks`** - Convert designs into actionable implementation task lists

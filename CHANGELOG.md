@@ -5,6 +5,15 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2025-11-03]
+
+### Added
+- `catchup` command for analyzing branch changes and commits to quickly understand work done
+- Command documentation in commands/catchup.md with workflow for understanding branch history
+
+### Changed
+- Updated README.md to include catchup command in workflow list with attribution to Shrivu Shankar
+
 ## [2025-10-28]
 
 ### Added

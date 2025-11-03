@@ -74,57 +74,14 @@ This workflow is ONLY for creating design and planning artifacts. The actual imp
 - The model MUST clearly communicate to the user that this workflow is complete once the design and planning artifacts are created
 
 **Rune CLI Task Creation:**
-The model MUST use the rune CLI command to create the tasks, following the format below exactly. Details, references, and requirements MUST be defined separately in the JSON structure. Requirements are the IDs of the acceptance criteria in the requirements document.
+The model MUST use the rune skill to create and manage tasks. Invoke the rune skill with instructions to:
+- Create the task file at specs/{feature_name}/tasks.md with appropriate title and references (requirements.md, design.md, decision_log.md)
+- Add tasks using batch operations with proper structure including:
+  - Task titles that are clear and actionable
+  - Phase groupings where appropriate
+  - Parent-child relationships for subtasks
+  - Details as arrays for additional context
+  - References as arrays of file paths
+  - Requirements as arrays of requirement IDs from requirements.md
 
-#### 1. Construct the JSON data containing the tasks following this structure:
-
-```json
-{
-  "file": "project-tasks.md",
-  "operations": [
-    {
-      "type": "add",
-      "title": "Security Implementation",
-      "phase": "Optional phase name",
-      "details": [
-        "Implement authentication system",
-        "Add authorization middleware",
-        "Security audit and testing"
-      ],
-      "references": ["List of optional files"]
-    },
-    {
-      "type": "add",
-      "parent": "1",
-      "title": "OAuth Integration",
-      "details": [
-        "Research OAuth providers",
-        "Implement OAuth flow",
-        "Add social login options"
-      ],
-      "requirements": ["6.1, 6.2"]
-    },
-    {
-      "type": "add",
-      "parent": "1",
-      "title": "Session Management",
-      "details": [
-        "Design session storage",
-        "Implement session middleware",
-        "Add session timeout handling"
-      ],
-      "requirements": ["4.1, 4.2"]
-    }
-  ]
-}
-```
-
-#### 2. Create the task file and execute batch operations:
-
-```bash
-# Create empty task file
-rune create specs/${feature_name}/tasks.md --title "Project Tasks" --reference specs/${feature_name}/requirements.md --reference specs/${feature_name}/design.md --reference specs/${feature_name}/decision_log.md
-
-# Execute batch creation (replace the JSON string with the actual JSON structure from step 1)
-rune batch create-tasks.json --input '<paste JSON structure here>'
-```
+The rune skill will handle the proper command syntax and JSON formatting automatically.

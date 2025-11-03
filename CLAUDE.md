@@ -7,3 +7,4 @@
 - If a project has a Makefile, the commands there MUST be used for development tooling.
 - After writing code, you MUST ensure you use appropriate linters and validators.
 - If a project is written in go, use @language-rules/go.md as your guide.
+- When managing tasks, use the rune skill.

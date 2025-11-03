@@ -8,6 +8,17 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [2025-11-03]
 
 ### Added
+- Rune task management skill with instructions and capabilities
+- Skill configuration files (skills/rune/prompt.md, skills/rune/skill.json)
+
+### Changed
+- Updated CLAUDE.md to instruct using rune skill for task management
+- Simplified next-task.md command to delegate to rune skill for task retrieval and completion
+- Simplified tasks.md command to delegate task creation to rune skill instead of requiring manual JSON construction
+
+## [2025-11-03]
+
+### Added
 - `catchup` command for analyzing branch changes and commits to quickly understand work done
 - Command documentation in commands/catchup.md with workflow for understanding branch history
 

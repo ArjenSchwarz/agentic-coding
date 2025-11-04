@@ -1,0 +1,50 @@
+name: 'Setup Claude Configuration'
+description: 'Symlinks Claude configuration directories from agentic-coding repo to ~/.claude/'
+branding:
+  icon: 'link'
+  color: 'blue'
+
+inputs:
+  repository:
+    description: 'Repository to checkout (defaults to ArjenSchwarz/agentic-coding)'
+    required: false
+    default: 'ArjenSchwarz/agentic-coding'
+  ref:
+    description: 'Branch, tag, or SHA to checkout (defaults to main)'
+    required: false
+    default: 'main'
+  checkout-path:
+    description: 'Path where the repository will be checked out'
+    required: false
+    default: '.agentic-coding-setup'
+
+runs:
+  using: 'composite'
+  steps:
+    - name: Checkout agentic-coding repository
+      uses: actions/checkout@v4
+      with:
+        repository: ${{ inputs.repository }}
+        ref: ${{ inputs.ref }}
+        path: ${{ inputs.checkout-path }}
+
+    - name: Create Claude directories and symlinks
+      shell: bash
+      run: |
+        # Create ~/.claude directory if it doesn't exist
+        mkdir -p ~/.claude
+
+        # Get the absolute path to the checkout
+        CHECKOUT_PATH="${{ github.workspace }}/${{ inputs.checkout-path }}"
+
+        # Create symlinks for each directory
+        ln -sf "$CHECKOUT_PATH/agents" ~/.claude/agents
+        ln -sf "$CHECKOUT_PATH/commands" ~/.claude/commands
+        ln -sf "$CHECKOUT_PATH/language-rules" ~/.claude/language-rules
+        ln -sf "$CHECKOUT_PATH/scripts" ~/.claude/scripts
+        ln -sf "$CHECKOUT_PATH/skills" ~/.claude/skills
+        ln -sf "$CHECKOUT_PATH/CLAUDE.md" ~/.claude/CLAUDE.md
+
+        # Verify symlinks were created
+        echo "Symlinks created:"
+        ls -la ~/.claude/ | grep -E "(agents|commands|language-rules|scripts|skills|CLAUDE.md)"

@@ -1,0 +1,53 @@
+name: Example - Setup Claude Configuration
+
+on:
+  workflow_dispatch:  # Manual trigger for demonstration
+  push:
+    branches:
+      - main
+
+jobs:
+  example-setup:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout this repository (if needed)
+        uses: actions/checkout@v4
+
+      - name: Setup Claude Configuration
+        uses: ArjenSchwarz/agentic-coding/.github/actions/setup-claude@main
+
+      - name: Verify setup
+        run: |
+          echo "Verifying Claude configuration symlinks..."
+          ls -la ~/.claude/
+
+          # Check directory symlinks
+          for dir in agents commands language-rules scripts skills; do
+            if [ -L ~/.claude/$dir ]; then
+              echo "✓ ~/.claude/$dir is a symlink pointing to: $(readlink ~/.claude/$dir)"
+            else
+              echo "✗ ~/.claude/$dir is not a symlink"
+              exit 1
+            fi
+          done
+
+          # Check CLAUDE.md symlink
+          if [ -L ~/.claude/CLAUDE.md ]; then
+            echo "✓ ~/.claude/CLAUDE.md is a symlink pointing to: $(readlink ~/.claude/CLAUDE.md)"
+          else
+            echo "✗ ~/.claude/CLAUDE.md is not a symlink"
+            exit 1
+          fi
+
+          echo "All symlinks verified successfully!"
+
+      - name: Example - List available agents
+        run: |
+          echo "Available Claude agents:"
+          ls -1 ~/.claude/agents/
+
+      - name: Example - List available commands
+        run: |
+          echo "Available Claude commands:"
+          ls -1 ~/.claude/commands/

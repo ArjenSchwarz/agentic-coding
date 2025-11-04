@@ -5,6 +5,21 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2025-11-04]
+
+### Added
+- GitHub Action for setting up Claude configuration in CI/CD pipelines
+  - Composite action at `.github/actions/setup-claude/action.yml` that symlinks all configuration directories
+  - Action symlinks agents, commands, language-rules, scripts, skills, and CLAUDE.md to `~/.claude/`
+  - Example workflow demonstrating action usage with verification steps
+  - Action documentation with basic and advanced usage examples
+- Skills section in README documenting `creating-spec` and `rune` skills
+- GitHub Action section in README with usage examples and workflow integration
+
+### Changed
+- Updated README with Skills section explaining spec-driven workflow orchestration and task management capabilities
+- Enhanced README with GitHub Action documentation including basic usage, what it does, and complete CI/CD examples
+
 ## [2025-11-03]
 
 ### Added

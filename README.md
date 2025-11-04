@@ -28,6 +28,15 @@ The framework provides specialized AI agents for different aspects of developmen
 - **`research-agent`** - Conducts research and generates structured reports (stolen from @sammcj)
 - **`ui-ux-reviewer`** - Evaluates user interfaces for usability and accessibility improvements
 
+## Skills
+
+The framework includes Claude Code skills that provide specialized workflows:
+
+- **`creating-spec`** - Orchestrates the complete spec-driven workflow from initial feature idea through requirements, design, and task planning. This skill guides you through all three phases with built-in review gates and decision logging.
+- **`rune`** - Manages hierarchical task lists using the rune CLI tool. Provides efficient task creation, status tracking, phase organization, and batch operations for atomic updates.
+
+Skills provide more structured, multi-step workflows compared to individual commands, with built-in approval gates and validation steps.
+
 ## Workflow
 
 1. Start with `requirements` to define what needs to be built
@@ -75,6 +84,71 @@ The `scripts/` directory contains helper scripts for AI-assisted development. To
 This approach allows you to use the scripts across multiple projects without committing them to each repository, keeping them centralized and easy to update.
 
 This framework is designed to work with various AI coding tools including Claude Code, GitHub Copilot, and Cline.
+
+## GitHub Action
+
+For CI/CD pipelines and automated workflows, you can use the included GitHub Action to set up Claude configuration in your workflows. This action symlinks all configuration directories to `~/.claude/` so Claude Code can access your custom agents, commands, language rules, scripts, and skills.
+
+### Basic Usage
+
+```yaml
+steps:
+  - name: Setup Claude Configuration
+    uses: ArjenSchwarz/agentic-coding/.github/actions/setup-claude@main
+```
+
+### What It Does
+
+The action automatically:
+1. Checks out the `agentic-coding` repository
+2. Creates symlinks from the repository to `~/.claude/`:
+   - `agents/` → `~/.claude/agents`
+   - `commands/` → `~/.claude/commands`
+   - `language-rules/` → `~/.claude/language-rules`
+   - `scripts/` → `~/.claude/scripts`
+   - `skills/` → `~/.claude/skills`
+   - `CLAUDE.md` → `~/.claude/CLAUDE.md`
+
+### Advanced Usage
+
+You can customize the action behavior with inputs:
+
+```yaml
+steps:
+  - name: Setup Claude Configuration
+    uses: ArjenSchwarz/agentic-coding/.github/actions/setup-claude@main
+    with:
+      ref: 'develop'  # Use a different branch or tag
+      checkout-path: '.my-claude-config'  # Custom checkout path
+```
+
+### Complete Example
+
+```yaml
+name: CI with Claude Code
+
+on:
+  push:
+    branches: [main]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Claude Configuration
+        uses: ArjenSchwarz/agentic-coding/.github/actions/setup-claude@main
+
+      - name: Run Claude Code
+        run: |
+          # Your Claude Code commands here
+          # All custom agents, commands, etc. are now available
+          claude --print "Analyze this codebase"
+```
+
+See [.github/actions/setup-claude/README.md](.github/actions/setup-claude/README.md) for complete documentation.
 
 ## CLAUDE.md Configuration
 

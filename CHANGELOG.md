@@ -15,10 +15,18 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - Action documentation with basic and advanced usage examples
 - Skills section in README documenting `creating-spec` and `rune` skills
 - GitHub Action section in README with usage examples and workflow integration
+- `creating-spec` skill for orchestrating spec-driven development workflow
+  - Complete three-phase workflow: requirements, design, and task planning
+  - Built-in approval gates between phases
+  - Integration with design-critic and peer-review-validator agents
+  - Automatic decision logging and EARS format requirements
+  - Rune CLI integration for task management
+- Enhanced rune skill documentation with `--reference` flag support for creating task files with top-level references
 
 ### Changed
 - Updated README with Skills section explaining spec-driven workflow orchestration and task management capabilities
 - Enhanced README with GitHub Action documentation including basic usage, what it does, and complete CI/CD examples
+- Added example pattern for creating feature task files with references to requirements, design, and decision log
 
 ## [2025-11-03]
 

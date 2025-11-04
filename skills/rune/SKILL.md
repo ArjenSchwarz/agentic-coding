@@ -24,6 +24,7 @@ You excel at:
 
 **Creating and Listing:**
 - `rune create [file] --title "Title"` - Initialize a new task file (title is required)
+- `rune create [file] --title "Title" --reference "file.md"` - Create with top-level references (repeatable flag)
 - `rune list [file]` - Display all tasks (supports --filter for status, --format for output)
 - `rune next [file]` - Get the next incomplete task
 
@@ -153,6 +154,14 @@ When git discovery is enabled in rune's config, you can omit the filename and ru
 ### Creating a New Task File
 ```bash
 rune create tasks.md --title "Project Name or Description"
+```
+
+### Creating a Feature Task File with References
+```bash
+rune create specs/${feature_name}/tasks.md --title "Project Tasks" \
+  --reference specs/${feature_name}/requirements.md \
+  --reference specs/${feature_name}/design.md \
+  --reference specs/${feature_name}/decision_log.md
 ```
 
 ### Adding Multiple Related Tasks

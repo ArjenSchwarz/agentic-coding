@@ -32,7 +32,7 @@ The design document should be based on the requirements document, so ensure it e
 - The model MUST ensure the design addresses all feature requirements identified during the clarification process
 - The model MUST use tools like context7 to retrieve relevant information about the libraries and tools
 - After updating the requirement document, the model MUST do the following to review the document:
-  1. Use the copilot-agent tool with the model set to gpt-5 to request a second opinion on the requirements (peer-reviewer)
+  1. Use the copilot-agent tool with the model set to gpt-5.1-codex to request a second opinion on the requirements (peer-reviewer)
     When consulting, you:
       - Provide the complete work being validated (requirements, design, code, etc.)
       - Include any prior review findings (e.g., design-critic feedback) for validation

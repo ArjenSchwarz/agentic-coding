@@ -5,6 +5,24 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2025-11-14]
+
+### Added
+- `smolspec` command for lightweight specification workflow for small changes
+  - Combined requirements and implementation approach in single smolspec.md file
+  - Separate tasks.md file compatible with next-task command
+  - Built-in scope assessment with automatic escalation to full spec workflow
+  - Integration with design-critic agent for review before user presentation
+  - Streamlined workflow for minor changes that don't warrant full documentation
+- Go Test Fixer skill for improving Go test files
+  - Converts slice-based table tests to map-based table tests
+  - Splits large test files into focused test files
+  - Enforces Go testing best practices from language-rules/go.md
+
+### Changed
+- Updated release-prep command to specify release notes location in docs/release_notes/
+- Updated Copilot prompt files to use gpt-5.1-codex model instead of gpt-5
+
 ## [2025-11-04]
 
 ### Added

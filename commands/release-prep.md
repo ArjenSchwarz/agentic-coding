@@ -28,6 +28,7 @@ I want to prepare this project for the next release, which will be {input}. Plea
 - Include upgrade/migration instructions if needed
 - Mention contributors if applicable
 - Add links to relevant documentation for new features
+- The release notes should be saved in docs/release_notes.
 
 ## Final Checks
 

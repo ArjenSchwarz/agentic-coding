@@ -25,6 +25,11 @@ The design document should be based on the requirements document, so ensure it e
   - Data Models
   - Error Handling
   - Testing Strategy
+- When writing the Testing Strategy section, the model SHOULD evaluate acceptance criteria for property-based testing (PBT) candidates:
+  - Review requirements that express universal guarantees (invariants, round-trip behavior, idempotence)
+  - For components like parsers, serializers, data structures, or algorithms, consider whether PBT would provide better coverage than example-based tests alone
+  - If PBT is appropriate, specify: the properties to test, the framework to use (based on project language), and the input generation approach
+  - If PBT is not appropriate for the feature, this should be omitted from the Testing Strategy
 - The model SHOULD include diagrams or visual representations when appropriate (use Mermaid for diagrams if applicable)
 - The model MUST ensure the design addresses all feature requirements identified during the clarification process
 - The model MUST use tools like context7 to retrieve relevant information about the libraries and tools

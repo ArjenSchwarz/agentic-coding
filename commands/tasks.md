@@ -45,6 +45,7 @@ The tasks document should be based on the requirement and design documents, so e
   - Be scoped to specific coding activities (e.g., "Implement X function" rather than "Support X feature")
 - Tasks MUST build incrementally on previous steps
 - The model MUST prioritize test-driven development where appropriate (tests before implementation, e.g., 1.1 creates unit tests, 1.2 does implementation)
+- If the design specifies property-based testing for certain components, the model MUST include explicit tasks for writing property tests before or alongside unit tests for those components
 - The plan MUST cover all aspects of the design that can be implemented through code
 - All requirements MUST be covered by the implementation tasks
 - If gaps are identified during implementation planning, the model MUST mention them and propose relevant changes to the requirements or design

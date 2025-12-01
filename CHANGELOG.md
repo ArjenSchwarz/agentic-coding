@@ -9,6 +9,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 - Copilot prompt version of smolspec command (`copilot/prompts/smolspec.prompt.md`)
+- Property-based testing (PBT) guidance as optional consideration in design workflow
+  - Design command evaluates acceptance criteria for PBT candidates (invariants, round-trips, idempotence)
+  - Tasks command includes property test tasks when design specifies them
+  - Go language rules include PBT section with `pgregory.net/rapid` recommendation
 - Decision log format reference document (`references/decision-log-format.md`) with Enhanced Nygard ADR structure
 - Utility scripts: `scripts/convert_formats.sh` and `scripts/fetch-tickets.py`
 

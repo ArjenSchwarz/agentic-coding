@@ -24,6 +24,12 @@ CRITICAL: Follow these rules when writing Go code to avoid outdated patterns tha
 ### Testing
 - Use `t.Context()` instead of `context.WithCancel()` in tests
 
+### Property-Based Testing
+- Use `pgregory.net/rapid` for property-based tests
+- Use `testing/quick` for simple random testing when rapid is not needed
+- Define generators for custom types using `rapid.Custom()`
+- Name property test functions with `TestProperty` prefix for clarity (e.g., `TestPropertyRoundTrip`)
+
 ### Formatting
 - Use `fmt.Appendf(nil, format, args...)` instead of `[]byte(fmt.Sprintf(format, args...))`
 

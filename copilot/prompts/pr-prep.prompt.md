@@ -1,5 +1,5 @@
 ---
-mode: agent
+agent: agent
 ---
 I want to prepare this project for a pull request, which will be created manually. Please do the following:
 
@@ -30,6 +30,8 @@ I want to prepare this project for a pull request, which will be created manuall
 - Highlight breaking changes prominently at the top
 - Include upgrade/migration instructions if needed
 - Add links to relevant documentation for new features
+- Write the release notes in a way that is suitable for inclusion in the PR description
+- The release notes should be saved in pr_description.md
 
 ## Final Checks
 

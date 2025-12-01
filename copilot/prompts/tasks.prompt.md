@@ -1,5 +1,5 @@
 ---
-mode: agent
+agent: agent
 ---
 ### 3. Create Task List
 

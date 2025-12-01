@@ -5,6 +5,20 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2025-12-01]
+
+### Added
+- Copilot prompt version of smolspec command (`copilot/prompts/smolspec.prompt.md`)
+- Decision log format reference document (`references/decision-log-format.md`) with Enhanced Nygard ADR structure
+- Utility scripts: `scripts/convert_formats.sh` and `scripts/fetch-tickets.py`
+
+### Changed
+- Enhanced `smolspec` command with complexity estimation, self-review checklists, outcome-focused tasks, and distributed testing requirements
+- Updated CLAUDE.md with decision log format reference and fixed file path syntax
+- Changed `design-critic` and `peer-review-validator` agents to use opus model
+- Updated Copilot prompt frontmatter to use `agent: agent` instead of `mode: agent`
+- Enhanced `pr-prep.prompt.md` to save release notes to pr_description.md
+
 ## [2025-11-14]
 
 ### Added

@@ -1,3 +1,6 @@
+---
+agent: agent
+---
 # Small Spec (Smolspec) - Lightweight Specification for Minor Changes
 
 Create a lightweight specification for small changes that don't warrant the full spec workflow. This command combines research, planning, and task creation into a streamlined process.

@@ -1,5 +1,5 @@
 ---
-mode: agent
+agent: agent
 ---
 ### 2. Create Feature Design Document
 

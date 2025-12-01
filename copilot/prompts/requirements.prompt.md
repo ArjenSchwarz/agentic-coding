@@ -1,5 +1,5 @@
 ---
-mode: agent
+agent: agent
 ---
 ### 1. Requirement Gathering
 

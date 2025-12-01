@@ -39,6 +39,16 @@ a design.
 6. <a name="1.6"></a>The system SHALL preserve the original document data when transformations are not applied
 ```
 - The model SHOULD consider edge cases, user experience, technical constraints, and success criteria in the initial requirements
+
+**Self-Review Checklist (before agent review):**
+Before triggering agent reviews, the model MUST verify:
+- [ ] Each requirement has a user story in "As a [role], I want [feature], so that [benefit]" format
+- [ ] All acceptance criteria use EARS keywords (SHALL, SHOULD, MAY, WHEN, WHERE, IF, THEN)
+- [ ] Each acceptance criterion is testable (can be verified with a concrete test)
+- [ ] Anchor tags follow the pattern `<a name="X.Y"></a>` for cross-referencing
+- [ ] No vague terms without definition (e.g., "fast", "reliable", "user-friendly")
+- [ ] Edge cases and error conditions are addressed
+
 - After updating the requirement document, the model MUST do the following to review the document:
   1. Use the copilot-agent tool with the model set to gpt-5.1-codex to request a second opinion on the requirements (peer-reviewer)
     When consulting, you:

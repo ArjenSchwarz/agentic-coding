@@ -33,6 +33,16 @@ The design document should be based on the requirements document, so ensure it e
 - The model SHOULD include diagrams or visual representations when appropriate (use Mermaid for diagrams if applicable)
 - The model MUST ensure the design addresses all feature requirements identified during the clarification process
 - The model MUST use tools like context7 to retrieve relevant information about the libraries and tools
+
+**Self-Review Checklist (before agent review):**
+Before triggering agent reviews, the model MUST verify:
+- [ ] Each requirement from requirements.md has a corresponding design element
+- [ ] All acceptance criteria can be traced to specific components or interfaces
+- [ ] Data models support all required operations from the requirements
+- [ ] Error handling covers failure modes implied by requirements
+- [ ] Testing strategy includes tests for each acceptance criterion
+- [ ] No design elements exist without a corresponding requirement (scope creep check)
+
 - The model MUST use relevant sub agents to receive feedback on the design, after writing the initial design. The requirements MUST always take precedence over this feedback.
 - The model MUST highlight design decisions and their rationales in a decision log document at specs/{feature_name}/decision_log.md
 - The model MUST ask the user for input on specific technical decisions during the design process

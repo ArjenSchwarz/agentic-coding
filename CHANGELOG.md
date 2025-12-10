@@ -5,6 +5,31 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2025-12-10]
+
+### Added
+- Swift language rules (`claude/rules/language-rules/swift.md`) with patterns for:
+  - SwiftData and CloudKit testing with test environment detection
+  - Swift 6 concurrency and MainActor patterns
+  - SwiftUI Liquid Glass guidelines for iOS 26+/macOS Tahoe
+  - NavigationSplitView platform-specific patterns
+  - App Intents design for Shortcuts compatibility
+  - Testing with Swift Testing framework
+- Sync script (`scripts/sync-claude.sh`) for creating symlinks from `~/.claude/` to repository files
+
+### Changed
+- Reorganized all Claude Code configuration files into `claude/` subdirectory structure:
+  - `CLAUDE.md` → `claude/CLAUDE.md`
+  - `agents/` → `claude/agents/`
+  - `commands/` → `claude/commands/`
+  - `skills/` → `claude/skills/`
+  - `language-rules/` → `claude/rules/language-rules/`
+  - `references/` → `claude/rules/references/`
+- Updated GitHub Action to use new `claude/` directory structure for symlinks
+- Updated example workflow to verify new directory structure
+- Updated README.md with new file structure documentation
+- Added YAML frontmatter with `paths` glob pattern to language rules for automatic matching
+
 ## [2025-12-02]
 
 ### Added

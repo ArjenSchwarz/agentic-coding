@@ -1,3 +1,7 @@
+---
+paths: **/*.go
+---
+
 # Go language rules
 
 ## Go development rules

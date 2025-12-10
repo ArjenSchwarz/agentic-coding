@@ -37,14 +37,13 @@ runs:
         # Get the absolute path to the checkout
         CHECKOUT_PATH="${{ github.workspace }}/${{ inputs.checkout-path }}"
 
-        # Create symlinks for each directory
-        ln -sf "$CHECKOUT_PATH/agents" ~/.claude/agents
-        ln -sf "$CHECKOUT_PATH/commands" ~/.claude/commands
-        ln -sf "$CHECKOUT_PATH/language-rules" ~/.claude/language-rules
-        ln -sf "$CHECKOUT_PATH/scripts" ~/.claude/scripts
-        ln -sf "$CHECKOUT_PATH/skills" ~/.claude/skills
-        ln -sf "$CHECKOUT_PATH/CLAUDE.md" ~/.claude/CLAUDE.md
+        # Create symlinks for each directory from claude/ subdirectory
+        ln -sfn "$CHECKOUT_PATH/claude/agents" ~/.claude/agents
+        ln -sfn "$CHECKOUT_PATH/claude/commands" ~/.claude/commands
+        ln -sfn "$CHECKOUT_PATH/claude/skills" ~/.claude/skills
+        ln -sfn "$CHECKOUT_PATH/claude/rules" ~/.claude/rules
+        ln -sfn "$CHECKOUT_PATH/claude/CLAUDE.md" ~/.claude/CLAUDE.md
 
         # Verify symlinks were created
         echo "Symlinks created:"
-        ls -la ~/.claude/ | grep -E "(agents|commands|language-rules|scripts|skills|CLAUDE.md)"
+        ls -la ~/.claude/ | grep -E "(agents|commands|skills|rules|CLAUDE.md)"

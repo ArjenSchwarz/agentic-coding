@@ -49,6 +49,16 @@ Each phase requires explicit user approval before proceeding to ensure quality a
 
 ## File Structure
 
+All Claude Code configuration files are organized under the `claude/` directory:
+
+- `claude/CLAUDE.md` - User-level instructions that guide AI behavior
+- `claude/agents/` - Specialized AI agents for different development tasks
+- `claude/commands/` - Slash commands for the development workflow
+- `claude/skills/` - Multi-step workflow skills with approval gates
+- `claude/rules/` - Additional rules and references:
+  - `claude/rules/language-rules/` - Language-specific coding guidelines (e.g., Go patterns)
+  - `claude/rules/references/` - Reference documentation formats
+
 Feature work is organized in `specs/{feature_name}/` directories containing:
 - `requirements.md` - Feature requirements in EARS format
 - `design.md` - Design document
@@ -69,19 +79,16 @@ The `copilot/prompts/` directory contains prompt files for GitHub Copilot users.
 
 ## Scripts Directory
 
-The `scripts/` directory contains helper scripts for AI-assisted development. To use these scripts in your projects:
+The `scripts/` directory contains helper scripts for AI-assisted development:
 
-1. Create a symlink in your project:
-   ```bash
-   ln -s ~/code/agentic-coding/scripts .claude/scripts
-   ```
+- **`sync-claude.sh`** - Syncs all configuration files from `claude/` to `~/.claude/` by creating symlinks
 
-2. Add to your project's `.gitignore`:
-   ```
-   .claude/scripts
-   ```
+To set up your global Claude Code configuration, run:
+```bash
+./scripts/sync-claude.sh
+```
 
-This approach allows you to use the scripts across multiple projects without committing them to each repository, keeping them centralized and easy to update.
+This creates symlinks from `~/.claude/` pointing to the files in this repository's `claude/` directory, keeping your configuration centralized and version-controlled.
 
 This framework is designed to work with various AI coding tools including Claude Code, GitHub Copilot, and Cline.
 
@@ -101,13 +108,12 @@ steps:
 
 The action automatically:
 1. Checks out the `agentic-coding` repository
-2. Creates symlinks from the repository to `~/.claude/`:
-   - `agents/` → `~/.claude/agents`
-   - `commands/` → `~/.claude/commands`
-   - `language-rules/` → `~/.claude/language-rules`
-   - `scripts/` → `~/.claude/scripts`
-   - `skills/` → `~/.claude/skills`
-   - `CLAUDE.md` → `~/.claude/CLAUDE.md`
+2. Creates symlinks from the repository's `claude/` directory to `~/.claude/`:
+   - `claude/agents/` → `~/.claude/agents`
+   - `claude/commands/` → `~/.claude/commands`
+   - `claude/skills/` → `~/.claude/skills`
+   - `claude/rules/` → `~/.claude/rules`
+   - `claude/CLAUDE.md` → `~/.claude/CLAUDE.md`
 
 ### Advanced Usage
 
@@ -152,12 +158,12 @@ See [.github/actions/setup-claude/README.md](.github/actions/setup-claude/README
 
 ## CLAUDE.md Configuration
 
-The `CLAUDE.md` file contains user-level instructions that guide AI behavior when working with this framework. Key guidelines include:
+The `claude/CLAUDE.md` file contains user-level instructions that guide AI behavior when working with this framework. Key guidelines include:
 
 - Emphasis on simplicity and understandable code
 - Avoiding hyperbolic language and sycophantic responses
 - Feature-based development using the specs directory structure
-- Language-specific rules (e.g., Go development patterns in `language-rules/go.md`)
+- Language-specific rules (e.g., Go development patterns in `claude/rules/language-rules/go.md`)
 - Mandatory use of linters and validators after writing code
 
-These instructions can be copied to your global `~/.claude/CLAUDE.md` or project-specific `.claude/CLAUDE.md` to ensure consistent AI behavior across your projects.
+Run `./scripts/sync-claude.sh` to symlink these configurations to your global `~/.claude/` directory, or copy them to a project-specific `.claude/` directory.

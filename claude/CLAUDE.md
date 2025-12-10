@@ -6,9 +6,10 @@
 - If .claude/scripts/README.md exists in the project, you SHOULD use the tools mentioned in there for their intended purposes.
 - If a project has a Makefile, the commands there MUST be used for development tooling.
 - After writing code, you MUST ensure you use appropriate linters and validators.
-- If a project is written in go, use @language-rules/go.md as your guide.
+- When you discover a learning specific to a language that needs to be kept, add it to the related language-rule file (or create a new one if needed).
 - When managing tasks, use the rune skill.
+- When creating GitHub issues, ALWAYS create them in the current repository unless explicitly told otherwise.
 
 ## Decision Log Format
 
-When creating or updating decision log entries in any project, you MUST follow the format specified in `~/.claude/references/decision-log-format.md`. This format uses the Enhanced Nygard ADR structure with required fields (ID, Date, Status, Context, Decision, Rationale) and recommended fields (Alternatives Considered, Consequences). Always read the format file before creating decision log entries to ensure compliance.
+When creating or updating decision log entries in any project, you MUST follow the format specified in `rules/references/decision-log-format.md`. This format uses the Enhanced Nygard ADR structure with required fields (ID, Date, Status, Context, Decision, Rationale) and recommended fields (Alternatives Considered, Consequences). Always read the format file before creating decision log entries to ensure compliance.

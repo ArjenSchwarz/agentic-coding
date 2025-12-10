@@ -23,7 +23,7 @@ jobs:
           ls -la ~/.claude/
 
           # Check directory symlinks
-          for dir in agents commands language-rules scripts skills; do
+          for dir in agents commands rules scripts skills; do
             if [ -L ~/.claude/$dir ]; then
               echo "✓ ~/.claude/$dir is a symlink pointing to: $(readlink ~/.claude/$dir)"
             else

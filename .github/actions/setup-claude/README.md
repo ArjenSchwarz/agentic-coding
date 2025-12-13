@@ -8,7 +8,7 @@ This GitHub Action symlinks Claude Code configuration directories from the `agen
 2. Creates symlinks from the repository to `~/.claude/` for:
    - `agents/` → `~/.claude/agents`
    - `commands/` → `~/.claude/commands`
-   - `language-rules/` → `~/.claude/language-rules`
+   - `rules/` → `~/.claude/rules`
    - `scripts/` → `~/.claude/scripts`
    - `skills/` → `~/.claude/skills`
    - `CLAUDE.md` → `~/.claude/CLAUDE.md`

@@ -40,9 +40,14 @@ You excel at:
 - `rune remove [file] [task-id]` - Remove task and subtasks (task-id is positional)
 
 **Organization:**
-- `rune add-phase [file] --name "Phase Name"` - Add a new phase
+- `rune add-phase [file] "Phase Name"` - Add a new phase (name is positional)
 - `rune has-phases [file]` - Check if file uses phases
 - `rune find [file] --pattern "search term"` - Search tasks
+- `rune renumber [file]` - Recalculate all task IDs to sequential numbering (creates backup)
+
+**Front Matter:**
+- `rune add-frontmatter [file] --reference "file.md"` - Add references to existing file (repeatable flag)
+- `rune add-frontmatter [file] --meta "key:value"` - Add metadata to front matter (repeatable flag)
 
 **Batch Operations:**
 - `rune batch [file] --input '{"file":"tasks.md","operations":[...]}'` - Execute multiple operations atomically
@@ -105,6 +110,20 @@ All operations in a batch are atomic - either all succeed or none are applied.
 - `[ ]` - Pending (not started)
 - `[-]` - In-progress (currently working on)
 - `[x]` - Completed (finished)
+
+### Phases
+
+Phases are H2 headers (`## Phase Name`) that group tasks. Tasks are numbered globally across phases.
+- `rune add-phase [file] "Phase Name"` - Adds H2 header at end of file
+- `rune add [file] --title "Task" --phase "Phase Name"` - Adds task under specified phase
+
+### Renumbering
+
+`rune renumber [file]` recalculates task IDs to sequential numbering.
+- Creates .bak backup before changes
+- Preserves hierarchy, statuses, and phase markers
+- Does NOT update requirement links in task details
+- Use `--dry-run` to preview
 
 ### Git Integration
 When git discovery is enabled in rune's config, you can omit the filename and rune will auto-discover based on the current branch.

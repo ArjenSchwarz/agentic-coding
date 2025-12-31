@@ -1,6 +1,3 @@
----
-agent: agent
----
 ### 3. Create Task List
 
 Create an actionable implementation plan with a checklist of coding tasks based on the requirements and design.

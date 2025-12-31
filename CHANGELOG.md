@@ -5,6 +5,30 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2025-12-31]
+
+### Added
+- `project-init` skill for setting up Claude Code project configuration
+  - Adds SessionStart hook to `.claude/settings.json` for remote/sandbox environments
+  - Includes `setup-project.sh` script that merges hooks without overwriting existing settings
+- `skill-creator` skill for creating effective Claude skills
+  - Includes `init_skill.py` script for initializing new skill directories
+  - Includes `quick_validate.py` for skill validation
+  - Reference documentation for workflows and output patterns
+- `systematic-debugger` skill for applying modified Fagan Inspection methodology to persistent bugs
+- `permission-analyzer` skill for analyzing Claude Code permission configurations
+  - Includes `analyze_permissions.py` script for permission analysis
+- `starwave` commands directory with design, requirements, and tasks commands
+- `make-it-so` command for implementing all tasks
+- `claude-remote.sh` script for pulling user configuration in sandboxed environments (GitHub Actions, online Claude Code)
+- Project-level `.claude/settings.json` with SessionStart hook for remote environment setup
+
+### Changed
+- Simplified `creating-spec` skill documentation
+- Updated `rune` skill with minor improvements
+- Simplified `copilot/prompts/tasks.prompt.md`
+- Expanded Swift language rules with additional patterns and guidelines
+
 ## [2025-12-13]
 
 ### Added

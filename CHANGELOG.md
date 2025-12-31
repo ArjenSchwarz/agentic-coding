@@ -11,6 +11,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - `project-init` skill for setting up Claude Code project configuration
   - Adds SessionStart hook to `.claude/settings.json` for remote/sandbox environments
   - Includes `setup-project.sh` script that merges hooks without overwriting existing settings
+  - Language detection for automatic permission configuration (Go, Swift, Node.js, Python, Rust, Ruby, Java, Docker, Terraform)
 - `skill-creator` skill for creating effective Claude skills
   - Includes `init_skill.py` script for initializing new skill directories
   - Includes `quick_validate.py` for skill validation

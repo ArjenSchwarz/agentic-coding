@@ -1,3 +1,8 @@
+---
+name: starwave:smolspec
+description: Small Spec (Smolspec) - Lightweight Specification for Minor Changes
+---
+
 # Small Spec (Smolspec) - Lightweight Specification for Minor Changes
 
 Create a lightweight specification for small changes that don't warrant the full spec workflow. This command combines research, planning, and task creation into a streamlined process.
@@ -42,7 +47,7 @@ If escalation is needed, the model MUST:
 1. Explain why the full spec workflow is more appropriate
 2. Highlight specific complexity factors discovered during research
 3. Provide the complexity metrics (LOC estimate, file count, dependencies)
-4. Recommend starting with `/requirements` command instead
+4. Recommend starting with `/starwave:requirements` skill instead
 5. STOP execution of smolspec workflow
 
 ## Feature Naming
@@ -59,7 +64,7 @@ For changes that are appropriate for smolspec, the model MUST create documentati
 
 **File Structure:**
 - Create `specs/{feature_name}/smolspec.md` for requirements and design
-- Create `specs/{feature_name}/tasks.md` for implementation tasks (compatible with next-task command)
+- Create `specs/{feature_name}/tasks.md` for implementation tasks (compatible with next-task skill)
 - Create `specs/{feature_name}/decision_log.md` if any decisions need to be documented
 
 **Document Formats:**
@@ -95,7 +100,7 @@ Brief list of technical risks and key assumptions:
 - Prerequisite: {what must exist/work before this can be implemented}
 ```
 
-The tasks.md file MUST follow the standard task format to be compatible with the next-task command:
+The tasks.md file MUST follow the standard task format to be compatible with the next-task skill:
 - Numbered checkbox list with maximum two levels of hierarchy
 - May optionally group tasks into 1-2 phases if helpful for organization
 - Total task count SHOULD be 4-10 tasks (small changes shouldn't need more)
@@ -162,7 +167,7 @@ Before presenting to user, the model MUST verify:
 - Once smolspec.md is approved, create the tasks.md file
 - The model MUST use the rune skill to create tasks in specs/{feature_name}/tasks.md
 - Tasks should reference the smolspec.md file in their front matter
-- Task structure should follow the standard format compatible with next-task command
+- Task structure should follow the standard format compatible with next-task skill
 - Keep it simple: 4-10 total tasks, optionally organized into 1-2 phases
 - Each task MUST be outcome-focused (WHAT needs to be achieved, not HOW)
 - Each task MUST be verifiable with clear success criteria
@@ -180,7 +185,7 @@ Before presenting to user, the model MUST verify:
 ## Additional Constraints
 
 **Workflow Execution:**
-- The model SHOULD complete the entire workflow in a single conversation flow (don't split into separate commands)
+- The model SHOULD complete the entire workflow in a single conversation flow (don't split into separate skills)
 - The model MUST NOT implement the feature as part of this workflow - only create the specification
 - The model MAY ask targeted questions but should minimize back-and-forth compared to full spec workflow
 - The model SHOULD suggest using full spec workflow if the change grows in scope during planning
@@ -221,7 +226,7 @@ The smolspec workflow is complete when:
   - Distributed testing (not consolidated at end)
   - All tasks are code-focused and verifiable
 - User has explicitly approved both the smolspec and tasks
-- Tasks have been created in the rune system and are compatible with next-task command
+- Tasks have been created in the rune system and are compatible with next-task skill
 - All documentation is self-contained and executable by fresh AI session
 - Self-review checklists have been completed for both smolspec and tasks
 - Documentation is minimal but complete (smolspec typically <100 lines)

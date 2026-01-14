@@ -1,3 +1,8 @@
+---
+name: next-task
+description: 4. Next task
+---
+
 ### 4. Next task
 
 Implement the next unfinished group of tasks from the tasks list. A group of tasks is a set of tasks that start with the same number like 1.1, 1.2, but NOT 2.1.
@@ -17,4 +22,3 @@ Implement the next unfinished group of tasks from the tasks list. A group of tas
 - Once a subtask or task is completed, use the rune skill to mark it complete (e.g., `rune complete 1.1`)
 - The model MUST NOT proceed past the selected task. Once a task is done, it needs to be put up for review by the user
 - Use tools and sub agents as appropriate while implementing the task. For example, if you need to know the capabilities of a library, use context7, and if you want to verify your code is efficient, use the efficiency-optimizer sub agent
-

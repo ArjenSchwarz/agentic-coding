@@ -7,7 +7,6 @@ This GitHub Action symlinks Claude Code configuration directories from the `agen
 1. Checks out the `agentic-coding` repository (main branch by default)
 2. Creates symlinks from the repository to `~/.claude/` for:
    - `agents/` → `~/.claude/agents`
-   - `commands/` → `~/.claude/commands`
    - `rules/` → `~/.claude/rules`
    - `scripts/` → `~/.claude/scripts`
    - `skills/` → `~/.claude/skills`
@@ -63,7 +62,7 @@ jobs:
       - name: Run Claude Code
         run: |
           # Your Claude Code commands here
-          # Claude will now have access to your custom agents, commands, etc.
+          # Claude will now have access to your custom agents, skills, etc.
           claude --print "Your prompt here"
 ```
 

@@ -1,3 +1,8 @@
+---
+name: starwave:tasks
+description: 3. Create Task List
+---
+
 ### 3. Create Task List
 
 Create an actionable implementation plan with a checklist of coding tasks based on the requirements and design.
@@ -10,7 +15,7 @@ The tasks document should be based on the requirement and design documents, so e
 - Verify that the specs/{feature_name} folder exists and has a requirements.md and design.md file
 - If the folder does NOT exist, the model SHOULD check the current git branch and see if that matches an existing feature
 - The model MUST request the user to provide the {feature_name} using the question "I can't find this feature, can you provide it again? Based on the git branch, I think it might be {found_name}"
-- If the requirements.md or design.md file does not exist in the folder, the model MUST inform the user that they need to use the requirements and design tools to create these first
+- If the requirements.md or design.md file does not exist in the folder, the model MUST inform the user that they need to use the requirements and design skills to create these first
 - If a decision_log.md file exists in the specs/{feature_name} folder, the decisions in there MUST be followed
 
 **Task Planning Approach:**
@@ -51,7 +56,7 @@ The tasks document should be based on the requirement and design documents, so e
 - If gaps are identified during implementation planning, the model MUST mention them and propose relevant changes to the requirements or design
 
 **Task Exclusions:**
-The model MUST NOT include the following types of non-coding tasks:
+The model MUST NOT include the following types of non-coding tasks in the main tasks.md:
 - User acceptance testing or user feedback gathering
 - Deployment to production or staging environments
 - Performance metrics gathering or analysis
@@ -60,6 +65,42 @@ The model MUST NOT include the following types of non-coding tasks:
 - Business process changes or organizational changes
 - Marketing or communication activities
 - Any task that cannot be completed through writing, modifying, or testing code
+
+**User Prerequisites (Optional):**
+If the feature requires manual configuration or setup steps that cannot be performed by the agent, the model MUST create a separate `specs/{feature_name}/prerequisites.md` file.
+
+Prerequisites are tasks that require human intervention outside of code, such as:
+- Xcode project configuration (capabilities, entitlements, signing)
+- Apple Developer portal setup (App IDs, certificates, provisioning profiles)
+- Cloud console configuration (AWS, GCP, Azure resources)
+- Third-party service setup (API keys, webhooks, OAuth apps)
+- Database provisioning or schema migrations requiring admin access
+- Environment variable configuration in deployment platforms
+- DNS or domain configuration
+- App store or marketplace registration
+
+**Prerequisites Format:**
+```markdown
+# Prerequisites for {Feature Name}
+
+These tasks must be completed by the user before or during implementation.
+
+## Before Starting
+- [ ] {Task that must be done before any coding begins}
+
+## During Implementation
+- [ ] {Task needed before a specific coding task, reference which task}
+
+## Before Testing
+- [ ] {Task needed before testing can occur}
+```
+
+**Prerequisites Constraints:**
+- Only create prerequisites.md if there are actual prerequisites identified
+- Each prerequisite MUST include clear instructions on what needs to be configured
+- Prerequisites SHOULD indicate when they need to be completed (before starting, during implementation, before testing)
+- Prerequisites that block specific coding tasks MUST reference which task they block
+- The model MUST ask the user to confirm prerequisites are complete before proceeding with dependent tasks during implementation
 
 **Approval Workflow:**
 - After updating the tasks document, the model MUST ask the user "Do the tasks look good?"

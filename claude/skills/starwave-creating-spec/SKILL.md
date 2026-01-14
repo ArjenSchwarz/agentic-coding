@@ -1,5 +1,5 @@
 ---
-name: creating-spec
+name: starwave:creating-spec
 description: Initialize a new spec with requirements, design, and task planning. Orchestrates the entire spec-driven workflow from feature idea to actionable task list.
 ---
 
@@ -30,7 +30,7 @@ Before starting the spec workflow, assess the implementation size to determine t
 
 **Sizing Criteria:**
 
-Use **smolspec** (run `/smolspec` command) when ALL of these apply:
+Use **smolspec** (run `/starwave:smolspec` skill) when ALL of these apply:
 - Estimated implementation <80 lines of code
 - Affects 1-3 files only
 - Single component with minimal dependencies
@@ -55,26 +55,26 @@ Use **full spec workflow** (continue to Phase 2) when ANY of these apply:
 2. Present sizing assessment with metrics (estimated LOC, file count, complexity factors)
 3. Recommend either smolspec or full spec workflow
 4. Get user approval for the recommended path
-5. If smolspec approved: run `/smolspec`, then continue to Phase 5 (Branch Creation)
+5. If smolspec approved: run `/starwave:smolspec`, then continue to Phase 5 (Branch Creation)
 6. If full spec approved: continue to Phase 2
 
 ---
 
 ## Phase 2: Requirement Gathering
 
-Run the /starwave:requirements command
+Run the /starwave:requirements skill
 
 ---
 
 ## Phase 3: Design Creation
 
-Run the /starwave:design command
+Run the /starwave:design skill
 
 ---
 
 ## Phase 4: Task Planning
 
-Run the /starwave:tasks command
+Run the /starwave:tasks skill
 
 ---
 

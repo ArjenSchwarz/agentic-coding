@@ -5,6 +5,30 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2025-01-14]
+
+### Changed
+- Migrated all commands to skills - commands directory has been removed
+- Reorganized spec-driven development skills under `starwave-` prefix with flat folder structure:
+  - `starwave-creating-spec` - Main orchestrator for the full workflow
+  - `starwave-smolspec` - Lightweight specification for small changes
+  - `starwave-requirements` - Requirements gathering phase
+  - `starwave-design` - Design document creation phase
+  - `starwave-tasks` - Task planning phase
+- Skills are now invoked as `/starwave:creating-spec`, `/starwave:requirements`, etc.
+- Updated spec-workflow.md with new workflow diagram showing `/starwave:creating-spec` as the main entry point
+- Updated README.md to reflect new skill organization and workflow
+
+### Added
+- Optional `prerequisites.md` file support in starwave-tasks skill for manual user setup tasks
+  - Supports tasks like Xcode configuration, Apple Developer portal setup, cloud console configuration
+  - Organizes prerequisites by timing: Before Starting, During Implementation, Before Testing
+- Smolspec section in spec-workflow.md explaining when and how to use the lightweight specification workflow
+
+### Removed
+- `claude/commands/` directory - all commands migrated to skills
+- Removed `commands` symlink from sync-claude.sh and GitHub Action
+
 ## [2025-12-31]
 
 ### Added

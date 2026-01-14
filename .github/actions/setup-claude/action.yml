@@ -39,7 +39,6 @@ runs:
 
         # Create symlinks for each directory from claude/ subdirectory
         ln -sfn "$CHECKOUT_PATH/claude/agents" ~/.claude/agents
-        ln -sfn "$CHECKOUT_PATH/claude/commands" ~/.claude/commands
         ln -sfn "$CHECKOUT_PATH/claude/rules" ~/.claude/rules
         ln -sfn "$CHECKOUT_PATH/claude/skills" ~/.claude/skills
         ln -sfn "$CHECKOUT_PATH/scripts" ~/.claude/scripts
@@ -47,4 +46,4 @@ runs:
 
         # Verify symlinks were created
         echo "Symlinks created:"
-        ls -la ~/.claude/ | grep -E "(agents|commands|skills|rules|scripts|CLAUDE.md)"
+        ls -la ~/.claude/ | grep -E "(agents|skills|rules|scripts|CLAUDE.md)"

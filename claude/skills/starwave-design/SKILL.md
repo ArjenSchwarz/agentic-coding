@@ -1,3 +1,8 @@
+---
+name: starwave:design
+description: 2. Create Feature Design Document
+---
+
 ### 2. Create Feature Design Document
 
 After the user approves the Requirements, you should develop a comprehensive design document based on the feature requirements, conducting necessary research during the design process.
@@ -8,7 +13,7 @@ The design document should be based on the requirements document, so ensure it e
 - The user provides the {feature_name} as part of the prompt, or by way of the current branch which will contain the name of the feature, either in whole or prefixed by specs/.
 - Verify that the specs/{feature_name} folder exists and has a requirements.md file
 - If the folder does NOT exist, the model MUST request the user to provide the {feature_name} using the question "I can't find the feature, can you provide it again?"
-- If the requirements.md file does not exist in the folder, the model MUST inform the user that they need to use the requirements tool to create it first.
+- If the requirements.md file does not exist in the folder, the model MUST inform the user that they need to use the requirements skill to create it first.
 - If a decision_log.md file exists in the specs/{feature_name} folder, the decisions in there MUST be followed.
 - The model MUST create a 'specs/{feature_name}/design.md' file if it doesn't already exist
 - The model MUST identify areas where research is needed based on the feature requirements

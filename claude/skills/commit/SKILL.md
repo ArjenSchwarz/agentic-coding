@@ -1,25 +1,9 @@
-### 4. Make it so (implement all tasks)
+---
+name: commit
+description: Commits
+---
 
-Implement all the remaining tasks from the spec.
-
-**Constraints:**
-
-**Task Retrieval:**
-- The model MUST use the rune skill to retrieve the next tasks to work on
-- Use `rune next --phase --format json` to get the next incomplete phase to work on.
-
-**Task Execution:**
-- The model MUST read all files referenced in the front_matter_references and any additional references included in the task
-- The selected tasks MUST be added to the internal TODO list for tracking and implemented in the order specified
-- The model MUST implement all of the selected tasks, including all subtasks
-- Once a subtask or task is completed, use the rune skill to mark it complete (e.g., `rune complete 1.1`)
-- Use tools and sub agents as appropriate while implementing the task. For example, if you need to know the capabilities of a library, use context7, and if you want to verify your code is efficient, use the efficiency-optimizer sub agent
-
-**Review**
-- Once a phase is completely implemented, have the design-critic subagent look over the implemented work and verify that it's correct. Issues detected by the agent should be fixed or updated in the decision log.
-
-**Commit**
-- After the review, the code needs to be committed using the below process.
+# Commits
 
 1. Run all formatting and test commands.
 2. Use the command line to get an overview of the staged git changes. If no changes are staged, stage all files. If running the formatting resulted in unstaged changes to files, stage these as well. DO NOT revert code changes unless specifically asked to do so.
@@ -34,8 +18,3 @@ Implement all the remaining tasks from the spec.
 9. If a ticket number was found, use this as the commit message prefix, otherwise use [feat] / [bug] / [doc] as appropriate based on any prefixes in the branchname and/or the code changes
 10. Summarise the changes into a multi-line detailed commit message, prefixed with the commit message prefix and :. Do NOT include any co-authored-by information in the commit message.
 11. Commit the code
-
-**Compact**
-- After the commit, run `/compact` with instructions that preserve only the `/make-it-so` command context
-- Use this exact format: `/compact Continuing /make-it-so - implement the next phase. Current progress: [brief summary of completed phase]`
-- After compaction completes, immediately continue executing `/make-it-so` to implement the next phase

@@ -1,3 +1,8 @@
+---
+name: starwave:requirements
+description: 1. Requirement Gathering
+---
+
 ### 1. Requirement Gathering
 
 First, generate an initial set of requirements in EARS format based on the feature idea, then iterate with the user to refine them until they are complete and accurate.
@@ -28,12 +33,12 @@ a design.
 
 **Acceptance Criteria:**
 
-1. <a name="1.1"></a>The system SHALL provide a DataTransformer interface that operates on structured data instead of bytes  
-2. <a name="1.2"></a>The system SHALL allow data transformers to receive Record arrays and Schema information  
-3. <a name="1.3"></a>The system SHALL apply data transformers before rendering to avoid parse/render cycles  
-4. <a name="1.4"></a>The system SHALL maintain the existing byte-level Transformer interface for backward compatibility  
-5. <a name="1.5"></a>The renderer SHALL detect whether a transformer implements DataTransformer and apply it at the appropriate stage  
-6. <a name="1.6"></a>The system SHALL preserve the original document data when transformations are not applied  
+1. <a name="1.1"></a>The system SHALL provide a DataTransformer interface that operates on structured data instead of bytes
+2. <a name="1.2"></a>The system SHALL allow data transformers to receive Record arrays and Schema information
+3. <a name="1.3"></a>The system SHALL apply data transformers before rendering to avoid parse/render cycles
+4. <a name="1.4"></a>The system SHALL maintain the existing byte-level Transformer interface for backward compatibility
+5. <a name="1.5"></a>The renderer SHALL detect whether a transformer implements DataTransformer and apply it at the appropriate stage
+6. <a name="1.6"></a>The system SHALL preserve the original document data when transformations are not applied
 ```
 - When asking the user questions and offering options, the model MUST use the AskUserQuestion tool.
 - The model SHOULD consider edge cases, user experience, technical constraints, and success criteria in the initial requirements

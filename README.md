@@ -4,18 +4,6 @@ This repository contains my current process for working with agentic coding assi
 
 The framework now includes cross-platform support with GitHub Copilot prompt files, enhanced peer review capabilities with multiple AI system consultation, and improved workflow management with the rune CLI integration.
 
-## Commands
-
-The framework includes commands for a complete feature development workflow (detailed in [spec-workflow](spec-workflow.md)):
-
-- **`catchup`** - Get up to speed on branch changes by analyzing commits and modified files (inspired by [Shrivu Shankar](https://blog.sshh.io/p/how-i-use-every-claude-code-feature))
-- **`requirements`** - Generate and refine feature requirements in EARS format
-- **`design`** - Create design documents based on approved requirements
-- **`tasks`** - Convert designs into actionable implementation task lists
-- **`next-task`** - Execute the next group of tasks from the implementation plan
-- **`commit`** - Format, stage, and commit changes with proper changelog management
-- **`release-prep`** - Prepare the project for a new release with quality checks and documentation updates
-
 ## Agents
 
 The framework provides specialized AI agents for different aspects of development. These are defined for use in Claude Code, and not every tool supports sub-agents like this. Some agents have dependencies on external CLI tools (e.g., peer-review-validator requires Gemini CLI, Codex CLI, or Q Developer CLI for consulting external AI systems).
@@ -30,20 +18,37 @@ The framework provides specialized AI agents for different aspects of developmen
 
 ## Skills
 
-The framework includes Claude Code skills that provide specialized workflows:
+The framework includes Claude Code skills for the complete feature development workflow (detailed in [spec-workflow](spec-workflow.md)):
 
-- **`creating-spec`** - Orchestrates the complete spec-driven workflow from initial feature idea through requirements, design, and task planning. This skill guides you through all three phases with built-in review gates and decision logging.
+**Starwave Skills (Spec-Driven Development):**
+- **`starwave:creating-spec`** - Main entry point that orchestrates the complete spec-driven workflow. Assesses scope, routes to appropriate workflow, and guides through all phases with built-in review gates.
+- **`starwave:smolspec`** - Lightweight specification for minor changes (<80 LOC, 1-3 files)
+- **`starwave:requirements`** - Generate and refine feature requirements in EARS format
+- **`starwave:design`** - Create design documents based on approved requirements
+- **`starwave:tasks`** - Convert designs into actionable implementation task lists
+
+**Implementation Skills:**
+- **`next-task`** - Execute the next group of tasks from the implementation plan
+- **`make-it-so`** - Implement all remaining tasks from the spec automatically
+
+**Utility Skills:**
+- **`catchup`** - Get up to speed on branch changes by analyzing commits and modified files (inspired by [Shrivu Shankar](https://blog.sshh.io/p/how-i-use-every-claude-code-feature))
+- **`commit`** - Format, stage, and commit changes with proper changelog management
+- **`release-prep`** - Prepare the project for a new release with quality checks and documentation updates
 - **`rune`** - Manages hierarchical task lists using the rune CLI tool. Provides efficient task creation, status tracking, phase organization, and batch operations for atomic updates.
 
-Skills provide more structured, multi-step workflows compared to individual commands, with built-in approval gates and validation steps.
+Skills are invoked using slash commands (e.g., `/starwave:creating-spec`, `/commit`) and provide structured workflows with built-in approval gates.
 
 ## Workflow
 
-1. Start with `requirements` to define what needs to be built
-2. Use `design` to plan the architecture and approach
-3. Generate implementation steps with `tasks`
-4. Execute incrementally using `next-task`
-5. Commit progress using `commit`
+The recommended way to start a new feature is with `/starwave:creating-spec`, which will:
+
+1. Assess the scope of your feature
+2. Route to either smolspec (small changes) or full spec workflow
+3. Guide you through requirements → design → tasks phases
+4. Offer to create a feature branch when planning is complete
+
+Then implement using `/next-task` and commit with `/commit`.
 
 Each phase requires explicit user approval before proceeding to ensure quality and alignment.
 
@@ -53,8 +58,7 @@ All Claude Code configuration files are organized under the `claude/` directory:
 
 - `claude/CLAUDE.md` - User-level instructions that guide AI behavior
 - `claude/agents/` - Specialized AI agents for different development tasks
-- `claude/commands/` - Slash commands for the development workflow
-- `claude/skills/` - Multi-step workflow skills with approval gates
+- `claude/skills/` - Skills for the development workflow (invoked via slash commands)
 - `claude/rules/` - Additional rules and references:
   - `claude/rules/language-rules/` - Language-specific coding guidelines (e.g., Go patterns)
   - `claude/rules/references/` - Reference documentation formats
@@ -110,7 +114,6 @@ The action automatically:
 1. Checks out the `agentic-coding` repository
 2. Creates symlinks from the repository's `claude/` directory to `~/.claude/`:
    - `claude/agents/` → `~/.claude/agents`
-   - `claude/commands/` → `~/.claude/commands`
    - `claude/skills/` → `~/.claude/skills`
    - `claude/rules/` → `~/.claude/rules`
    - `claude/CLAUDE.md` → `~/.claude/CLAUDE.md`

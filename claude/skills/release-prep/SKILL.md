@@ -1,3 +1,8 @@
+---
+name: release-prep
+description: I want to prepare this project for the next release, which will be {input}. Please do the following:
+---
+
 I want to prepare this project for the next release, which will be {input}. Please do the following:
 
 ## Pre-Release Quality Checks

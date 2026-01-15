@@ -5,6 +5,11 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2025-01-15]
+
+### Changed
+- Updated commit skill to conditionally run tests and linting only when code files are changed, skipping for documentation-only changes
+
 ## [2025-01-14]
 
 ### Changed

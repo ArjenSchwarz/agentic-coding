@@ -5,8 +5,8 @@ description: Commits
 
 # Commits
 
-1. Run all formatting and test commands.
-2. Use the command line to get an overview of the staged git changes. If no changes are staged, stage all files. If running the formatting resulted in unstaged changes to files, stage these as well. DO NOT revert code changes unless specifically asked to do so.
+1. Use the command line to get an overview of the staged git changes. If no changes are staged, stage all files.
+2. Determine if the changes include code files (not just documentation like .md files, comments, or config files). If code changes are present, run all formatting and test commands. If only documentation changes, skip tests and linting. If running the formatting resulted in unstaged changes to files, stage these as well. DO NOT revert code changes unless specifically asked to do so.
 3. Create a concise, well-documented summary of the changes in the format as defined at keepachangelog.com, excluding any changes to the changelog file itself. Use proper formatting and be specific about the changes. Ignore the marking of tasks as complete.
 4. Read the CHANGELOG.md file, if the file does not exist, create it.
 5. Verify if the summary is already present in the changelog, if not add it to the top of the file.

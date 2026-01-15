@@ -581,6 +581,34 @@ struct SidebarView: View {
 
 On iOS with compact width, NavigationSplitView collapses to a navigation stack. The toolbar must be on the view that owns the navigation bar (the sidebar) for buttons to appear correctly.
 
+### ToolbarSpacer for Visual Grouping (macOS 26 / iOS 26)
+
+In Liquid Glass, toolbar items with the same placement are automatically grouped into a single glass "bubble". To create visually separate groups while keeping items in the same area, use `ToolbarSpacer`:
+
+```swift
+.toolbar {
+    // First group - document actions
+    ToolbarItemGroup(placement: .primaryAction) {
+        Button("Edit", systemImage: "pencil") { }
+        Button("Share", systemImage: "square.and.arrow.up") { }
+    }
+
+    // Spacer creates visual separation between groups
+    ToolbarSpacer(.fixed)
+
+    // Second group - separate glass bubble
+    ToolbarItemGroup(placement: .primaryAction) {
+        Button("Sidebar", systemImage: "sidebar.right") { }
+    }
+}
+```
+
+**ToolbarSpacer options:**
+- `.fixed` - Small fixed spacing, creates separate glass bubbles
+- `.flexible` - Flexible spacing that pushes groups apart
+
+Without `ToolbarSpacer`, multiple `ToolbarItemGroup` blocks with the same placement will merge into a single glass bubble. Different placements (e.g., `.primaryAction` vs `.secondaryAction`) create separation but position items in different areas of the toolbar.
+
 ### NavigationSplitView: Platform-Specific Navigation Patterns
 
 NavigationSplitView behaves differently on iOS vs macOS, requiring platform-specific code for navigation:

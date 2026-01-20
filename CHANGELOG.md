@@ -20,6 +20,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Changed
 - Updated `peer-review-validator` agent to use `kiro-agent` instead of `q-developer-agent` for AWS/cloud-native validation
 
+### Removed
+- `code-simplifier` agent (replaced by skill)
+- `ui-ux-reviewer` agent (replaced by skill)
+- `efficiency-optimizer` agent (replaced by skill)
+- `design-critic` agent (replaced by skill)
+- `pre-push-code-reviewer` agent (replaced by `pre-push-review` skill)
+
 ## [2025-01-16]
 
 ### Changed

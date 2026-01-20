@@ -12,6 +12,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - Reviews code quality, spec adherence, testing, and documentation
   - Provides actionable feedback categorized by severity (Critical, Important, Minor, Suggestion)
   - Skill-based alternative to the existing `pre-push-code-reviewer` agent
+- `code-simplifier` skill for reviewing and simplifying code to reduce complexity
+- `ui-ux-reviewer` skill for evaluating user experience of interfaces (CLI, web, mobile)
+- `efficiency-optimizer` skill for analyzing code for performance improvements
+- `design-critic` skill for critical review of design documents and architecture proposals
+
+### Changed
+- Updated `peer-review-validator` agent to use `kiro-agent` instead of `q-developer-agent` for AWS/cloud-native validation
 
 ## [2025-01-16]
 

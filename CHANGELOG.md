@@ -5,6 +5,14 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2026-01-20]
+
+### Added
+- `pre-push-review` skill for reviewing unpushed commits before pushing to remote repository
+  - Reviews code quality, spec adherence, testing, and documentation
+  - Provides actionable feedback categorized by severity (Critical, Important, Minor, Suggestion)
+  - Skill-based alternative to the existing `pre-push-code-reviewer` agent
+
 ## [2025-01-16]
 
 ### Changed

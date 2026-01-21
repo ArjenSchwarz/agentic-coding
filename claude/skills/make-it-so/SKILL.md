@@ -18,10 +18,10 @@ Implement all the remaining tasks from the spec.
 - The selected tasks MUST be added to the internal TODO list for tracking and implemented in the order specified
 - The model MUST implement all of the selected tasks, including all subtasks
 - Once a subtask or task is completed, use the rune skill to mark it complete (e.g., `rune complete 1.1`)
-- Use tools and sub agents as appropriate while implementing the task. For example, if you need to know the capabilities of a library, use context7, and if you want to verify your code is efficient, use the efficiency-optimizer sub agent
+- Use tools and skills as appropriate while implementing the task. For example, if you need to know the capabilities of a library, use context7, and if you want to verify your code is efficient, use the efficiency-optimizer skill
 
 **Review**
-- Once a phase is completely implemented, have the design-critic subagent look over the implemented work and verify that it's correct. Issues detected by the agent should be fixed or updated in the decision log.
+- Once a phase is completely implemented, use the design-critic skill to look over the implemented work and verify that it's correct. Issues detected should be fixed or updated in the decision log.
 
 **Commit**
 - After the review, the code needs to be committed using the below process.

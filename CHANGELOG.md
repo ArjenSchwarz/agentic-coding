@@ -5,6 +5,14 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2026-01-21]
+
+### Changed
+- Updated skill files to replace "agent" references with "skill" terminology
+  - `next-task`, `make-it-so`: Changed "sub agent" to "skill" for efficiency-optimizer and design-critic
+  - `starwave-requirements`, `starwave-design`: Updated to use design-critic skill and Task tool with subagent_type="peer-review-validator"
+  - `starwave-smolspec`: Changed "design-critic agent" to "design-critic skill"
+
 ## [2026-01-20]
 
 ### Added

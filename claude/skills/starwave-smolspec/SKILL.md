@@ -139,7 +139,7 @@ The tasks.md file MUST follow the standard task format to be compatible with the
 - Ask clarifying questions if needed (use AskUserQuestion tool)
 - Keep documentation minimal but complete
 - Ensure smolspec is self-contained (assume fresh AI session will execute without conversation history)
-- Use the design-critic agent to review the smolspec.md document
+- Use the design-critic skill to review the smolspec.md document
 - Incorporate the design-critic's feedback and recommendations into the smolspec.md
 - Update the document based on valid critiques before presenting to user
 - Capture any noteworthy decisions or trade-offs identified during critique inside `specs/{feature_name}/decision_log.md`

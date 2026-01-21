@@ -39,8 +39,8 @@ The design document should be based on the requirements document, so ensure it e
 - The model MUST ensure the design addresses all feature requirements identified during the clarification process
 - The model MUST use tools like context7 to retrieve relevant information about the libraries and tools
 
-**Self-Review Checklist (before agent review):**
-Before triggering agent reviews, the model MUST verify:
+**Self-Review Checklist (before skill review):**
+Before triggering skill reviews, the model MUST verify:
 - [ ] Each requirement from requirements.md has a corresponding design element
 - [ ] All acceptance criteria can be traced to specific components or interfaces
 - [ ] Data models support all required operations from the requirements
@@ -48,12 +48,12 @@ Before triggering agent reviews, the model MUST verify:
 - [ ] Testing strategy includes tests for each acceptance criterion
 - [ ] No design elements exist without a corresponding requirement (scope creep check)
 
-- The model MUST use relevant sub agents to receive feedback on the design, after writing the initial design. The requirements MUST always take precedence over this feedback.
+- The model MUST use relevant skills to receive feedback on the design, after writing the initial design. The requirements MUST always take precedence over this feedback.
 - The model MUST highlight design decisions and their rationales in a decision log document at specs/{feature_name}/decision_log.md
 - The model MUST ask the user for input on specific technical decisions during the design process
 - When asking the user questions and offering options, the model MUST use the AskUserQuestion tool.
-- After updating the design document, the model MUST use the design-critic, peer-review-validator, and other relevant sub agents to review the document and provide its questions to the user.
-- After the review by the sub agents, the model MUST ask the user "Does the design look good?"
+- After updating the design document, the model MUST use the design-critic skill, and the Task tool with subagent_type="peer-review-validator" to review the document and provide its questions to the user.
+- After the review by the skills, the model MUST ask the user "Does the design look good?"
 - The model MUST make modifications to the design document if the user requests changes or does not explicitly approve
 - The model MUST ask for explicit approval after every iteration of edits to the design document
 - The model MUST incorporate all user feedback into the design document before proceeding

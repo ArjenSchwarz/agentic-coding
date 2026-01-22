@@ -5,6 +5,16 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2026-01-22]
+
+### Added
+- `pr-review-fixer` skill for fetching and fixing GitHub PR review comments
+  - Filters out resolved comments and keeps only last claude[bot] comment per thread
+  - Validates issues against current code before creating fix tasks
+  - Creates review-overview and review-fixes files with iteration tracking
+  - Integrates with rune for task management
+  - Supports spec-based PRs (output to specs folder) and non-spec PRs (output to .claude/reviews)
+
 ## [2026-01-21]
 
 ### Changed

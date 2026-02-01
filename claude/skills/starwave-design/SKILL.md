@@ -52,7 +52,7 @@ Before triggering skill reviews, the model MUST verify:
 - The model MUST highlight design decisions and their rationales in a decision log document at specs/{feature_name}/decision_log.md
 - The model MUST ask the user for input on specific technical decisions during the design process
 - When asking the user questions and offering options, the model MUST use the AskUserQuestion tool.
-- After updating the design document, the model MUST use the design-critic skill, and the Task tool with subagent_type="peer-review-validator" to review the document and provide its questions to the user.
+- After updating the design document, the model MUST use the Task tool with subagent_type="general-purpose" to run the design-critic skill (invoke the Skill tool with skill="design-critic"), and the Task tool with subagent_type="peer-review-validator" to review the document and provide its questions to the user.
 - After the review by the skills, the model MUST ask the user "Does the design look good?"
 - The model MUST make modifications to the design document if the user requests changes or does not explicitly approve
 - The model MUST ask for explicit approval after every iteration of edits to the design document

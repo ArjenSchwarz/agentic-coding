@@ -55,6 +55,32 @@ The tasks document should be based on the requirement and design documents, so e
 - All requirements MUST be covered by the implementation tasks
 - If gaps are identified during implementation planning, the model MUST mention them and propose relevant changes to the requirements or design
 
+**Task Dependencies:**
+- The model MUST identify dependencies between tasks using `blocked_by` relationships
+- A task that requires another task to be completed first MUST declare that dependency
+- Common dependency patterns include:
+  - Tests blocked by the interfaces/types they test
+  - Integration code blocked by the components being integrated
+  - Higher-level features blocked by lower-level building blocks
+- Dependencies MUST be expressed as task IDs (e.g., `"blocked_by": ["1", "2"]`)
+- Circular dependencies are not allowed and indicate a design problem
+
+**Work Streams for Parallel Execution:**
+- The model MUST analyze tasks to identify independent work streams that can be executed in parallel
+- A work stream is a set of tasks that can be worked on independently from other streams
+- Common stream patterns include:
+  - Frontend vs Backend work
+  - Different modules or components with no shared code
+  - Independent features that don't interact
+  - Test writing vs implementation (when tests can be written from interfaces)
+- Tasks in the same stream should be numbered sequentially and share the same stream ID
+- The default stream is 1; additional streams use 2, 3, etc.
+- Tasks SHOULD be assigned to streams based on:
+  - Code locality (same files/modules = same stream)
+  - Logical grouping (related functionality = same stream)
+  - Dependency chains (dependent tasks should generally be in the same stream)
+- Cross-stream dependencies are allowed and enable coordination between parallel agents
+
 **Task Exclusions:**
 The model MUST NOT include the following types of non-coding tasks in the main tasks.md:
 - User acceptance testing or user feedback gathering
@@ -125,5 +151,28 @@ The model MUST use the rune skill to create and manage tasks. Invoke the rune sk
   - Details as arrays for additional context
   - References as arrays of file paths
   - Requirements as arrays of requirement IDs from requirements.md
+  - Stream assignments for parallel execution (`stream`: integer)
+  - Dependencies between tasks (`blocked_by`: array of task IDs)
 
 The rune skill will handle the proper command syntax and JSON formatting automatically.
+
+**Stream Assignment Guidelines:**
+When creating tasks, the model SHOULD:
+1. First identify all tasks that have no dependencies on other tasks - these can start immediately
+2. Group related tasks into streams based on code locality and logical relationships
+3. Assign stream IDs consistently (all backend tasks in stream 1, all frontend in stream 2, etc.)
+4. Ensure tasks within a stream that depend on each other use `blocked_by`
+5. Cross-stream dependencies should be minimized but used when necessary
+
+Example batch operation with streams and dependencies:
+```json
+{
+  "file": "tasks.md",
+  "operations": [
+    {"type": "add", "title": "Define API interfaces", "stream": 1, "phase": "Implementation"},
+    {"type": "add", "title": "Implement API handlers", "stream": 1, "blocked_by": ["1"], "phase": "Implementation"},
+    {"type": "add", "title": "Create UI components", "stream": 2, "phase": "Implementation"},
+    {"type": "add", "title": "Wire UI to API", "stream": 2, "blocked_by": ["2", "3"], "phase": "Implementation"}
+  ]
+}
+```

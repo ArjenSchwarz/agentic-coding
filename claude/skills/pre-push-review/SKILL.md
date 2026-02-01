@@ -42,7 +42,9 @@ You are an expert code reviewer specializing in pre-push quality assurance. Your
    - Check for clear code comments where needed
    - Verify public APIs are documented
    - Ensure complex logic has explanatory comments
-   - Confirm README or other docs are updated if needed
+   - **README updates**: If new features, commands, or setup steps were added, verify README.md reflects them
+   - **CLAUDE.md / AGENTS.md updates**: If new conventions, workflows, or project-specific instructions were introduced, ensure these files are updated
+   - **Other docs**: Check if changes affect any other documentation (API docs, guides, etc.) and flag if updates are needed
 
 4. **Run Validation Tools**:
    - Execute linters and validators as specified in project configuration

@@ -5,6 +5,30 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2026-02-04]
+
+### Added
+- `explain-like` skill for explaining code changes or designs at three expertise levels (beginner, intermediate, expert)
+  - Supports PR/branch change explanations and design document validation
+  - Generates structured explanations with different depth for different audiences
+  - Can be used as a self-review mechanism to catch gaps or logic issues
+- `fix-bug` skill for systematic bug investigation, resolution, and documentation
+  - Integrates with `systematic-debugger` skill for root cause analysis
+  - Creates regression tests before implementing fixes
+  - Generates standardized bugfix reports in `specs/bugfixes/<bug-name>/`
+- `orbit-guidance.yaml` template for multi-variant implementation approaches
+  - Defines three implementation styles: Minimal/Pragmatic, Defensive/Thorough, Performance-Oriented
+  - For use with Orbit multi-agent parallel execution
+
+### Changed
+- `pre-push-review` skill: Added implementation explanation step using `explain-like` skill
+  - Generates `specs/{feature_name}/implementation.md` for documentation
+  - Uses explanation as validation mechanism to verify spec completeness
+  - Adds "Completeness Assessment" section to track implementation status
+- `starwave-design` skill: Added self-validation step using `explain-like` skill
+  - Requires explaining design at multiple expertise levels before proceeding to reviews
+  - Helps identify gaps, overcomplexity, or logic issues in design documents
+
 ## [2026-02-01]
 
 ### Added

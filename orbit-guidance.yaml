@@ -1,0 +1,43 @@
+# Orbit Multi-Variant Guidance File
+# Use with: orbit run --variants 3 --guidance-file guidance.yaml
+
+global_guidance: |
+  Follow existing code conventions and patterns in the codebase.
+  Ensure all tests pass before completing each phase.
+  Write clear commit messages that explain the "why" not just the "what".
+
+variants:
+  - id: 1
+    guidance: |
+      APPROACH: Minimal and Pragmatic
+
+      - Implement the simplest solution that satisfies the requirements
+      - Avoid abstractions until you have at least 3 concrete use cases
+      - Prefer inline code over creating new helper functions
+      - Skip error wrapping unless the context would be lost
+      - Use concrete types rather than interfaces where possible
+      - Only add tests for the public API, not internal functions
+
+  - id: 2
+    guidance: |
+      APPROACH: Defensive and Thorough
+
+      - Add comprehensive input validation at all boundaries
+      - Wrap all errors with context about what operation failed
+      - Create interfaces for any external dependencies to enable testing
+      - Write unit tests for both happy paths and edge cases
+      - Add debug logging at key decision points
+      - Document non-obvious design decisions with comments
+      - Consider failure modes and add appropriate recovery logic
+
+  - id: 3
+    guidance: |
+      APPROACH: Performance-Oriented
+
+      - Minimize allocations by reusing buffers and slices
+      - Use sync.Pool for frequently allocated objects
+      - Prefer iteration over recursion to avoid stack growth
+      - Add benchmarks for any hot paths
+      - Use concurrent processing where it makes sense
+      - Pre-size maps and slices when the capacity is known
+      - Consider cache-friendliness in data structure layout

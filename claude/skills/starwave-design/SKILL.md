@@ -48,6 +48,11 @@ Before triggering skill reviews, the model MUST verify:
 - [ ] Testing strategy includes tests for each acceptance criterion
 - [ ] No design elements exist without a corresponding requirement (scope creep check)
 
+**Self-Validation via Explanation:**
+- The model MUST use the explain-like skill (invoke the Skill tool with skill="explain-like") to explain the design at multiple expertise levels (beginner, intermediate, expert)
+- This serves as a self-review mechanism: if the design cannot be clearly explained at each level, it may indicate gaps, overcomplexity, or logic issues
+- The model SHOULD address any issues discovered during this explanation process before proceeding to skill reviews
+
 - The model MUST use relevant skills to receive feedback on the design, after writing the initial design. The requirements MUST always take precedence over this feedback.
 - The model MUST highlight design decisions and their rationales in a decision log document at specs/{feature_name}/decision_log.md
 - The model MUST ask the user for input on specific technical decisions during the design process

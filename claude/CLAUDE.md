@@ -1,3 +1,9 @@
+# Skills Usage
+
+This project uses custom skills extensively. Available skills include: spec creation, PR review fixing, pre-push review, and explain-like. Check `.claude/skills/` for the full list before suggesting manual approaches.
+
+When asked to analyze or document something, first check if there's an existing skill/workflow for that task (e.g., spec creation, review). Use the established workflow rather than doing ad-hoc analysis.
+
 # Communication Style
 
 - DO NOT overcomplicate things. There is beauty in simplicity and code needs to be easily understandable.
@@ -11,6 +17,20 @@
 - When you discover a learning specific to a language that needs to be kept, add it to the related language-rule file (or create a new one if needed).
 - When managing tasks, use the rune skill.
 - When creating GitHub issues, ALWAYS create them in the current repository unless explicitly told otherwise.
+
+# Agent Notes
+
+Maintain implementation notes in `docs/agent-notes/` to preserve knowledge across sessions.
+
+**Before starting a task**: Check `docs/agent-notes/` for relevant notes and read them. Only read what's relevant — don't load everything.
+
+**After completing a task**: Create or update notes about the code you worked on. Focus on:
+- How things work (architecture, data flow, key abstractions)
+- Non-obvious behavior, gotchas, and things that don't work as expected
+- Why certain approaches were chosen or rejected
+- Setup/configuration details that aren't obvious from the code
+
+Keep notes factual and concise. Organise by topic or module (e.g., `auth.md`, `api-layer.md`) — not by date or task. Update existing notes rather than creating duplicates.
 
 # Project Conventions
 

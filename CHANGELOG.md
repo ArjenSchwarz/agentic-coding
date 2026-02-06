@@ -5,6 +5,14 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2026-02-06]
+
+### Added
+- Agent Notes workflow in CLAUDE.md for maintaining implementation notes across sessions
+  - Notes stored in `docs/agent-notes/`, organised by topic or module
+  - Read relevant notes before starting tasks, update after completing them
+- Skills Usage section in CLAUDE.md to direct agents to check existing skills before manual approaches
+
 ## [2026-02-04]
 
 ### Added

@@ -25,6 +25,7 @@ gh api graphql -f query='
         # Code-level review comments (file/line specific)
         reviewThreads(first: 100) {
           nodes {
+            id
             isResolved
             comments(first: 50) {
               nodes { id body author { login } path line }
@@ -215,14 +216,32 @@ Parse output for:
 - Assertion errors with expected vs actual values
 - Stack traces pointing to failure source
 
-### 10. Verify All Fixes
+### 10. Resolve Fixed Threads
+
+After fixing code-level issues, resolve the corresponding review threads on GitHub:
+
+```bash
+# For each fixed code-level thread, resolve it using its thread ID
+gh api graphql -f query='
+  mutation($threadId: ID!) {
+    resolveReviewThread(input: {threadId: $threadId}) {
+      thread { isResolved }
+    }
+  }
+' -f threadId=THREAD_NODE_ID
+```
+
+Only resolve threads whose issues were validated and fixed. Do not resolve threads that were skipped or marked invalid — those need human attention.
+
+### 11. Commit, Push, and Verify
 
 After all fixes:
 
 1. Run full test suite locally
 2. Run linter
-3. Commit changes with descriptive message
-4. Push and monitor CI status
+3. Commit changes with a descriptive message
+4. Push to remote
+5. Monitor CI status to confirm checks pass
 
 ## Key Behaviors
 

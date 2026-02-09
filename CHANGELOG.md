@@ -7,6 +7,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [2026-02-06]
 
+### Changed
+- `next-task` skill: Updated parallel execution to use `rune next --phase --stream N` for subagents
+  - Subagents now retrieve all phase tasks for their stream in one call instead of iterative claiming
+  - Simplified subagent instructions and cross-stream coordination
+- `pr-review-fixer` skill: Added thread resolution, auto-commit, and push
+  - New step to resolve fixed code-level review threads via GraphQL mutation
+  - Final step now explicitly commits and pushes to remote
+  - Added thread `id` to GraphQL query for review thread resolution
+
 ### Added
 - Agent Notes workflow in CLAUDE.md for maintaining implementation notes across sessions
   - Notes stored in `docs/agent-notes/`, organised by topic or module

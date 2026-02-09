@@ -34,11 +34,11 @@ When a phase is pulled in and multiple streams have ready tasks:
 2. If there are 2 or more streams with ready tasks:
    - The model SHOULD spawn subagents (using the Task tool) to handle each stream in parallel
    - Each subagent receives instructions to:
-     - Claim tasks in their assigned stream using `rune next --stream N --claim "agent-stream-N"`
+     - Retrieve all phase tasks for their stream using `rune next --phase --stream N --format json`
      - Read all referenced files from front_matter_references
-     - Implement the claimed tasks in dependency order
-     - Mark tasks complete as they finish
-     - Report back when all claimed tasks in the stream are done or blocked
+     - Implement the tasks in dependency order
+     - Mark tasks complete as they finish using `rune complete <task-id>`
+     - Report back when all tasks in the stream are done or blocked
    - The main agent coordinates by:
      - Monitoring subagent progress
      - Handling any cross-stream dependencies that become unblocked
@@ -52,11 +52,11 @@ When spawning a subagent for a stream, provide these instructions:
 - Stream number to work on
 - Path to the tasks file
 - List of front_matter_references to read
-- Instruction to use `rune next --stream N --claim "agent-stream-N"` to claim work
+- Instruction to use `rune next --phase --stream N --format json` to retrieve all tasks for the stream
 - Instruction to mark tasks complete using `rune complete <task-id>`
 - Instruction to stop when all tasks in the stream are complete or blocked by tasks in other streams
 
 **Cross-Stream Coordination:**
-- When a subagent completes a task that unblocks tasks in another stream, that stream's agent will pick up the newly unblocked work on their next `rune next` call
+- When a subagent completes a task that unblocks tasks in another stream, that stream's agent will pick up the newly unblocked work on their next `rune next --phase --stream N` call
 - If all streams become blocked waiting on each other, this indicates a circular dependency problem that should be reported to the user
 - The main agent should periodically check `rune streams --json` to monitor overall progress

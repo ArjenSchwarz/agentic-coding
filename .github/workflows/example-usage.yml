@@ -23,7 +23,7 @@ jobs:
           ls -la ~/.claude/
 
           # Check directory symlinks
-          for dir in agents commands rules scripts skills; do
+          for dir in agents rules scripts skills; do
             if [ -L ~/.claude/$dir ]; then
               echo "✓ ~/.claude/$dir is a symlink pointing to: $(readlink ~/.claude/$dir)"
             else
@@ -47,7 +47,7 @@ jobs:
           echo "Available Claude agents:"
           ls -1 ~/.claude/agents/
 
-      - name: Example - List available commands
+      - name: Example - List available skills
         run: |
-          echo "Available Claude commands:"
-          ls -1 ~/.claude/commands/
+          echo "Available Claude skills:"
+          ls -1 ~/.claude/skills/

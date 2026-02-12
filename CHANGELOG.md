@@ -5,6 +5,24 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2026-02-13]
+
+### Added
+- `transit` routing skill for dispatching Transit tickets (`T-[number]`) to appropriate workflows by task type
+  - Routes bugs to `/fix-bug`, features to `/starwave:creating-spec`, research to plan mode
+  - Asks for clarification on chore and documentation types
+  - Handles edge cases: task not found, done/abandoned tickets, ambiguous types
+- Transit integration in `fix-bug` skill with ticket status tracking and branch creation step
+  - Moves ticket to `in-progress` at start, `ready-for-review` at completion
+  - Offers `T-{number}/bugfix-{bug-name}` branch naming when ticket present
+- Transit integration in `starwave-creating-spec` skill with ticket status tracking
+  - Moves ticket to `spec` after scope assessment approval, `ready-for-implementation` after Phase 5
+  - Offers `T-{number}/{spec-name}` as recommended branch name when ticket present
+- Agent notes for Transit integration (`docs/agent-notes/transit-integration.md`)
+
+### Changed
+- `commit` skill: Broadened ticket extraction pattern from 3-5 to 1-5 character prefixes to support Transit's `T-[number]` format
+
 ## [2026-02-06]
 
 ### Changed

@@ -13,7 +13,7 @@ description: Commits
 6. Add the changelog to staged commits
 7. Verify the current git branch using the git command.
 8. Extract any ticket numbers from the branch, check for the below options based on what is likely.
-    a. Extract the JIRA ticket number from the branch. The ticket number will be in the format ABC-123 and will be the combination of 3-5 letters or numbers, a -, and 1-5 numbers. This will be at the start of the branch name, possibly preceeded by something like feature/ or hotfix/.
+    a. Extract the ticket number from the branch. The ticket number will be in the format ABC-123 and will be the combination of 1-5 letters or numbers, a -, and 1-5 numbers. This will be at the start of the branch name, possibly preceeded by something like feature/ or hotfix/.
     b. Check for a pure number, this would likely reflect a GitHub Issue.
 9. If a ticket number was found, use this as the commit message prefix, otherwise use [feat] / [bug] / [doc] as appropriate based on any prefixes in the branchname and/or the code changes
 10. Summarise the changes into a multi-line detailed commit message, prefixed with the commit message prefix and :. Do NOT include any co-authored-by information in the commit message.

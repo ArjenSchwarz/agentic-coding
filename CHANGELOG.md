@@ -11,6 +11,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Renamed `liquid-glass-forms` skill to `swiftui-forms`
 - Added Transit ticket (`T-<id>`) convention to CLAUDE.md project conventions, pointing to Transit MCP tools and `transit` skill
 - Added `swiftui-forms` skill reference to Swift language rules for form layout work
+- `starwave-smolspec` skill: Clarified rune integration to explicitly request file creation with smolspec.md reference and `blocked_by` dependencies via batch operations
 
 ## [2026-02-13]
 

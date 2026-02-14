@@ -165,8 +165,9 @@ Before presenting to user, the model MUST verify:
 
 **5. Task Creation:**
 - Once smolspec.md is approved, create the tasks.md file
-- The model MUST use the rune skill to create tasks in specs/{feature_name}/tasks.md
-- Tasks should reference the smolspec.md file in their front matter
+- The model MUST use the rune skill to:
+  - Create the task file at specs/{feature_name}/tasks.md with a reference to smolspec.md
+  - Add tasks using batch operations, including `blocked_by` dependencies where tasks build on previous steps
 - Task structure should follow the standard format compatible with next-task skill
 - Keep it simple: 4-10 total tasks, optionally organized into 1-2 phases
 - Each task MUST be outcome-focused (WHAT needs to be achieved, not HOW)

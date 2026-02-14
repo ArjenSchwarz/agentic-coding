@@ -6,6 +6,8 @@ paths: **/*.swift
 
 Rules for AI agents generating Swift 6 and SwiftUI code targeting iOS 17+/macOS 14+.
 
+**Forms:** When building SwiftUI form layouts (preferences, settings, inspectors), use the `swiftui-forms` skill.
+
 ---
 
 ## Swift 6 Concurrency

@@ -5,6 +5,13 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2026-02-14]
+
+### Changed
+- Renamed `liquid-glass-forms` skill to `swiftui-forms`
+- Added Transit ticket (`T-<id>`) convention to CLAUDE.md project conventions, pointing to Transit MCP tools and `transit` skill
+- Added `swiftui-forms` skill reference to Swift language rules for form layout work
+
 ## [2026-02-13]
 
 ### Added

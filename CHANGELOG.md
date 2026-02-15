@@ -5,6 +5,13 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2026-02-16]
+
+### Changed
+- Added Transit comment requirement to CLAUDE.md — status changes must include an explanatory comment
+- `fix-bug` skill: Auto-create branch and PR for Transit bugs instead of prompting; added Transit comment templates for status transitions
+- `starwave-creating-spec` skill: Added Transit comment templates for `spec` and `ready-for-implementation` status transitions
+
 ## [2026-02-14]
 
 ### Changed

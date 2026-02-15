@@ -38,6 +38,7 @@ Keep notes factual and concise. Organise by topic or module (e.g., `auth.md`, `a
 - If `.claude/scripts/README.md` exists in the project, you SHOULD use the tools mentioned in there for their intended purposes.
 - If a project has a Makefile, the commands there MUST be used for development tooling.
 - References in the form `T-<id>` are Transit tickets. Query and update them using the Transit MCP tools (`mcp__transit__query_tasks`, `mcp__transit__update_task_status`, `mcp__transit__create_task`). Use the `transit` skill to route tickets to the appropriate workflow.
+- When changing a Transit ticket's status, ALWAYS add a comment explaining why the status was changed (e.g., "Moving to spec — scope assessment approved", "Marking done — all tasks implemented and tests passing").
 
 # CLI Commands
 

@@ -22,10 +22,10 @@ Each phase builds on the previous one and requires explicit user approval before
 
 If a `T-[number]` ticket is mentioned (e.g., `T-42`), track it throughout the workflow:
 - Extract the display ID from the reference
-- Move the ticket to `spec` status after the scope assessment is approved (before Phase 2 or smolspec starts)
-- Move the ticket to `ready-for-implementation` status at the end of Phase 5 (after branch creation or skip)
+- Move the ticket to `spec` status after the scope assessment is approved (before Phase 2 or smolspec starts). Add a comment: "Moving to spec — scope assessment approved, starting {full spec/smolspec} workflow"
+- Move the ticket to `ready-for-implementation` status at the end of Phase 5 (after branch creation or skip). Add a comment: "Ready for implementation — spec complete, tasks defined on branch {branch-name}"
 
-Use `mcp__transit__update_task_status` with the display ID to update status.
+Use `mcp__transit__update_task_status` with the display ID to update status. Always include a comment when changing status.
 
 If no Transit ticket is mentioned, skip all Transit-related steps.
 

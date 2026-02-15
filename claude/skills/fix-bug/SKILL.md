@@ -13,10 +13,11 @@ Fix bugs systematically while ensuring proper test coverage and documentation.
 
 If a `T-[number]` ticket is mentioned (e.g., `T-42`), track it throughout the workflow:
 - Extract the display ID from the reference
-- Move the ticket to `in-progress` status at the start of work (after branch creation or before investigation)
-- Move the ticket to `ready-for-review` status after the workflow completes
+- Automatically create a branch named `T-{number}/bugfix-{bug-name}` (no user prompt needed)
+- Move the ticket to `in-progress` status after branch creation. Add a comment: "Starting bugfix — investigating on branch T-{number}/bugfix-{bug-name}"
+- Move the ticket to `ready-for-review` status after the PR is created. Add a comment: "Fix ready for review — PR #{pr-number}"
 
-Use `mcp__transit__update_task_status` with the display ID to update status.
+Use `mcp__transit__update_task_status` with the display ID to update status. Always include a comment when changing status.
 
 If no Transit ticket is mentioned, skip all Transit-related steps.
 
@@ -26,18 +27,13 @@ If no Transit ticket is mentioned, skip all Transit-related steps.
 
 Determine a concise, descriptive bug name (kebab-case) for the report directory. Derive from the issue description or ask the user if unclear.
 
-### 2. Branch Creation (Optional)
+### 2. Branch Creation
 
-Offer to create a bugfix branch before starting investigation.
+**When a Transit ticket is present:** Automatically create a branch named `T-{number}/bugfix-{bug-name}` and switch to it. Do not ask for permission. Move the ticket to `in-progress` status.
 
-Use AskUserQuestion to offer branch naming options:
-- `T-{number}/bugfix-{bug-name}` - When a Transit ticket is present (recommended)
+**When no Transit ticket is present:** Use AskUserQuestion to offer branch naming options:
 - `bugfix/{bug-name}` - Standard bugfix branch
 - Skip branch creation
-
-If a branch is created and a Transit ticket is present, move the ticket to `in-progress` status via `mcp__transit__update_task_status`.
-
-If branch creation is skipped and a Transit ticket is present, still move the ticket to `in-progress` before proceeding.
 
 ### 3. Systematic Investigation
 
@@ -80,6 +76,18 @@ Review and update any affected documentation:
 
 Create `specs/bugfixes/<bug-name>/report.md` using the template in `references/report-template.md`.
 
+### 8. Commit and PR (Transit bugs only)
+
+When a Transit ticket is present, after all checks pass:
+1. Commit all changes using the `/commit` skill
+2. Push the branch to the remote
+3. Create a PR using `gh pr create` with:
+   - Title: `Fix T-{number}: {bug-name-in-title-case}`
+   - Body: Summary of the bug, root cause, and fix (reference the bugfix report)
+4. Move the Transit ticket to `ready-for-review` status. Add a comment with the PR URL.
+
+When no Transit ticket is present, do not commit or create a PR unless asked.
+
 ## Output
 
 Upon completion:
@@ -87,5 +95,5 @@ Upon completion:
 2. Regression test exists and passes
 3. Full test suite passes
 4. Report exists at `specs/bugfixes/<bug-name>/report.md`
-5. Code is ready for commit (do not commit unless asked)
-6. If a Transit ticket was tracked, move it to `ready-for-review` status via `mcp__transit__update_task_status`
+5. If a Transit ticket was tracked: changes committed, PR created, ticket moved to `ready-for-review`
+6. If no Transit ticket: code is ready for commit (do not commit unless asked)

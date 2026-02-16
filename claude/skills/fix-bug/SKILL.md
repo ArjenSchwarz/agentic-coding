@@ -29,7 +29,7 @@ Determine a concise, descriptive bug name (kebab-case) for the report directory.
 
 ### 2. Branch Creation
 
-**When a Transit ticket is present:** Automatically create a branch named `T-{number}/bugfix-{bug-name}` and switch to it. Do not ask for permission. Move the ticket to `in-progress` status.
+**When a Transit ticket is present:** If the current branch already matches `T-{number}/bugfix-*` (e.g., in a worktree), skip branch creation. Otherwise, automatically create a branch named `T-{number}/bugfix-{bug-name}` and switch to it. Do not ask for permission. Move the ticket to `in-progress` status.
 
 **When no Transit ticket is present:** Use AskUserQuestion to offer branch naming options:
 - `bugfix/{bug-name}` - Standard bugfix branch

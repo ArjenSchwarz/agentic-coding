@@ -7,9 +7,17 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [2026-02-16]
 
+### Added
+- `bug-blitz` skill for batch-fixing all open bugs in parallel
+  - Fetches bug-type tasks in "idea" status from Transit
+  - Creates isolated git worktrees per bug based off main
+  - Spawns parallel subagents each running the fix-bug workflow
+  - Reports results in a summary table and offers worktree cleanup
+
 ### Changed
 - Added Transit comment requirement to CLAUDE.md — status changes must include an explanatory comment
 - `fix-bug` skill: Auto-create branch and PR for Transit bugs instead of prompting; added Transit comment templates for status transitions
+- `fix-bug` skill: Skip branch creation when current branch already matches `T-{number}/bugfix-*` (worktree support)
 - `starwave-creating-spec` skill: Added Transit comment templates for `spec` and `ready-for-implementation` status transitions
 
 ## [2026-02-14]

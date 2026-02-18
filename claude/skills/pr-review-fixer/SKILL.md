@@ -80,7 +80,7 @@ gh api graphql -f query='
 
 **Output paths**:
 - Spec PRs: `specs/[name]/review-overview-[N].md` and `specs/[name]/review-fixes-[N].md`
-- Non-spec PRs: `.claude/reviews/review-overview-[N].md` and `.claude/reviews/review-fixes-[N].md`
+- Non-spec PRs: `.claude/reviews/PR-[number]/review-overview-[N].md` and `.claude/reviews/PR-[number]/review-fixes-[N].md`
 
 **Iteration**: Find highest existing iteration number in output dir, increment by 1.
 

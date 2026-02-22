@@ -5,6 +5,14 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2026-02-22]
+
+### Changed
+- `pr-review-fixer` skill: Post review reports as PR comments instead of committing them as files
+  - Review overview is posted via `gh pr comment` before pushing code fixes
+  - Local review/task files are working files only, never committed
+  - Iteration tracking now based on existing `claude[bot]` PR comments
+
 ## [2026-02-20]
 
 ### Added

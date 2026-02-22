@@ -1,6 +1,6 @@
 ---
 name: pr-review-fixer
-description: Fetch unresolved PR comments (both code-level and PR-level), validate issues, and fix them. Also checks CI status and fixes failing tests, lint errors, and build issues. Use when reviewing and addressing GitHub PR feedback. Filters out resolved comments, keeps only the last claude[bot] comment per thread, creates review-overview and task files with iteration tracking, then fixes validated issues.
+description: Fetch unresolved PR comments (both code-level and PR-level), validate issues, and fix them. Also checks CI status and fixes failing tests, lint errors, and build issues. Use when reviewing and addressing GitHub PR feedback. Filters out resolved comments, keeps only the last claude[bot] comment per thread, validates issues, posts review report as a PR comment, then fixes validated issues.
 # model: inherit
 # allowed-tools: Bash,Read,Write,Edit,Grep,Glob
 ---
@@ -72,17 +72,13 @@ gh api graphql -f query='
 2. **claude[bot] handling**: Keep only the **last** `claude[bot]` comment
 3. **Identify actionable items**: Look for requested changes, questions, or suggestions
 
-### 3. Determine Output Location
+### 3. Determine Working Location
 
-**Spec detection** (in order):
-1. Check if branch name matches a folder in `specs/`
-2. Check if PR modifies files in `specs/` directory
+Review reports are posted as PR comments (not committed). Task files are local working files only.
 
-**Output paths**:
-- Spec PRs: `specs/[name]/review-overview-[N].md` and `specs/[name]/review-fixes-[N].md`
-- Non-spec PRs: `.claude/reviews/PR-[number]/review-overview-[N].md` and `.claude/reviews/PR-[number]/review-fixes-[N].md`
+**Working directory**: Use a temp directory or `.claude/reviews/PR-[number]/` for local task files during the session. These files are not committed.
 
-**Iteration**: Find highest existing iteration number in output dir, increment by 1.
+**Iteration tracking**: Check existing PR comments by `claude[bot]` with "PR Review Overview" in the body. Count those to determine the current iteration number N.
 
 ### 4. Validate Issues
 
@@ -100,7 +96,7 @@ gh api graphql -f query='
 
 ### 5. Create Review Overview
 
-Write `review-overview-[N].md`:
+Prepare the review overview content (this will be posted as a PR comment, not committed):
 
 ```markdown
 # PR Review Overview - Iteration [N]
@@ -233,13 +229,41 @@ gh api graphql -f query='
 
 Only resolve threads whose issues were validated and fixed. Do not resolve threads that were skipped or marked invalid — those need human attention.
 
-### 11. Commit, Push, and Verify
+### 11. Post Review Report as PR Comment
+
+Post the review overview as a comment on the PR. This replaces committing report files.
+
+```bash
+# Post the review overview content as a PR comment
+gh pr comment $PR_NUM --body "$(cat <<'EOF'
+# PR Review Overview - Iteration [N]
+
+**PR**: #[number] | **Branch**: [name] | **Date**: [YYYY-MM-DD]
+
+## Valid Issues (fixed)
+
+[List of validated and fixed issues with file:line, reviewer, and brief description]
+
+## Invalid/Skipped Issues
+
+[List of skipped issues with rationale]
+
+## CI Status
+
+[Summary of CI check results and any fixes applied]
+EOF
+)"
+```
+
+**Do not commit** `review-overview-*.md` or `review-fixes-*.md` files. They are working files only.
+
+### 12. Commit, Push, and Verify
 
 After all fixes:
 
 1. Run full test suite locally
 2. Run linter
-3. Commit changes with a descriptive message
+3. Commit **only code changes** (exclude any local review/task files)
 4. Push to remote
 5. Monitor CI status to confirm checks pass
 
@@ -251,3 +275,5 @@ After all fixes:
 - **Deduplication**: Consolidate multiple comments on same issue into one task
 - **CI verification**: Always check CI status after fixing review comments
 - **Local reproduction**: Run tests/linters locally before pushing fixes
+- **Reports as comments**: Post review reports as PR comments, never commit them
+- **Clean commits**: Only commit actual code changes, not working/report files

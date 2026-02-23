@@ -5,6 +5,18 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2026-02-23]
+
+### Changed
+- `starwave-tasks` skill: Enforce red/green TDD ordering for all implementation tasks
+  - Tasks must follow red (write failing test) then green (implement to pass) pairing
+  - Test and implementation tasks must be adjacent and clearly paired
+  - Configuration, types/interfaces, and wiring tasks are exempt
+- `starwave-tasks` skill: Add self-check section before presenting tasks to user
+  - Verify red/green TDD ordering
+  - Run `rune list` to validate task file renders correctly (numbering, hierarchy, streams, dependencies)
+  - Confirm requirement coverage, no orphaned tasks, and no circular dependencies
+
 ## [2026-02-22]
 
 ### Changed

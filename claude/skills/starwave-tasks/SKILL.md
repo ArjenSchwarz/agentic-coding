@@ -49,7 +49,12 @@ The tasks document should be based on the requirement and design documents, so e
   - Be concrete enough that a coding agent can execute them without additional clarification
   - Be scoped to specific coding activities (e.g., "Implement X function" rather than "Support X feature")
 - Tasks MUST build incrementally on previous steps
-- The model MUST prioritize test-driven development where appropriate (tests before implementation, e.g., 1.1 creates unit tests, 1.2 does implementation)
+- The model MUST use red/green TDD ordering for all implementation tasks:
+  - **Red**: Write a failing test first that defines the expected behaviour (e.g., task 1.1 writes unit tests for the interface/function)
+  - **Green**: Implement the minimum code to make the test pass (e.g., task 1.2 implements the function)
+  - Every implementation task MUST be preceded by a test task that will initially fail against the unimplemented code
+  - The test task and its corresponding implementation task MUST be adjacent and clearly paired (e.g., "1.1 Write tests for X" followed by "1.2 Implement X to pass tests")
+  - Tasks that only modify configuration, types/interfaces, or wiring are exempt from requiring a preceding test task
 - If the design specifies property-based testing for certain components, the model MUST include explicit tasks for writing property tests before or alongside unit tests for those components
 - The plan MUST cover all aspects of the design that can be implemented through code
 - All requirements MUST be covered by the implementation tasks
@@ -127,6 +132,22 @@ These tasks must be completed by the user before or during implementation.
 - Prerequisites SHOULD indicate when they need to be completed (before starting, during implementation, before testing)
 - Prerequisites that block specific coding tasks MUST reference which task they block
 - The model MUST ask the user to confirm prerequisites are complete before proceeding with dependent tasks during implementation
+
+**Self-Check (before presenting to user):**
+After creating or updating the tasks file, the model MUST perform these checks before asking for approval:
+
+1. **Red/green TDD ordering**: Verify every implementation task is preceded by a test task that will fail against the unimplemented code. The only exceptions are tasks that deal with configuration, types/interfaces, or wiring.
+2. **Rune list validation**: Run `rune list specs/{feature_name}/tasks.md` and verify:
+   - All tasks render correctly with proper numbering and hierarchy
+   - Phase groupings display as expected
+   - Stream assignments are present where specified
+   - Dependencies (`blocked_by`) are shown and reference valid task IDs
+   - No parsing errors or warnings are reported
+3. **Requirement coverage**: Confirm every requirement from requirements.md is referenced by at least one task
+4. **No orphaned tasks**: Verify no task exists in isolation without being connected to the incremental build chain
+5. **No circular dependencies**: Confirm the dependency graph has no cycles
+
+If any check fails, the model MUST fix the issue and re-run the checks before presenting to the user.
 
 **Approval Workflow:**
 - After updating the tasks document, the model MUST ask the user "Do the tasks look good?"

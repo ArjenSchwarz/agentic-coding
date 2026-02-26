@@ -88,6 +88,10 @@ When a Transit ticket is present, after all checks pass:
 
 When no Transit ticket is present, do not commit or create a PR unless asked.
 
+### 9. Automated Review Fix (Transit bugs only)
+
+After the PR is created, wait 10 minutes for CI checks and automated reviews to come in, then run the `/pr-review-fixer` skill to address any feedback from the first round automatically.
+
 ## Output
 
 Upon completion:
@@ -95,5 +99,5 @@ Upon completion:
 2. Regression test exists and passes
 3. Full test suite passes
 4. Report exists at `specs/bugfixes/<bug-name>/report.md`
-5. If a Transit ticket was tracked: changes committed, PR created, ticket moved to `ready-for-review`
+5. If a Transit ticket was tracked: changes committed, PR created, first review round addressed, ticket moved to `ready-for-review`
 6. If no Transit ticket: code is ready for commit (do not commit unless asked)

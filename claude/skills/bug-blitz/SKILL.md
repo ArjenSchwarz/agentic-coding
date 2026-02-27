@@ -13,13 +13,13 @@ Resolve all open bugs in parallel — one worktree and one subagent per bug.
 
 ### 1. Fetch Bugs
 
-Query Transit for all bug-type tasks in "idea" status:
+First, determine the current project by calling `mcp__transit__get_projects()` and matching the current repository name against the project list. If no matching Transit project is found, inform the user and stop.
+
+Then query Transit for all bug-type tasks in "idea" status, filtered by the matched project:
 
 ```
-mcp__transit__query_tasks(type="bug", status="idea")
+mcp__transit__query_tasks(type="bug", status=["idea"], project="{project_name}")
 ```
-
-If the current project has a Transit project ID, filter by `projectId` as well.
 
 If no bugs are found, inform the user and stop.
 

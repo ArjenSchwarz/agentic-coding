@@ -5,6 +5,14 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2026-03-04]
+
+### Added
+- `blitz-merge` skill for batch-fixing bugs with automated review cycles and squash-merge
+  - Extends bug-blitz with a review loop that runs `/pr-review-fixer` until no blockers/critical/major issues remain (capped at 5 iterations)
+  - Sequentially squash-merges each clean PR after rebasing onto latest `origin/main`
+  - Updates Transit tickets to `done` after successful merge
+
 ## [2026-02-27]
 
 ### Changed

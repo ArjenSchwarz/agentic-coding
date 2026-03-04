@@ -8,6 +8,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [2026-03-04]
 
 ### Added
+- `pr-pilot` skill for shepherding a PR from push through review to merge
+  - Pushes branch, creates PR, runs `/pr-review-fixer` in a loop until no blockers/critical/major issues remain (capped at 5 iterations)
+  - Rebases onto latest `origin/main`, resolves conflicts, and squash-merges
+  - Optional Transit ticket tracking — moves ticket to `done` after merge
 - `blitz-merge` skill for batch-fixing bugs with automated review cycles and squash-merge
   - Extends bug-blitz with a review loop that runs `/pr-review-fixer` until no blockers/critical/major issues remain (capped at 5 iterations)
   - Sequentially squash-merges each clean PR after rebasing onto latest `origin/main`

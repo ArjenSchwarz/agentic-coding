@@ -89,13 +89,14 @@ Run the project's test suite and linter to verify the rebase is clean.
 git push --force-with-lease
 ```
 
-#### 3.3 Wait for CI
+#### 3.3 Wait for CI and Reviews
 
-```bash
-gh pr checks {pr_number} --watch
-```
+Wait 10 minutes after the force push to allow CI checks and agent reviewers to run.
 
-If CI fails after rebase, run `/pr-review-fixer` once more to fix CI issues. If it still fails, inform the user and stop.
+Then run `/pr-review-fixer` to check for new review comments and CI failures — agent reviewers will post fresh comments on the rebased code.
+
+- **CLEAN**: Proceed to merge.
+- **HAS_ISSUES**: Fix, push, and repeat (up to 3 iterations). If still not clean, inform the user and stop.
 
 #### 3.4 Squash and Merge
 

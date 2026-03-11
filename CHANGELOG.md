@@ -5,6 +5,16 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2026-03-11]
+
+### Changed
+- `pr-pilot` skill: Replace `gh pr checks --watch` with a 10-minute wait for CI and agent reviewers, then run `/pr-review-fixer` to handle new comments on rebased code
+- `pre-push-review` skill: Rewrite as parallel multi-agent review with automatic fixes
+  - Launches 4 concurrent review agents: code reuse, code quality, efficiency, and spec/documentation
+  - Agents fix issues directly instead of only reporting them
+  - Adds verification phase to run tests and linters after fixes
+  - Simplifies structure into 7 clear phases
+
 ## [2026-03-05]
 
 ### Changed

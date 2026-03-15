@@ -8,8 +8,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [2026-03-15]
 
 ### Added
-- `no-push-main` PreToolUse hook that blocks git pushes to protected branches (`main`/`master`)
-  - Catches direct pushes, force pushes, bare pushes on protected branches, refspec targets, and flag combinations (`-u`, `--force-with-lease`)
+- `no-push-main` PreToolUse hook that protects `main`/`master` branches from accidental modification
+  - Push protection: direct, force, bare, refspec targets, `--delete`, and flag combinations (`-u`, `--force-with-lease`)
+  - History rewrite protection: blocks `reset --hard`, `rebase`, and `commit --amend` while on protected branches
+  - Destructive operation protection: blocks `checkout .`, `restore .`, and `clean -f` while on protected branches
+  - Branch manipulation protection: blocks `branch -D`/`-f` targeting protected branches
   - Hook lives in `claude/hooks/` and is synced to `~/.claude/hooks/` for global use
 - `claude/hooks/` directory with README documenting available hooks, setup, and how to add new ones
 - Hooks symlink in `sync-claude.sh`, GitHub Action, and remote sync for consistent availability across local, CI, and sandbox environments

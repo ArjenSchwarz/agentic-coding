@@ -1,12 +1,11 @@
 #!/usr/bin/env python3
-"""Pre-tool-use hook that blocks git push to main/master.
+"""Pre-tool-use hook that protects main/master branches.
 
-Catches:
-- Explicit pushes: git push origin main, git push origin master
-- Default branch pushes: git push (when on main/master)
-- Force pushes to any branch: git push --force, git push -f
-- Force pushes with lease: git push --force-with-lease (to main/master)
-- Pushes with upstream set: git push -u origin main
+Blocks:
+- Pushes: direct, force, bare (when on protected branch), refspec targets
+- History rewriting: reset --hard, rebase, commit --amend
+- Destructive operations: checkout ., restore ., clean -f
+- Branch manipulation: branch -D/-f, push --delete, push origin :main
 """
 
 from __future__ import annotations
@@ -15,6 +14,8 @@ import json
 import re
 import subprocess
 import sys
+
+PROTECTED = {"main", "master"}
 
 
 def get_current_branch():
@@ -30,49 +31,130 @@ def get_current_branch():
         return None
 
 
-def check_command(command: str) -> str | None:
-    """Return a reason string if the push should be blocked, None otherwise."""
+def on_protected_branch():
+    """Return the branch name if on a protected branch, else None."""
+    current = get_current_branch()
+    return current if current in PROTECTED else None
 
-    # Normalise whitespace
-    cmd = " ".join(command.split())
 
-    # Only care about git push commands
+def check_push(cmd: str) -> str | None:
+    """Check git push commands."""
     if not re.search(r"\bgit\s+push\b", cmd):
         return None
 
-    protected = {"main", "master"}
     is_force = bool(re.search(r"(?:^|\s)(-f|--force|--force-with-lease)(?:\s|$)", cmd))
 
+    # git push --delete origin main / git push origin :main
+    for branch in PROTECTED:
+        if re.search(rf"(?:^|\s)--delete\s+\S+\s+{branch}\b", cmd):
+            return f"Deleting remote {branch} is not allowed."
+        if re.search(rf"\bgit\s+push\s+\S+\s+:{branch}\b", cmd):
+            return f"Deleting remote {branch} is not allowed."
+
     # Strip flags to get: git push [remote] [refspec...]
-    stripped = re.sub(r"\s+(-u|--set-upstream|-f|--force|--force-with-lease|--no-verify|--tags|--dry-run)(?=\s|$)", "", cmd)
+    stripped = re.sub(r"\s+(-u|--set-upstream|-f|--force|--force-with-lease|--no-verify|--tags|--dry-run|--delete)(?=\s|$)", "", cmd)
     stripped = " ".join(stripped.split())
 
-    # Parse the stripped command into parts after "git push"
     match = re.match(r"^git push(?:\s+(\S+))?(?:\s+(\S+))?\s*$", stripped)
     if not match:
         return None
 
-    remote = match.group(1)  # e.g. "origin" or None
-    refspec = match.group(2)  # e.g. "main" or "feature:main" or None
+    refspec = match.group(2)
 
-    # Extract target branch from refspec (handles src:dst format)
     target_branch = None
     if refspec:
         target_branch = refspec.split(":")[-1] if ":" in refspec else refspec
 
-    # 1. Explicit push to protected branch
-    if target_branch in protected:
+    if target_branch in PROTECTED:
         if is_force:
             return f"Force push to {target_branch} is not allowed."
         return f"Pushing to {target_branch} is not allowed. Use a feature branch and a PR."
 
-    # 2. No explicit branch — check current branch
     if target_branch is None:
-        current = get_current_branch()
-        if current in protected:
+        branch = on_protected_branch()
+        if branch:
             if is_force:
-                return f"Force push while on {current} is not allowed."
-            return f"Pushing while on {current} is not allowed. Use a feature branch and a PR."
+                return f"Force push while on {branch} is not allowed."
+            return f"Pushing while on {branch} is not allowed. Use a feature branch and a PR."
+
+    return None
+
+
+def check_history_rewrite(cmd: str) -> str | None:
+    """Check commands that rewrite history: reset --hard, rebase, commit --amend."""
+    # git reset --hard (while on protected branch)
+    if re.search(r"\bgit\s+reset\b", cmd) and re.search(r"(?:^|\s)--hard(?:\s|$)", cmd):
+        branch = on_protected_branch()
+        if branch:
+            return f"git reset --hard while on {branch} is not allowed."
+
+    # git rebase (while on protected branch)
+    if re.search(r"\bgit\s+rebase\b", cmd):
+        branch = on_protected_branch()
+        if branch:
+            return f"git rebase while on {branch} is not allowed."
+
+    # git commit --amend (while on protected branch)
+    if re.search(r"\bgit\s+commit\b", cmd) and re.search(r"(?:^|\s)--amend(?:\s|$)", cmd):
+        branch = on_protected_branch()
+        if branch:
+            return f"git commit --amend while on {branch} is not allowed."
+
+    return None
+
+
+def check_destructive(cmd: str) -> str | None:
+    """Check destructive working tree operations: checkout ., restore ., clean -f."""
+    # git checkout . or git checkout -- .
+    if re.search(r"\bgit\s+checkout\s+(--\s+)?\.\s*$", cmd):
+        branch = on_protected_branch()
+        if branch:
+            return f"git checkout . while on {branch} is not allowed. Uncommitted work may be lost."
+
+    # git restore . or git restore --staged .
+    if re.search(r"\bgit\s+restore\b", cmd) and re.search(r"\.\s*$", cmd):
+        branch = on_protected_branch()
+        if branch:
+            return f"git restore . while on {branch} is not allowed. Uncommitted work may be lost."
+
+    # git clean -f
+    if re.search(r"\bgit\s+clean\b", cmd) and re.search(r"(?:^|\s)-[a-zA-Z]*f", cmd):
+        branch = on_protected_branch()
+        if branch:
+            return f"git clean -f while on {branch} is not allowed. Untracked files may be lost."
+
+    return None
+
+
+def check_branch_manipulation(cmd: str) -> str | None:
+    """Check branch deletion/force-move: branch -D main, branch -f main."""
+    if not re.search(r"\bgit\s+branch\b", cmd):
+        return None
+
+    for branch in PROTECTED:
+        # git branch -D main / git branch --delete --force main
+        if re.search(r"(?:^|\s)(-D|--delete)(?:\s|$)", cmd) and re.search(rf"\b{branch}\b", cmd):
+            return f"Deleting branch {branch} is not allowed."
+
+        # git branch -f main <ref> / git branch --force main <ref>
+        if re.search(r"(?:^|\s)(-f|--force)(?:\s|$)", cmd) and re.search(rf"\b{branch}\b", cmd):
+            return f"Force-moving branch {branch} is not allowed."
+
+    return None
+
+
+def check_command(command: str) -> str | None:
+    """Return a reason string if the command should be blocked, None otherwise."""
+    cmd = " ".join(command.split())
+
+    if not re.search(r"\bgit\b", cmd):
+        return None
+
+    checks = [check_push, check_history_rewrite, check_destructive, check_branch_manipulation]
+    for check in checks:
+        reason = check(cmd)
+        if reason:
+            return reason
 
     return None
 

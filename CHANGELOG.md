@@ -5,6 +5,15 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2026-03-15]
+
+### Added
+- `no-push-main` PreToolUse hook that blocks git pushes to protected branches (`main`/`master`)
+  - Catches direct pushes, force pushes, bare pushes on protected branches, refspec targets, and flag combinations (`-u`, `--force-with-lease`)
+  - Hook lives in `claude/hooks/` and is synced to `~/.claude/hooks/` for global use
+- `claude/hooks/` directory with README documenting available hooks, setup, and how to add new ones
+- Hooks symlink in `sync-claude.sh`, GitHub Action, and remote sync for consistent availability across local, CI, and sandbox environments
+
 ## [2026-03-11]
 
 ### Changed

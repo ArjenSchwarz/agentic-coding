@@ -2,10 +2,12 @@
 """Pre-tool-use hook that protects main/master branches.
 
 Blocks:
-- Pushes: direct, force, bare (when on protected branch), refspec targets
-- History rewriting: reset --hard, rebase, commit --amend
-- Destructive operations: checkout ., restore ., clean -f
-- Branch manipulation: branch -D/-f, push --delete, push origin :main
+- git push: direct, force, bare (when on protected branch), refspec targets
+- git history rewriting: reset --hard, rebase, commit --amend
+- git destructive operations: checkout ., restore ., clean -f
+- git branch manipulation: branch -D/-f, push --delete, push origin :main
+- gh CLI: API calls that modify refs/branches/protection, repo deletion,
+  admin merges, force syncs, and mutating gh api calls targeting protected branches
 """
 
 from __future__ import annotations
@@ -143,18 +145,93 @@ def check_branch_manipulation(cmd: str) -> str | None:
     return None
 
 
+def check_gh_api(cmd: str) -> str | None:
+    """Check gh api calls that could modify protected branches or repo settings."""
+    if not re.search(r"\bgh\s+api\b", cmd):
+        return None
+
+    is_mutating = bool(re.search(r"(?:^|\s)-X\s+(DELETE|PATCH|PUT|POST)\b", cmd))
+
+    # gh api without -X defaults to GET for reads, but POST for graphql
+    if not is_mutating:
+        # Check for graphql mutations
+        if re.search(r"\bgraphql\b", cmd) and re.search(r"mutation\s*\{|mutation\b", cmd):
+            is_mutating = True
+        # Check for --input (sends data, implies POST)
+        if re.search(r"(?:^|\s)--input(?:\s|$)", cmd):
+            is_mutating = True
+        # Check for -f/-F (field flags imply POST when no -X is set)
+        if re.search(r"(?:^|\s)-[fF]\s+", cmd) and not re.search(r"(?:^|\s)-X\s+GET\b", cmd):
+            is_mutating = True
+
+    if not is_mutating:
+        return None
+
+    # Block mutating API calls that target protected branch refs
+    for branch in PROTECTED:
+        if re.search(rf"refs/heads/{branch}\b", cmd):
+            return f"Mutating gh api call targeting refs/heads/{branch} is not allowed."
+        if re.search(rf"branches/{branch}/protection", cmd):
+            return f"gh api call modifying {branch} branch protection is not allowed."
+
+    # Block deletion of rulesets
+    if re.search(r"rulesets/\d+", cmd) and re.search(r"(?:^|\s)-X\s+DELETE\b", cmd):
+        return "Deleting repository rulesets via gh api is not allowed."
+
+    return None
+
+
+def check_gh_commands(cmd: str) -> str | None:
+    """Check gh subcommands that could damage protected branches."""
+    if not re.search(r"\bgh\b", cmd):
+        return None
+
+    # gh repo delete
+    if re.search(r"\bgh\s+repo\s+delete\b", cmd):
+        return "gh repo delete is not allowed."
+
+    # gh repo sync --force --branch main
+    if re.search(r"\bgh\s+repo\s+sync\b", cmd):
+        is_force = bool(re.search(r"(?:^|\s)--force(?:\s|$)", cmd))
+        for branch in PROTECTED:
+            if re.search(rf"(?:^|\s)--branch\s+{branch}\b", cmd):
+                if is_force:
+                    return f"gh repo sync --force --branch {branch} is not allowed."
+
+    # gh repo edit --default-branch (changing default branch)
+    if re.search(r"\bgh\s+repo\s+edit\b", cmd) and re.search(r"(?:^|\s)--default-branch(?:\s|$)", cmd):
+        return "Changing the default branch via gh repo edit is not allowed."
+
+    # gh pr merge --admin (bypassing required checks)
+    if re.search(r"\bgh\s+pr\s+merge\b", cmd) and re.search(r"(?:^|\s)--admin(?:\s|$)", cmd):
+        return "gh pr merge --admin is not allowed. Merge without bypassing required checks."
+
+    # gh api (delegate to detailed check)
+    reason = check_gh_api(cmd)
+    if reason:
+        return reason
+
+    return None
+
+
 def check_command(command: str) -> str | None:
     """Return a reason string if the command should be blocked, None otherwise."""
     cmd = " ".join(command.split())
 
-    if not re.search(r"\bgit\b", cmd):
-        return None
+    git_checks = [check_push, check_history_rewrite, check_destructive, check_branch_manipulation]
+    gh_checks = [check_gh_commands]
 
-    checks = [check_push, check_history_rewrite, check_destructive, check_branch_manipulation]
-    for check in checks:
-        reason = check(cmd)
-        if reason:
-            return reason
+    if re.search(r"\bgit\b", cmd):
+        for check in git_checks:
+            reason = check(cmd)
+            if reason:
+                return reason
+
+    if re.search(r"\bgh\b", cmd):
+        for check in gh_checks:
+            reason = check(cmd)
+            if reason:
+                return reason
 
     return None
 
@@ -166,7 +243,7 @@ def main():
     reason = check_command(command)
     if reason:
         print(reason, file=sys.stderr)
-        sys.exit(1)
+        sys.exit(2)
 
 
 if __name__ == "__main__":

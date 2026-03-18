@@ -69,6 +69,22 @@ A `PreToolUse` hook that protects `main`/`master` branches from accidental modif
 | `git branch -D main` | Deletes the local protected branch |
 | `git branch -f main <ref>` | Force-moves the protected branch pointer |
 
+**GitHub CLI (`gh`) protection:**
+
+| Command | Reason |
+|---|---|
+| `gh repo delete` | Deletes the repository |
+| `gh repo edit --default-branch` | Changes the default branch |
+| `gh repo sync --force --branch main` | Force-syncs protected branch |
+| `gh pr merge --admin` | Merges PR bypassing required checks |
+| `gh api -X DELETE .../git/refs/heads/main` | Deletes protected branch via API |
+| `gh api -X PATCH .../git/refs/heads/main` | Force-updates protected ref via API |
+| `gh api -X DELETE .../branches/main/protection` | Removes branch protection rules |
+| `gh api -X DELETE .../rulesets/<id>` | Deletes repository rulesets |
+| `gh api .../refs/heads/main -f sha=...` | Implicit POST updating protected ref |
+| `gh api --input file .../refs/heads/main` | Mutating call via input file |
+| `gh api graphql -f query='mutation...' .../refs/heads/main` | GraphQL mutation targeting protected ref |
+
 **Allowed actions:**
 
 - `git push origin feature-branch` — pushes to non-protected branches
@@ -77,11 +93,14 @@ A `PreToolUse` hook that protects `main`/`master` branches from accidental modif
 - `git commit -m "message"` — normal commits (only `--amend` is blocked)
 - `git branch -D feature-x` — deleting non-protected branches
 - `git clean -n` — dry-run clean (only `-f` is blocked)
-- Any non-git command
+- `gh pr merge 42 --squash` — normal PR merges (only `--admin` is blocked)
+- `gh pr list`, `gh pr view` — read-only gh commands
+- `gh api -X GET .../refs/heads/main` — read-only API calls
+- Any non-git/gh command
 
 **How it works:**
 
-The hook receives tool input as JSON on stdin. It checks the command against four categories: pushes, history rewrites, destructive operations, and branch manipulation. For commands that don't name a branch explicitly, it checks the current branch via `git rev-parse`. If blocked, it exits non-zero with a message on stderr, which Claude sees and respects.
+The hook receives tool input as JSON on stdin. It checks the command against five categories: git pushes, history rewrites, destructive operations, branch manipulation, and gh CLI commands. For git commands that don't name a branch explicitly, it checks the current branch via `git rev-parse`. For `gh api` calls, it detects mutating intent via HTTP method (`-X DELETE/PATCH/PUT/POST`), field flags (`-f`/`-F`), `--input`, or GraphQL mutations, and blocks those targeting protected branch refs. If blocked, it exits non-zero with a message on stderr, which Claude sees and respects.
 
 ## Adding New Hooks
 

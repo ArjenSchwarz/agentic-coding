@@ -5,6 +5,20 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2026-03-18]
+
+### Changed
+- `no-push-main` hook: Add `gh` CLI protection and fix exit code
+  - Blocks `gh repo delete`, `gh repo edit --default-branch`, `gh repo sync --force --branch main`, `gh pr merge --admin`
+  - Blocks mutating `gh api` calls targeting protected branch refs, branch protection rules, and rulesets
+  - Detects mutation intent via HTTP method, `-f`/`-F` field flags, `--input`, and GraphQL mutations
+  - Fix exit code from 1 to 2 (required by Claude Code to block execution)
+
+### Added
+- Branch protection research report (`docs/agent-notes/branch-protection-across-agents.md`)
+  - Documents protection mechanisms for Claude Code, Kiro CLI, Copilot CLI, and Codex CLI
+  - Covers `gh` CLI and MCP server attack surfaces with practical recommendations
+
 ## [2026-03-15]
 
 ### Added

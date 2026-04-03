@@ -60,3 +60,9 @@ When spawning a subagent for a stream, provide these instructions:
 - When a subagent completes a task that unblocks tasks in another stream, that stream's agent will pick up the newly unblocked work on their next `rune next --phase --stream N` call
 - If all streams become blocked waiting on each other, this indicates a circular dependency problem that should be reported to the user
 - The main agent should periodically check `rune streams --json` to monitor overall progress
+
+**Specs Overview Update:**
+- After completing all tasks in the current group, check if `specs/OVERVIEW.md` exists in the project
+- If it exists, update the spec's status in the overview to reflect current progress:
+  - If all tasks in the entire spec are now complete: update status to `Done`
+  - If some tasks remain: update status to `In Progress` (if currently `Planned`)

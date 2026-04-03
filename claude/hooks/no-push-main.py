@@ -19,6 +19,29 @@ import sys
 
 PROTECTED = {"main", "master"}
 
+# Regex matching git global options that take an argument (flag + value).
+# These appear between `git` and the subcommand and must be stripped
+# so that patterns like `\bgit\s+push\b` still match.
+_GIT_GLOBAL_OPT_WITH_ARG = re.compile(
+    r"(?:^|\s)(?:-C|-c|--git-dir|--work-tree|--namespace|--super-prefix"
+    r"|--config-env|--literal-pathspecs|--glob-pathspecs"
+    r"|--noglob-pathspecs|--icase-pathspecs)\s+\S+"
+)
+
+# Regex matching git global flags that are standalone (no argument).
+_GIT_GLOBAL_FLAG = re.compile(
+    r"(?:^|\s)(?:--bare|--no-replace-objects|--no-lazy-fetch"
+    r"|--no-optional-locks|--no-pager|--paginate|-p|--html-path"
+    r"|--man-path|--info-path|--version)(?=\s|$)"
+)
+
+
+def strip_git_global_opts(cmd: str) -> str:
+    """Remove git global options so `git -C /path push` becomes `git push`."""
+    result = _GIT_GLOBAL_OPT_WITH_ARG.sub("", cmd)
+    result = _GIT_GLOBAL_FLAG.sub("", result)
+    return " ".join(result.split())
+
 
 def get_current_branch():
     try:
@@ -214,24 +237,41 @@ def check_gh_commands(cmd: str) -> str | None:
     return None
 
 
+def _split_compound_command(command: str) -> list[str]:
+    """Split a compound shell command on &&, ||, and ; into individual commands.
+
+    Uses a simple split that handles the common case of chained commands.
+    Does not attempt to parse full shell syntax (subshells, pipes, etc.)
+    since those are rare in the tool-use context.
+    """
+    # Split on && || ; but not inside quoted strings.
+    # For robustness, split on the operators and strip each part.
+    parts = re.split(r"\s*(?:&&|\|\||;)\s*", command)
+    return [p.strip() for p in parts if p.strip()]
+
+
 def check_command(command: str) -> str | None:
     """Return a reason string if the command should be blocked, None otherwise."""
-    cmd = " ".join(command.split())
-
     git_checks = [check_push, check_history_rewrite, check_destructive, check_branch_manipulation]
     gh_checks = [check_gh_commands]
 
-    if re.search(r"\bgit\b", cmd):
-        for check in git_checks:
-            reason = check(cmd)
-            if reason:
-                return reason
+    for part in _split_compound_command(command):
+        cmd = " ".join(part.split())
 
-    if re.search(r"\bgh\b", cmd):
-        for check in gh_checks:
-            reason = check(cmd)
-            if reason:
-                return reason
+        if re.search(r"\bgit\b", cmd):
+            # Normalize away global git options like -C, --git-dir, -c so that
+            # `git -C /some/path push` is checked the same as `git push`.
+            normalized = strip_git_global_opts(cmd)
+            for check in git_checks:
+                reason = check(normalized)
+                if reason:
+                    return reason
+
+        if re.search(r"\bgh\b", cmd):
+            for check in gh_checks:
+                reason = check(cmd)
+                if reason:
+                    return reason
 
     return None
 

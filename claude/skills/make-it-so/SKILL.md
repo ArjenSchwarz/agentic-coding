@@ -40,6 +40,14 @@ Implement all the remaining tasks from the spec.
 10. Summarise the changes into a multi-line detailed commit message, prefixed with the commit message prefix and :. Do NOT include any co-authored-by information in the commit message.
 11. Commit the code
 
+**Specs Overview Update**
+- After committing, check if all tasks in the spec are now complete (use `rune list specs/{feature_name}/tasks.md --format json` and verify no incomplete tasks remain)
+- If all tasks are complete AND `specs/OVERVIEW.md` exists:
+  - Update the spec's status from `Planned` or `In Progress` to `Done` in the table row
+  - If any new files were created in the spec directory during implementation (e.g., implementation.md), add them to the spec's detail section file list
+- If tasks remain incomplete AND `specs/OVERVIEW.md` exists AND the spec's status is `Planned`:
+  - Update the spec's status from `Planned` to `In Progress` in the table row
+
 **Compact**
 - After the commit, run `/compact` with instructions that preserve only the `/make-it-so` skill context
 - Use this exact format: `/compact Continuing /make-it-so - implement the next phase. Current progress: [brief summary of completed phase]`

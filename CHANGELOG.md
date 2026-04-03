@@ -5,6 +5,20 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2026-04-03]
+
+### Changed
+- `no-push-main` hook: Handle compound commands and git global options
+  - Split compound shell commands (chained with `&&`, `||`, `;`) and check each part independently
+  - Strip git global options (`-C`, `--git-dir`, `--work-tree`, etc.) before matching, so `git -C /path push` is correctly blocked
+
+### Added
+- `specs-overview` skill: Generate or regenerate `specs/OVERVIEW.md` with tabular summary, status tracking, and per-spec file listings
+- `make-it-so` skill: Update `specs/OVERVIEW.md` status after committing (Done/In Progress)
+- `next-task` skill: Update `specs/OVERVIEW.md` status after completing task groups
+- `starwave-creating-spec` skill: Add Phase 4.5 to register new specs in `specs/OVERVIEW.md`
+- `orbit-guidance-2.yaml`: Multi-variant guidance file for orbit with minimal and defensive approach variants
+
 ## [2026-03-18]
 
 ### Changed

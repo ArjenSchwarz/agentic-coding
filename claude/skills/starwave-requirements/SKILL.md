@@ -42,6 +42,7 @@ a design.
 ```
 - When asking the user questions and offering options, the model MUST use the AskUserQuestion tool.
 - The model SHOULD consider edge cases, user experience, technical constraints, and success criteria in the initial requirements
+- When writing acceptance criteria for UI elements that have existing equivalents in the codebase (e.g., indicators, buttons, affordances), the criteria SHOULD reference the existing pattern as the baseline (e.g., "SHALL match the existing add-note affordance") rather than describing visual properties from scratch. This prevents visual inconsistencies when the new implementation diverges from established patterns.
 
 **Self-Review Checklist (before skill review):**
 Before triggering skill reviews, the model MUST verify:

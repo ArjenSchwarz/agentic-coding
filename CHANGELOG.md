@@ -5,6 +5,15 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2026-04-11]
+
+### Changed
+- `starwave-design` skill: Add pattern extension audit and UI consistency reference requirements
+  - New "Pattern Extension Audit" section: when extending an existing pattern to a new type, requires searching all call sites and including a parity audit in the Architecture section
+  - New "UI Consistency References" section: requires referencing existing UI elements as baseline instead of describing visual properties from scratch
+  - Two new self-review checklist items for pattern audit and UI consistency verification
+- `starwave-requirements` skill: Add guidance for acceptance criteria to reference existing UI patterns as baseline rather than describing visual properties independently
+
 ## [2026-04-03]
 
 ### Changed

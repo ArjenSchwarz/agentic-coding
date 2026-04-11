@@ -39,6 +39,17 @@ The design document should be based on the requirements document, so ensure it e
 - The model MUST ensure the design addresses all feature requirements identified during the clarification process
 - The model MUST use tools like context7 to retrieve relevant information about the libraries and tools
 
+**Pattern Extension Audit:**
+When the design extends an existing pattern to a new type (e.g., adding table row sub-blocks alongside list item sub-blocks, or adding a new export format alongside an existing one), the model MUST:
+1. Search the codebase for all references to the existing pattern's key functions and types (e.g., grep for `allListItemIds`, `listItemId`, the sub-ID format string)
+2. List every call site and determine whether each needs a parallel implementation for the new type
+3. Include this parity audit as a table or checklist in the Architecture section, with an explicit "needs equivalent: yes/no" decision for each site and a brief rationale
+
+This prevents bugs where the primary touch points are covered but secondary consumers (e.g., export formatters, heading path indexes, section note counts) are missed.
+
+**UI Consistency References:**
+When the design introduces a UI element that has an existing equivalent in the codebase (e.g., an indicator, button, or affordance), the design MUST reference the existing pattern as the baseline. The design SHOULD NOT describe visual properties from scratch when an equivalent already exists — instead, it should state which existing element to match and only describe deviations.
+
 **Self-Review Checklist (before skill review):**
 Before triggering skill reviews, the model MUST verify:
 - [ ] Each requirement from requirements.md has a corresponding design element
@@ -47,6 +58,8 @@ Before triggering skill reviews, the model MUST verify:
 - [ ] Error handling covers failure modes implied by requirements
 - [ ] Testing strategy includes tests for each acceptance criterion
 - [ ] No design elements exist without a corresponding requirement (scope creep check)
+- [ ] If extending an existing pattern, all call sites of the original pattern are audited and the design addresses each one
+- [ ] UI elements that have existing equivalents reference the existing pattern rather than defining visual properties from scratch
 
 **Self-Validation via Explanation:**
 - The model MUST use the explain-like skill (invoke the Skill tool with skill="explain-like") to explain the design at multiple expertise levels (beginner, intermediate, expert)

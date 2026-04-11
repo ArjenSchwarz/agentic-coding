@@ -165,9 +165,23 @@ mcp__transit__update_task_status(displayId={id}, status="done", comment="Merged 
 
 Pull the newly merged main into the next PR's worktree (handled by the fetch + rebase in step 3.1 for the next iteration).
 
-### Phase 4: Report and Cleanup
+### Phase 4: Update Local Main
 
-#### 4.1 Final Report
+After all merges are complete, update the local main/master branch so it reflects the merged changes:
+
+```bash
+cd {original_repo_path}
+git checkout main
+git pull origin main
+```
+
+If the repo uses `master` instead of `main`, substitute accordingly.
+
+This ensures the local default branch is up to date with origin after all squash-merges.
+
+### Phase 5: Report and Cleanup
+
+#### 5.1 Final Report
 
 Present a summary of all bugs:
 
@@ -175,7 +189,7 @@ Present a summary of all bugs:
 |-----|-----|---------------|--------------|---------|
 | T-{id}: {name} | #{pr} | N | merged/failed/manual review | done/ready-for-review |
 
-#### 4.2 Cleanup Worktrees
+#### 5.2 Cleanup Worktrees
 
 Remove worktrees for successfully merged bugs:
 

@@ -11,9 +11,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - `claude-code-workshop` skill: Interactive workshop that teaches Claude Code features through hands-on exploration, with version-based filtering to focus on what's new since a specific release
 - `WSL-settings` agent note: Document `CLAUDE_CODE_SUBPROCESS_ENV_SCRUB` and `CLAUDE_CODE_SCRIPT_CAPS` behavior on WSL2
 
-### Removed
-- `claude-code-workshop-workspace/` test output directory used during skill development
-
 ## [2026-04-11]
 
 ### Changed

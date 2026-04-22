@@ -5,6 +5,17 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2026-04-22]
+
+### Changed
+- `pr-review-fixer` skill: Stop writing working files inside the repo
+  - Working directory moved to `/tmp/pr-review-${PR_NUM}/`; removed the `.claude/reviews/` option
+  - Review overview is assembled in-context and posted inline via `gh pr comment` (no intermediate file)
+  - Rune task file now lives under the temp working directory; dropped the `--reference` to a non-existent overview file
+  - Removed `tee test-output.txt` from test failure handling
+  - Cleaned up stale "exclude working files" guidance in commit step and Key Behaviors
+- `transit` skill: Route `chore` task type to `/starwave:smolspec` instead of asking the user to clarify
+
 ## [2026-04-14]
 
 ### Added

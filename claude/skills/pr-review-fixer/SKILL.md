@@ -74,9 +74,9 @@ gh api graphql -f query='
 
 ### 3. Determine Working Location
 
-Review reports are posted as PR comments (not committed). Task files are local working files only.
+Nothing from this skill is written into the repo. Review reports go out as PR comments, and the rune task file lives in a system temp directory.
 
-**Working directory**: Use a temp directory or `.claude/reviews/PR-[number]/` for local task files during the session. These files are not committed.
+**Working directory**: `/tmp/pr-review-${PR_NUM}/`. Create it if needed. Never write under the repo (no `.claude/reviews/`, no report files beside the code).
 
 **Iteration tracking**: Check existing PR comments by `claude[bot]` with "PR Review Overview" in the body. Count those to determine the current iteration number N.
 
@@ -94,9 +94,9 @@ Review reports are posted as PR comments (not committed). Task files are local w
 4. Mark as valid or invalid with brief rationale
 5. Skip pure acknowledgments, thanks, or informational comments without action items
 
-### 5. Create Review Overview
+### 5. Prepare Review Overview
 
-Prepare the review overview content (this will be posted as a PR comment, not committed):
+Assemble the review overview in-context (not on disk). Step 11 posts the final version — including CI status from step 9 — as a PR comment. Use this structure:
 
 ```markdown
 # PR Review Overview - Iteration [N]
@@ -132,16 +132,17 @@ Prepare the review overview content (this will be posted as a PR comment, not co
 
 ### 6. Create Task List
 
-Use rune to create `review-fixes-[N].md`:
+Use rune to create the task file under the temp working directory from step 3 — never in the repo:
 
 ```bash
-rune create ${OUTPUT_DIR}/review-fixes-${N}.md \
-  --title "PR Review Fixes - Iteration ${N}" \
-  --reference ${OUTPUT_DIR}/review-overview-${N}.md
+WORK_DIR="/tmp/pr-review-${PR_NUM}"
+mkdir -p "${WORK_DIR}"
+TASK_FILE="${WORK_DIR}/review-fixes-${N}.md"
+
+rune create "${TASK_FILE}" --title "PR Review Fixes - Iteration ${N}"
 
 # Add tasks via batch for efficiency
-rune batch ${OUTPUT_DIR}/review-fixes-${N}.md --input '{
-  "file": "review-fixes-'${N}'.md",
+rune batch "${TASK_FILE}" --input '{
   "operations": [
     {"type": "add", "title": "Fix: [issue 1]"},
     {"type": "add", "title": "Fix: [issue 2]"}
@@ -196,16 +197,7 @@ For each failed check:
 
 **Test failure handling:**
 
-```bash
-# Run tests and capture output
-make test 2>&1 | tee test-output.txt
-
-# If using pytest
-pytest --tb=short 2>&1 | tee test-output.txt
-
-# If using go test
-go test ./... 2>&1 | tee test-output.txt
-```
+Run the project's test command and read the output directly — do not tee to a file in the repo. Examples: `make test`, `pytest --tb=short`, `go test ./...`. If you need to persist output across commands, use `${WORK_DIR}/test-output.txt` (the temp path from step 3), not a path in the repo.
 
 Parse output for:
 - Failed test names and locations
@@ -231,31 +223,25 @@ Only resolve threads whose issues were validated and fixed. Do not resolve threa
 
 ### 11. Post Review Report as PR Comment
 
-Post the review overview as a comment on the PR. This replaces committing report files.
+Compose the final overview here — using the structure from step 5, plus the CI status from step 9 — and post it directly with `gh pr comment`. Do not stage the body in a file first; pass it inline. Example:
 
 ```bash
-# Post the review overview content as a PR comment
-gh pr comment $PR_NUM --body "$(cat <<'EOF'
-# PR Review Overview - Iteration [N]
+gh pr comment "$PR_NUM" --body "$(cat <<EOF
+# PR Review Overview - Iteration ${N}
 
-**PR**: #[number] | **Branch**: [name] | **Date**: [YYYY-MM-DD]
+**PR**: #${PR_NUM} | **Branch**: ${BRANCH} | **Date**: $(date +%Y-%m-%d)
 
 ## Valid Issues (fixed)
-
-[List of validated and fixed issues with file:line, reviewer, and brief description]
+...
 
 ## Invalid/Skipped Issues
-
-[List of skipped issues with rationale]
+...
 
 ## CI Status
-
-[Summary of CI check results and any fixes applied]
+...
 EOF
 )"
 ```
-
-**Do not commit** `review-overview-*.md` or `review-fixes-*.md` files. They are working files only.
 
 ### 12. Commit, Push, and Verify
 
@@ -263,9 +249,11 @@ After all fixes:
 
 1. Run full test suite locally
 2. Run linter
-3. Commit **only code changes** (exclude any local review/task files)
+3. Commit the code changes
 4. Push to remote
 5. Monitor CI status to confirm checks pass
+
+Nothing from `/tmp/pr-review-${PR_NUM}/` belongs in the commit — those paths are outside the repo and git will ignore them automatically.
 
 ## Key Behaviors
 
@@ -275,5 +263,5 @@ After all fixes:
 - **Deduplication**: Consolidate multiple comments on same issue into one task
 - **CI verification**: Always check CI status after fixing review comments
 - **Local reproduction**: Run tests/linters locally before pushing fixes
-- **Reports as comments**: Post review reports as PR comments, never commit them
-- **Clean commits**: Only commit actual code changes, not working/report files
+- **Reports as comments**: Post review reports as PR comments, never write them to disk under the repo
+- **No in-repo working files**: Rune task files and any captured output live under `/tmp/pr-review-${PR_NUM}/`, not in the repo

@@ -32,7 +32,7 @@ Based on the task's `type` field, route to the appropriate workflow:
 | `bug` | Invoke `/fix-bug` and pass the ticket reference (`T-{number}`) and task context (name, description) |
 | `feature` | Invoke `/starwave:creating-spec` and pass the ticket reference (`T-{number}`) and task context (name, description) |
 | `research` | Enter planning mode with the research question from the task description |
-| `chore` | Ask the user to clarify: is this closer to a bug fix or a feature? Route accordingly |
+| `chore` | Invoke `/starwave:smolspec` and pass the ticket reference (`T-{number}`) and task context (name, description). Chores are typically refactors, cleanup, or maintenance — they fit the lightweight smolspec workflow. Follow the full chore pipeline: smolspec → implement → commit → pre-push review → pr-pilot |
 | `documentation` | Ask the user to clarify the scope, then route to the appropriate workflow |
 
 ### 4. Handoff

@@ -5,6 +5,15 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2026-04-24]
+
+### Changed
+- Starwave spec skills: Tighten brevity, scope, and granularity rules across the requirements → design → tasks workflow to curb verbose output
+  - `starwave:requirements`: Add "Writing Style — Signal over Volume" block (behavior-not-implementation ACs, no speculative/future-proofing reqs, no split outcomes, concrete-or-omit NFRs, no hyperbole); require a Non-Goals / Out-of-Scope section in the document format; add matching self-review gates
+  - `starwave:design`: Add "Writing Style — Signal over Volume" block (no requirement restatement, no boilerplate sections, no hyperbole, distilled research); allow omitting inapplicable sections; add "Contracts and Integration Points — Do Not Cut" block (behavioral contracts, integration points, file/module placement); add non-goals and contracts gates to self-review
+  - `starwave:tasks`: Add "Task Granularity — No Inflation" block (no fragmenting coherent changes across setup/implement/wire, no decorative phases or streams, no title-restating `details` bullets); add non-goals and granularity gates to self-check
+  - `starwave:smolspec`: Add fragmentation and out-of-scope rules to Task Description Guidelines; extend smolspec self-review with behavior-not-mechanism and anti-hyperbole gates; extend tasks self-review with fragmentation and out-of-scope gates
+
 ## [2026-04-22]
 
 ### Changed

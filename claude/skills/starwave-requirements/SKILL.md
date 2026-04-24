@@ -10,6 +10,18 @@ First, generate an initial set of requirements in EARS format based on the featu
 Don't focus on code exploration in this phase. Instead, just focus on writing requirements which will later be turned into
 a design.
 
+**Writing Style — Signal over Volume:**
+
+Requirements describe what the system must do and why, in the minimum words needed for each to be testable. They are not a design document, not a tutorial, and not a restatement of the user's prompt.
+
+- The introduction MUST be 2-4 sentences summarizing the feature and its motivation. Do not rephrase the acceptance criteria that follow.
+- User stories MUST fit on one line each. Do not expand them into paragraphs.
+- Each acceptance criterion MUST describe observable behavior, not implementation. Use outcome language ("SHALL return X given Y") rather than mechanism language ("SHALL use hook Z", "SHALL be implemented as a service", "SHALL use library W"). The design phase decides the how.
+- The model MUST NOT add speculative or "future-proofing" requirements. If a capability is not needed for this feature, it is not a requirement.
+- The model MUST NOT split one behavioral check into multiple ACs (e.g., separate "accepts", "processes", "returns" bullets for a single operation). Combine into one testable outcome.
+- Non-functional requirements (performance, security, accessibility, compatibility) MUST state a concrete, measurable target tied to this feature, or MUST be omitted. Generic bullets like "SHALL be secure" or "SHALL be performant" add nothing and MUST NOT be written.
+- The model MUST NOT use hyperbolic or marketing language ("comprehensive", "robust", "seamless", "powerful").
+
 **Constraints:**
 
 - The model MUST first propose a {feature_name} based on: (1) user's explicit preference if stated, (2) current branch name if not a default branch like main or develop, (3) derived from the prompt content. The model MUST allow the user to override this proposal.
@@ -21,6 +33,7 @@ a design.
 - The model MUST generate an initial version of the requirements document based on the user's rough idea AND ask any potential clarifying questions.
 - The model MUST format the initial requirements.md document with:
   - A clear introduction section that summarizes the feature
+  - A "Non-Goals" (or "Out of Scope") section listing what the feature explicitly does NOT do. Focus on items a reader might reasonably assume to be in scope — adjacent capabilities that are deferred, alternative approaches that were rejected, or user flows the feature does not cover. Keep entries to one line each.
   - A hierarchical numbered list of requirements where each contains:
     - A user story in the format "As a [role], I want [feature], so that [benefit]"
     - A numbered list of acceptance criteria in EARS format (Easy Approach to Requirements Syntax)
@@ -52,6 +65,13 @@ Before triggering skill reviews, the model MUST verify:
 - [ ] Anchor tags follow the pattern `<a name="X.Y"></a>` for cross-referencing
 - [ ] No vague terms without definition (e.g., "fast", "reliable", "user-friendly")
 - [ ] Edge cases and error conditions are addressed
+- [ ] Introduction is a 2-4 sentence summary, not a re-explanation of the acceptance criteria
+- [ ] No acceptance criterion prescribes implementation (no "SHALL use X", "SHALL be implemented as Y") — each describes observable behavior
+- [ ] No speculative / future-proofing requirements without a current need
+- [ ] No behavioral outcome is split across multiple ACs when one would suffice
+- [ ] Every non-functional requirement has a concrete, measurable target (otherwise it is omitted)
+- [ ] No hyperbolic or marketing language ("comprehensive", "robust", "seamless", etc.)
+- [ ] A Non-Goals / Out-of-Scope section is present and lists items a reader might reasonably assume to be in scope
 
 - After updating the requirement document, the model MUST use BOTH design-critic and peer-review-validator subagents sequentially to review the document:
   1. FIRST: Use the Task tool with subagent_type="general-purpose" to run the design-critic skill (invoke the Skill tool with skill="design-critic") to perform a critical review that challenges assumptions, identifies gaps, and questions necessity

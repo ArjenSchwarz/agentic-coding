@@ -49,6 +49,17 @@ The tasks document should be based on the requirement and design documents, so e
   - Be concrete enough that a coding agent can execute them without additional clarification
   - Be scoped to specific coding activities (e.g., "Implement X function" rather than "Support X feature")
 - Tasks MUST build incrementally on previous steps
+
+**Task Granularity — No Inflation:**
+
+A task represents a meaningful unit of work that moves the feature forward. Task lists bloat when agents fragment coherent changes into trivial substeps; this wastes execution time and obscures the real shape of the work.
+
+- The model MUST NOT split a single coherent change into separate tasks for setup, implementation, and wiring when the work is small enough to be done together (e.g., do NOT create "create file", "add import", "add function stub", "implement body" as four tasks when they form one cohesive edit). The TDD pairing rule is the only mandated split — beyond it, combine.
+- A task SHOULD be substantial enough that completing it represents recognisable progress. If a task takes only a line or two of code and has no independent test, it probably belongs merged into an adjacent task.
+- Phases MUST NOT be added for decorative structure. Use phases only when they group genuinely distinct stages of work (e.g., schema migration before API changes). A single-phase list is preferable to invented phases.
+- Streams MUST NOT be added when tasks cannot actually run in parallel. A single stream is the default; only split into multiple streams when independent work exists AND parallel execution is realistic.
+- Task `details` sub-bullets MUST add decision-relevant information (file paths, behavioral constraints, edge cases to cover). They MUST NOT restate the task title, explain what a test is for, or describe obvious implementation steps.
+
 - The model MUST use red/green TDD ordering for all implementation tasks:
   - **Red**: Write a failing test first that defines the expected behaviour (e.g., task 1.1 writes unit tests for the interface/function)
   - **Green**: Implement the minimum code to make the test pass (e.g., task 1.2 implements the function)
@@ -146,6 +157,8 @@ After creating or updating the tasks file, the model MUST perform these checks b
 3. **Requirement coverage**: Confirm every requirement from requirements.md is referenced by at least one task
 4. **No orphaned tasks**: Verify no task exists in isolation without being connected to the incremental build chain
 5. **No circular dependencies**: Confirm the dependency graph has no cycles
+6. **Non-goals respected**: Confirm no task implements or prepares for any capability listed in the requirements' Non-Goals / Out-of-Scope section
+7. **No granularity inflation**: Confirm no coherent change has been fragmented across multiple trivial tasks (beyond the mandated TDD test/implement pair), and that phases and streams are present only where they serve a real purpose
 
 If any check fails, the model MUST fix the issue and re-run the checks before presenting to the user.
 

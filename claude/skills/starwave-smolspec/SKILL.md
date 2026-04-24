@@ -114,6 +114,8 @@ The tasks.md file MUST follow the standard task format to be compatible with the
 - Bad example: "Add validateEmail() function to utils.go"
 - Good example: "Email validation prevents invalid addresses from being submitted"
 - Each task SHOULD include verification steps (testing distributed throughout, not consolidated at end)
+- Tasks MUST represent meaningful units of work. Do NOT fragment a single coherent change into separate tasks for setup, implementation, and wiring (e.g., "create file", "add import", "implement function", "connect it up"). Combine trivial substeps into one task.
+- Tasks MUST NOT implement or prepare for anything listed in the smolspec's Out of Scope section.
 
 **Documentation Constraints:**
 - Keep smolspec.md concise (typically under 100 lines total)
@@ -147,12 +149,14 @@ The tasks.md file MUST follow the standard task format to be compatible with the
 **3. Self-Review Phase:**
 Before presenting to user, the model MUST verify:
 - [ ] Requirements use specification language (MUST/SHOULD/MAY) and are testable
+- [ ] Requirements describe observable behavior, not implementation mechanism (no "MUST use library X", "MUST be implemented as a service")
 - [ ] Implementation approach references specific files with paths
 - [ ] Implementation approach references existing patterns or similar code
 - [ ] At least one risk or assumption is documented with mitigation/validation plan
 - [ ] Dependencies and prerequisites are clearly stated
 - [ ] Out of scope items are explicitly listed
 - [ ] No vague language (e.g., "robust", "user-friendly" without specifics)
+- [ ] No hyperbolic or marketing language ("comprehensive", "seamless", "powerful")
 - [ ] All sections are complete and self-contained
 - [ ] Document is concise (<100 lines) but complete
 - [ ] Red flags checked: scope creep, wrong technology, missing prerequisites
@@ -180,6 +184,8 @@ Before presenting to user, the model MUST verify:
   - [ ] All tasks involve code changes (no deployment/UAT tasks)
   - [ ] Tasks build incrementally without gaps
   - [ ] No orphaned or hanging code
+  - [ ] No coherent change is fragmented across trivial substeps (setup/implement/wire)
+  - [ ] No task implements or prepares for anything listed in the smolspec's Out of Scope section
 - Ask "Do these tasks look good?"
 - Make modifications if needed and repeat until explicit approval
 

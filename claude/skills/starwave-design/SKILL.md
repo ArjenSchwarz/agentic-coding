@@ -5,8 +5,22 @@ description: 2. Create Feature Design Document
 
 ### 2. Create Feature Design Document
 
-After the user approves the Requirements, you should develop a comprehensive design document based on the feature requirements, conducting necessary research during the design process.
+After the user approves the Requirements, develop a design document based on the feature requirements, conducting necessary research during the design process.
 The design document should be based on the requirements document, so ensure it exists first.
+
+**Writing Style — Signal over Volume:**
+
+The design exists to make implementation decisions clear and capture non-obvious thinking. It is not a brochure, a tutorial, or a restatement of the requirements. Favor brevity and substance.
+
+- The model MUST keep the design to the minimum length needed to convey the decisions. If a section can be expressed in two sentences, it MUST NOT be padded to a paragraph.
+- The model MUST NOT restate or paraphrase the requirements document. Reference requirements by ID when needed; do not duplicate them.
+- The model MUST NOT include filler content such as motivational preambles, generic benefits ("improves maintainability", "enhances user experience"), or summaries that repeat the preceding section.
+- The model MUST NOT describe what is obvious from the code, type signatures, or standard library conventions. Document the non-obvious: constraints, trade-offs, invariants, and decisions that could reasonably have gone another way.
+- The model MUST OMIT any of the required sections that do not apply to the feature rather than filling them with boilerplate (e.g., a pure refactor may have no new data models; a CLI tweak may have no error-handling considerations). When omitting a section, the model MUST NOT leave a placeholder — just leave the section out.
+- The model MUST NOT use hyperbolic or marketing language ("robust", "comprehensive", "seamless", "powerful", "cutting-edge").
+- Prose SHOULD be replaced with tables, lists, or short type/interface sketches whenever those convey the same information more densely.
+- Diagrams SHOULD only be included when they reveal structure that prose cannot convey concisely. Do not add a diagram for its own sake.
+- Research findings MUST be distilled into the decisions they informed. Do not dump raw research into the design.
 
 **Constraints:**
 
@@ -21,14 +35,14 @@ The design document should be based on the requirements document, so ensure it e
 - The model SHOULD NOT create separate research files, but instead use the research as context for the design and implementation plan
 - The model MUST summarize key findings that will inform the feature design
 - The model SHOULD cite sources and include relevant links in the conversation
-- The model MUST create a detailed design document at 'specs/{feature_name}/design.md'
+- The model MUST create a design document at 'specs/{feature_name}/design.md'
 - The model MUST incorporate research findings directly into the design process
-- The model MUST include the following sections in the design document:
-  - Overview
-  - Architecture
-  - Components and Interfaces
-  - Data Models
-  - Error Handling
+- The design document SHOULD use the following sections when they apply. Sections that do not apply to the feature MUST be omitted rather than padded with boilerplate:
+  - Overview (1-3 sentences on what is being built and why)
+  - Architecture (only what changes or is added; do not describe the existing system unless directly relevant — integration points ARE always relevant)
+  - Components and Interfaces (sketch types/signatures; add a one-line behavioral note when the contract is not obvious from the name)
+  - Data Models (omit if no new or changed models)
+  - Error Handling (omit if no new failure modes)
   - Testing Strategy
 - When writing the Testing Strategy section, the model SHOULD evaluate acceptance criteria for property-based testing (PBT) candidates:
   - Review requirements that express universal guarantees (invariants, round-trip behavior, idempotence)
@@ -38,6 +52,14 @@ The design document should be based on the requirements document, so ensure it e
 - The model SHOULD include diagrams or visual representations when appropriate (use Mermaid for diagrams if applicable)
 - The model MUST ensure the design addresses all feature requirements identified during the clarification process
 - The model MUST use tools like context7 to retrieve relevant information about the libraries and tools
+
+**Contracts and Integration Points — Do Not Cut:**
+
+Even when trimming prose, the following MUST be captured somewhere in the design (usually in Architecture or Components and Interfaces). A signature alone is not a contract.
+
+- **Behavioral contracts** that are not self-evident from the name or signature: idempotence, ordering guarantees, invariants, side effects, concurrency/transaction requirements, performance expectations that constrain the implementation.
+- **Integration points**: exactly where new code plugs into existing code — the hook, interface, call site, event, middleware slot, or extension point. Name the file or symbol when it is not otherwise obvious.
+- **File/module placement** for new subsystems where no existing convention clearly dictates the location. A one-liner is enough; skip this only when the placement is unambiguous from project conventions.
 
 **Pattern Extension Audit:**
 When the design extends an existing pattern to a new type (e.g., adding table row sub-blocks alongside list item sub-blocks, or adding a new export format alongside an existing one), the model MUST:
@@ -58,8 +80,15 @@ Before triggering skill reviews, the model MUST verify:
 - [ ] Error handling covers failure modes implied by requirements
 - [ ] Testing strategy includes tests for each acceptance criterion
 - [ ] No design elements exist without a corresponding requirement (scope creep check)
+- [ ] No design element implements or prepares for a capability listed in the requirements' Non-Goals / Out-of-Scope section
 - [ ] If extending an existing pattern, all call sites of the original pattern are audited and the design addresses each one
 - [ ] UI elements that have existing equivalents reference the existing pattern rather than defining visual properties from scratch
+- [ ] Every paragraph carries a decision, constraint, or non-obvious fact — none exist solely to introduce, summarize, or restate the requirements
+- [ ] No sections are padded with boilerplate; inapplicable sections are omitted entirely
+- [ ] No hyperbolic or marketing language ("comprehensive", "robust", "seamless", etc.)
+- [ ] Non-obvious behavioral contracts (idempotence, ordering, invariants, side effects, transaction/concurrency requirements) are stated, not just implied by signatures
+- [ ] Integration points with existing code are named (hook, call site, interface, event, extension point)
+- [ ] For new subsystems, file/module placement is stated when not dictated by existing project conventions
 
 **Self-Validation via Explanation:**
 - The model MUST use the explain-like skill (invoke the Skill tool with skill="explain-like") to explain the design at multiple expertise levels (beginner, intermediate, expert)

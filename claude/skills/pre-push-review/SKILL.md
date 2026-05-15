@@ -88,8 +88,34 @@ Use the explain-like skill (invoke the Skill tool with skill="explain-like") to 
 - If the explanation reveals logic that doesn't align with the design, flag it as a divergence.
 - Add a "Completeness Assessment" section summarizing: what's fully implemented, what's partially implemented, and what's missing.
 
-## Phase 7: Summary
+## Phase 7: Generate Review HTML
+
+Create a self-contained HTML page so the user can review the changes themselves before pushing.
+
+**Location** (in priority order, use the first that applies):
+
+1. `specs/{feature_name}/pre-push-review.html` if a matching spec was found in Phase 2
+2. `{repo-root}/.claude/pre-push-review.html` if `.claude/` exists
+3. `/tmp/pre-push-review-{branch-name}.html`
+
+Overwrite any existing file.
+
+**Required sections**:
+
+1. **Header**: branch name, target remote/branch, and the list of commits being reviewed (SHA, subject, author, date).
+2. **Summary**: files changed with added/removed line counts.
+3. **Per-file diffs**: render each file's unified diff with syntax highlighting. Load highlight.js from a CDN (`cdn.jsdelivr.net/gh/highlightjs/cdn-release` with the `diff` language) and call `hljs.highlightAll()`. Wrap each diff in `<pre><code class="language-diff">…</code></pre>`. HTML-escape the diff content.
+4. **How it works**: plain-English explanation of what the changes do, how they fit into the existing code, and any new abstractions introduced. Pull from the implementation explanation generated in Phase 6 if present.
+5. **Key decisions**: notable choices made during implementation — algorithm selection, trade-offs, why one approach was picked over alternatives. If a decision log exists in the spec, summarize the entries relevant to these commits.
+6. **Review findings**: what the review agents flagged in Phase 3 and what was fixed in Phase 4 (or skipped, with reason).
+7. **Things to double-check**: anything the user should pay extra attention to before pushing — risky areas, untested paths, follow-ups.
+
+**Styling**: keep CSS inline and minimal. Use a readable monospace font for diffs, a sans-serif for prose, and a collapsible `<details>` element for each per-file diff so long reviews stay navigable.
+
+After writing the file, print the absolute path so the user can open it in a browser.
+
+## Phase 8: Summary
 
 Provide a clear verdict: **Ready to push**, **Needs fixes** (with must-fix list), or **Requires discussion** (with architectural concerns).
 
-List what was fixed automatically and what still needs attention.
+List what was fixed automatically and what still needs attention. Include the path to the review HTML from Phase 7.

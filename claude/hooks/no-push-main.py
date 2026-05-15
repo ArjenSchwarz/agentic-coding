@@ -43,26 +43,40 @@ def strip_git_global_opts(cmd: str) -> str:
     return " ".join(result.split())
 
 
-def get_current_branch():
+def extract_git_cwd(cmd: str) -> str | None:
+    """Extract the working directory for a git command from `-C <path>`.
+
+    Returns the last `-C` path if present (git applies multiple `-C` flags
+    sequentially; the last one is the effective cwd for branch detection),
+    else None. `--git-dir` / `--work-tree` are not handled here — they
+    redirect the gitdir/worktree without changing the shell cwd and require
+    different semantics; rebase/push in worktrees normally use `-C`.
+    """
+    matches = re.findall(r"(?:^|\s)-C\s+(\S+)", cmd)
+    return matches[-1] if matches else None
+
+
+def get_current_branch(cwd: str | None = None):
     try:
         result = subprocess.run(
             ["git", "rev-parse", "--abbrev-ref", "HEAD"],
             capture_output=True,
             text=True,
             timeout=5,
+            cwd=cwd,
         )
         return result.stdout.strip() if result.returncode == 0 else None
     except Exception:
         return None
 
 
-def on_protected_branch():
+def on_protected_branch(cwd: str | None = None):
     """Return the branch name if on a protected branch, else None."""
-    current = get_current_branch()
+    current = get_current_branch(cwd)
     return current if current in PROTECTED else None
 
 
-def check_push(cmd: str) -> str | None:
+def check_push(cmd: str, cwd: str | None = None) -> str | None:
     """Check git push commands."""
     if not re.search(r"\bgit\s+push\b", cmd):
         return None
@@ -96,7 +110,7 @@ def check_push(cmd: str) -> str | None:
         return f"Pushing to {target_branch} is not allowed. Use a feature branch and a PR."
 
     if target_branch is None:
-        branch = on_protected_branch()
+        branch = on_protected_branch(cwd)
         if branch:
             if is_force:
                 return f"Force push while on {branch} is not allowed."
@@ -105,46 +119,46 @@ def check_push(cmd: str) -> str | None:
     return None
 
 
-def check_history_rewrite(cmd: str) -> str | None:
+def check_history_rewrite(cmd: str, cwd: str | None = None) -> str | None:
     """Check commands that rewrite history: reset --hard, rebase, commit --amend."""
     # git reset --hard (while on protected branch)
     if re.search(r"\bgit\s+reset\b", cmd) and re.search(r"(?:^|\s)--hard(?:\s|$)", cmd):
-        branch = on_protected_branch()
+        branch = on_protected_branch(cwd)
         if branch:
             return f"git reset --hard while on {branch} is not allowed."
 
     # git rebase (while on protected branch)
     if re.search(r"\bgit\s+rebase\b", cmd):
-        branch = on_protected_branch()
+        branch = on_protected_branch(cwd)
         if branch:
             return f"git rebase while on {branch} is not allowed."
 
     # git commit --amend (while on protected branch)
     if re.search(r"\bgit\s+commit\b", cmd) and re.search(r"(?:^|\s)--amend(?:\s|$)", cmd):
-        branch = on_protected_branch()
+        branch = on_protected_branch(cwd)
         if branch:
             return f"git commit --amend while on {branch} is not allowed."
 
     return None
 
 
-def check_destructive(cmd: str) -> str | None:
+def check_destructive(cmd: str, cwd: str | None = None) -> str | None:
     """Check destructive working tree operations: checkout ., restore ., clean -f."""
     # git checkout . or git checkout -- .
     if re.search(r"\bgit\s+checkout\s+(--\s+)?\.\s*$", cmd):
-        branch = on_protected_branch()
+        branch = on_protected_branch(cwd)
         if branch:
             return f"git checkout . while on {branch} is not allowed. Uncommitted work may be lost."
 
     # git restore . or git restore --staged .
     if re.search(r"\bgit\s+restore\b", cmd) and re.search(r"\.\s*$", cmd):
-        branch = on_protected_branch()
+        branch = on_protected_branch(cwd)
         if branch:
             return f"git restore . while on {branch} is not allowed. Uncommitted work may be lost."
 
     # git clean -f
     if re.search(r"\bgit\s+clean\b", cmd) and re.search(r"(?:^|\s)-[a-zA-Z]*f", cmd):
-        branch = on_protected_branch()
+        branch = on_protected_branch(cwd)
         if branch:
             return f"git clean -f while on {branch} is not allowed. Untracked files may be lost."
 
@@ -259,11 +273,18 @@ def check_command(command: str) -> str | None:
         cmd = " ".join(part.split())
 
         if re.search(r"\bgit\b", cmd):
+            # Extract `-C <path>` from the original command so branch
+            # detection runs in the worktree the git command actually
+            # operates on, not the shell's cwd.
+            cwd = extract_git_cwd(cmd)
             # Normalize away global git options like -C, --git-dir, -c so that
             # `git -C /some/path push` is checked the same as `git push`.
             normalized = strip_git_global_opts(cmd)
             for check in git_checks:
-                reason = check(normalized)
+                if check is check_branch_manipulation:
+                    reason = check(normalized)
+                else:
+                    reason = check(normalized, cwd)
                 if reason:
                     return reason
 

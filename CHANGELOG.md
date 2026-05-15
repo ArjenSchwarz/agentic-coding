@@ -5,6 +5,20 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2026-05-15]
+
+### Added
+- `capture-knowledge` skill: Capture reusable cross-project technical knowledge as notes in the user's Obsidian vault under `03-Notes/Generated/`, with per-machine vault path cache, frontmatter conventions, collision handling, and Obsidian Flavored Markdown guidance
+- `pr-review-html` skill: Fetch a GitHub PR, run parallel review agents (code reuse, quality, efficiency, spec/docs), apply local fixes, verify with tests and linters, and write a self-contained `pr-review.html` to the repo root with per-file diffs, decisions, findings, and double-check items
+- `claude/statusline.sh`: Custom statusline showing directory, model (with optional effort level), context window percentage, 5h/7d rate-limit usage with reset times, and git branch with dirty marker
+- `arjen-style-guide.md`: Personal iOS/iPadOS/macOS 26+ SwiftUI style guide distilled from Prism, Transit, and Flux
+
+### Changed
+- `pre-push-review` skill: Add Phase 7 to generate a self-contained HTML review page (per-file diffs with highlight.js, how-it-works explanation, key decisions, review findings, things to double-check), with a spec-aware location fallback; renumber Summary to Phase 8 and include the HTML path in the verdict
+- `no-push-main` hook: Honor `git -C <path>` when detecting the current branch, so push/rebase/reset/amend/checkout/restore/clean run inside worktrees check the worktree's branch instead of the shell's cwd
+  - New `extract_git_cwd()` helper pulls the last `-C` argument out of the original command
+  - `get_current_branch`, `on_protected_branch`, and the push/history/destructive checks all accept an optional `cwd` and pass it through to `git rev-parse`
+
 ## [2026-04-24]
 
 ### Changed

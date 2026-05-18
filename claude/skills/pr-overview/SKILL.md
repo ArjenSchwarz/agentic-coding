@@ -54,10 +54,12 @@ gh api graphql -f query='
 ' -f owner=OWNER -f repo=REPO -F pr=$PR_NUM
 ```
 
+A comment counts as a "Claude review" if **either** the author is `claude[bot]` (the upstream `anthropics/claude-code-action` Action) **or** the body contains the sentinel `<!-- claude-local-review -->` (emitted by the `local-review` agent when pr-pilot runs it locally). Treat both sources uniformly in the rules below.
+
 Filter:
-- **Code-level threads**: drop any thread where `isResolved: true`. For each remaining thread, surface the first comment as the top-level entry and any later comments as `replies`. If multiple `claude[bot]` comments exist in a thread, keep only the latest as the top-level entry.
-- **PR-level reviews**: drop reviews with empty/whitespace bodies. Drop reviews where `state == "APPROVED"` and the body has no actionable feedback. For `claude[bot]`, keep only the most recent.
-- **Discussion comments**: drop pure acknowledgements, CI bot noise, and `claude[bot]` "PR Review Overview" iteration reports (they're already in the GitHub UI). For `claude[bot]`, keep only the latest.
+- **Code-level threads**: drop any thread where `isResolved: true`. For each remaining thread, surface the first comment as the top-level entry and any later comments as `replies`. If multiple Claude review comments exist in a thread, keep only the latest as the top-level entry.
+- **PR-level reviews**: drop reviews with empty/whitespace bodies. Drop reviews where `state == "APPROVED"` and the body has no actionable feedback. For Claude reviews, keep only the most recent.
+- **Discussion comments**: drop pure acknowledgements, CI bot noise, and `pr-review-fixer`'s "PR Review Overview" iteration reports (matched by the `<!-- pr-review-overview -->` sentinel or, for legacy comments, `claude[bot]` author + "PR Review Overview" in the body — they're already in the GitHub UI). For Claude reviews, keep only the latest.
 
 Each surviving item becomes an entry in Phase 6's `unresolved_comments` array. Preserve the comment body **verbatim** — don't rewrite, summarise, or "clean up" reviewer markdown.
 

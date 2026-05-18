@@ -32,6 +32,14 @@ The invoker should pass you either a PR number (e.g. `PR 142`) or no number — 
 
 5. **Format the comment.** Produce a single Markdown body, opening with a one-sentence verdict line (`**Verdict:** ...`). Then one `###` section per non-empty category, with findings as bullets. Close with an `### Other notes` section only if you have positive callouts worth mentioning (a nicely simplified function, a good test). Keep it tight — this is a code review, not an essay. Do not pad with restatements of what the PR does; the PR author already knows.
 
+   End the body with this sentinel on its own line:
+
+   ```html
+   <!-- claude-local-review -->
+   ```
+
+   `pr-review-fixer` and `pr-overview` match on this marker to dedup multiple local-review comments and treat them the same way they treat `claude[bot]` reviews posted by the upstream GitHub Action. Do not omit it — without the sentinel the comment will be processed as a generic user comment and stack up across loop iterations.
+
 6. **Post the comment.** Write the body to a temp file (so HEREDOC quoting issues don't bite you), e.g. `mktemp -t local-review` (or `$CLAUDE_JOB_DIR/comment.md` if that variable is set), then run:
 
    ```bash

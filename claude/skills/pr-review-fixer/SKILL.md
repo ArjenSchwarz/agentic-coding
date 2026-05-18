@@ -1,6 +1,6 @@
 ---
 name: pr-review-fixer
-description: Fetch unresolved PR comments (both code-level and PR-level), validate issues, and fix them. Also checks CI status and fixes failing tests, lint errors, and build issues. Use when reviewing and addressing GitHub PR feedback. Filters out resolved comments, keeps only the last claude[bot] comment per thread, validates issues, posts review report as a PR comment, then fixes validated issues.
+description: Fetch unresolved PR comments (both code-level and PR-level), validate issues, and fix them. Also checks CI status and fixes failing tests, lint errors, and build issues. Use when reviewing and addressing GitHub PR feedback. Filters out resolved comments, keeps only the last Claude review comment per thread (matching either `claude[bot]` from the upstream Action or the `<!-- claude-local-review -->` sentinel from the local-review agent), validates issues, posts review report as a PR comment, then fixes validated issues.
 # model: inherit
 # allowed-tools: Bash,Read,Write,Edit,Grep,Glob
 ---
@@ -57,19 +57,21 @@ gh api graphql -f query='
 
 ### 2. Filter Comments
 
+A comment counts as a "Claude review" if **either** the author is `claude[bot]` (the upstream `anthropics/claude-code-action` Action) **or** the body contains the sentinel `<!-- claude-local-review -->` (emitted by the `local-review` agent when pr-pilot runs it locally). Apply the dedup rules below to both sources uniformly.
+
 **Code-level comments (reviewThreads):**
 1. **Exclude resolved threads**: Filter out threads where `isResolved: true`
-2. **claude[bot] handling**: For `claude[bot]` comments, keep only the **last comment** per thread
+2. **Claude review handling**: For Claude review comments (as defined above), keep only the **last comment** per thread
 3. **Group by file/location**: Organize by path and line number
 
 **PR-level review comments (reviews):**
 1. **Exclude empty bodies**: Skip reviews with empty or whitespace-only body
 2. **Exclude approval-only**: Skip reviews with state `APPROVED` and no actionable feedback
-3. **claude[bot] handling**: For `claude[bot]` reviews, keep only the **most recent** one
+3. **Claude review handling**: For Claude reviews (as defined above), keep only the **most recent** one
 
 **PR-level issue comments (comments):**
 1. **Exclude bot noise**: Skip automated comments (CI bots, etc.) unless actionable
-2. **claude[bot] handling**: Keep only the **last** `claude[bot]` comment
+2. **Claude review handling**: Keep only the **last** Claude review comment (as defined above)
 3. **Identify actionable items**: Look for requested changes, questions, or suggestions
 
 ### 3. Determine Working Location
@@ -78,7 +80,7 @@ Nothing from this skill is written into the repo. Review reports go out as PR co
 
 **Working directory**: `/tmp/pr-review-${PR_NUM}/`. Create it if needed. Never write under the repo (no `.claude/reviews/`, no report files beside the code).
 
-**Iteration tracking**: Check existing PR comments by `claude[bot]` with "PR Review Overview" in the body. Count those to determine the current iteration number N.
+**Iteration tracking**: Count existing PR comments whose body contains the sentinel `<!-- pr-review-overview -->` (or, for legacy comments posted before the sentinel existed, comments authored by `claude[bot]` with "PR Review Overview" in the body). The count gives you the current iteration number N. The sentinel is required because `gh pr comment` posts under the local user account, not `claude[bot]`, so an author check alone misses every iteration when this skill runs outside the upstream Action.
 
 ### 4. Validate Issues
 
@@ -227,6 +229,7 @@ Compose the final overview here — using the structure from step 5, plus the CI
 
 ```bash
 gh pr comment "$PR_NUM" --body "$(cat <<EOF
+<!-- pr-review-overview -->
 # PR Review Overview - Iteration ${N}
 
 **PR**: #${PR_NUM} | **Branch**: ${BRANCH} | **Date**: $(date +%Y-%m-%d)
@@ -242,6 +245,8 @@ gh pr comment "$PR_NUM" --body "$(cat <<EOF
 EOF
 )"
 ```
+
+The leading `<!-- pr-review-overview -->` sentinel is what the iteration counter in step 3 matches on. Without it, N will not increment between rounds when this skill is invoked locally.
 
 ### 12. Commit, Push, and Verify
 

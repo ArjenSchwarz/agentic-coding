@@ -14,11 +14,11 @@ The invoker should pass you either a PR number (e.g. `PR 142`) or no number — 
 
 ## Procedure
 
-1. **Resolve PR + repo.** Run `gh pr view <num-or-omit> --json number,title,url,baseRefName,headRefName,author,body` once and keep the output. Run `gh repo view --json nameWithOwner` to get the `REPO` value. If the user supplied a PR number, use it; otherwise use the one returned for the current branch.
+1. **Resolve PR + repo.** Run `gh pr view <num-or-omit> --json number,title,url,baseRefName,headRefName,author,body` once and keep the output. The `author` field is an object — read `author.login` when you reference it. Run `gh repo view --json nameWithOwner` to get the `REPO` value. If the user supplied a PR number, use it. Otherwise, `gh pr view` infers the PR from the current branch — that only works when the branch is the head of an open PR. If it errors or returns no PR, stop and tell the invoker to pass the PR number explicitly.
 
-2. **Read project conventions.** Read `CLAUDE.md` at the repo root if it exists, plus any nested `CLAUDE.md` files inside directories the diff touches. These define the project's style, naming, testing, and any project-specific review rules (e.g. localisation rules, SwiftUI patterns, Go idioms). Treat them as authoritative — do not invent rules they don't state, and do not skip rules they do state.
+2. **Read repo-level conventions.** Read `CLAUDE.md` at the repo root if it exists. It defines the project's style, naming, testing, and any project-specific review rules (e.g. localisation rules, SwiftUI patterns, Go idioms). Treat it as authoritative — do not invent rules it doesn't state, and do not skip rules it does state. (Nested `CLAUDE.md` files for touched directories are read in Step 3, once you know which directories are touched.)
 
-3. **Fetch the diff.** Run `gh pr diff <num>` to get the full unified diff. For large PRs (>2000 changed lines), also run `gh pr view <num> --json files` and prioritise the files that look most behaviour-bearing (source code over tests, config, generated files, vendored code, lockfiles).
+3. **Fetch the diff and any nested rules.** Run `gh pr diff <num>` to get the full unified diff. Use it to list the directories that are touched and read any `CLAUDE.md` inside them — those rules win over the repo-root file for paths they govern. If the diff is large enough that you can't hold it usefully in one pass, also run `gh pr view <num> --json files` and prioritise the files that look most behaviour-bearing (source code over tests, config, generated files, vendored code, lockfiles).
 
 4. **Review.** Read the diff and produce findings in these categories. Only include a category in the final comment if you actually have something to say about it — empty sections add noise.
    - **Code quality and best practices** — naming, readability, structure, idiomatic use of the language/framework, adherence to anything stated in `CLAUDE.md`.
@@ -32,7 +32,7 @@ The invoker should pass you either a PR number (e.g. `PR 142`) or no number — 
 
 5. **Format the comment.** Produce a single Markdown body, opening with a one-sentence verdict line (`**Verdict:** ...`). Then one `###` section per non-empty category, with findings as bullets. Close with an `### Other notes` section only if you have positive callouts worth mentioning (a nicely simplified function, a good test). Keep it tight — this is a code review, not an essay. Do not pad with restatements of what the PR does; the PR author already knows.
 
-6. **Post the comment.** Write the body to a temp file (so HEREDOC quoting issues don't bite you) and run:
+6. **Post the comment.** Write the body to a temp file (so HEREDOC quoting issues don't bite you), e.g. `mktemp -t local-review` (or `$CLAUDE_JOB_DIR/comment.md` if that variable is set), then run:
 
    ```bash
    gh pr comment <num> --body-file <path>

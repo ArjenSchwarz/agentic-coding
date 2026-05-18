@@ -44,11 +44,29 @@ If an existing PR was provided, fetch its details:
 gh pr view {pr_number} --json number,headRefName,state
 ```
 
+### 1.5 Detect Claude Review Marker
+
+Check whether this repo has opted in to Claude PR reviews by looking for a workflow that references the upstream action:
+
+```bash
+if grep -rq 'anthropics/claude-code-action' .github/workflows/ 2>/dev/null; then
+  HAS_CLAUDE_REVIEW=1
+else
+  HAS_CLAUDE_REVIEW=0
+fi
+```
+
+The workflow file's *presence* is the opt-in signal. If you want this to save Actions minutes rather than duplicate them, also gate the workflow's `on:` trigger so it does not run on every push — otherwise the GH Action and `local-review` will both post a comment.
+
+If `HAS_CLAUDE_REVIEW=0`, skip every "Run Local Claude Review" step below.
+
 ### 2. Review Loop
 
-#### 2.1 Wait for CI and Reviews
+#### 2.1 Run Local Claude Review and Wait for CI
 
-Wait 10 minutes after the PR was created (or after the last push) to allow CI checks and reviewer comments to arrive.
+If `HAS_CLAUDE_REVIEW=1`, invoke the `local-review` agent on the PR (pass the PR number from step 1) so the Claude review comment is posted from your local subscription instead of being produced by GitHub Actions. The agent reads the repo's `CLAUDE.md`, fetches `gh pr diff`, and posts one `gh pr comment` that `pr-review-fixer` will absorb in step 2.2 alongside any other reviewer comments.
+
+Then wait 10 minutes after the PR was created (or after the last push) to allow CI checks and other reviewer comments to arrive.
 
 #### 2.2 Run PR Review Fixer
 
@@ -89,9 +107,11 @@ Run the project's test suite and linter to verify the rebase is clean.
 git push --force-with-lease
 ```
 
-#### 3.3 Wait for CI and Reviews
+#### 3.3 Run Local Claude Review and Wait for CI
 
-Wait 10 minutes after the force push to allow CI checks and agent reviewers to run.
+If `HAS_CLAUDE_REVIEW=1`, invoke `local-review` again on the PR so the post-rebase diff gets a fresh Claude comment locally. Skip otherwise.
+
+Wait 10 minutes after the force push to allow CI checks and other agent reviewers to run.
 
 Then run `/pr-review-fixer` to check for new review comments and CI failures — agent reviewers will post fresh comments on the rebased code.
 

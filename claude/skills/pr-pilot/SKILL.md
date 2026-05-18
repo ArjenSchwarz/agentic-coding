@@ -44,28 +44,27 @@ If an existing PR was provided, fetch its details:
 gh pr view {pr_number} --json number,headRefName,state
 ```
 
-### 1.5 Detect Claude Review Marker
+### 1.5 Decide Whether to Run Local Claude Review
 
-Check whether this repo has opted in to Claude PR reviews by looking for a workflow file that references the upstream action. By convention the workflow is named `claude-code-review.yml`, but the check matches by content so any filename works. Both active workflows (`*.yml`, `*.yaml`) and explicitly-disabled ones (`*.yml.disabled`, `*.yaml.disabled`) count — the marker file's job is to signal "this repo wants Claude reviews", independent of whether GitHub Actions is currently executing it.
+Run `local-review` by default. Skip it only when the upstream `anthropics/claude-code-action` GitHub Action is already going to post the same comment, so the two don't duplicate each other.
+
+An active GH Action review = a workflow file GitHub will execute (extension `*.yml` or `*.yaml`) that references the upstream action. Anything else (no workflow, file renamed to `*.yml.disabled`, `.bak`, editor swap, etc.) means the GH Action will not run, so `local-review` should fill the gap.
 
 ```bash
-HAS_CLAUDE_REVIEW=0
-FOUND=$(find .github/workflows -maxdepth 1 -type f \
-  \( -name '*.yml' -o -name '*.yaml' -o -name '*.yml.disabled' -o -name '*.yaml.disabled' \) 2>/dev/null)
-if [ -n "$FOUND" ] && printf '%s\n' "$FOUND" | xargs grep -lq 'anthropics/claude-code-action' 2>/dev/null; then
-  HAS_CLAUDE_REVIEW=1
+RUN_LOCAL_REVIEW=1
+ACTIVE=$(find .github/workflows -maxdepth 1 -type f \( -name '*.yml' -o -name '*.yaml' \) 2>/dev/null)
+if [ -n "$ACTIVE" ] && printf '%s\n' "$ACTIVE" | xargs grep -lq 'anthropics/claude-code-action' 2>/dev/null; then
+  RUN_LOCAL_REVIEW=0
 fi
 ```
 
-The `find` step deliberately excludes files GitHub Actions does not execute *and* that are not intentional markers — `.bak`, editor swap files (`.swp`/`.swo`), `~` backups, etc. — so a stray backup of an unrelated workflow that happens to contain the upstream action string will not trigger a false positive. Renaming the workflow to `*.yml.disabled` is the easiest way to stop the upstream Action from running on every push while keeping `local-review` active — that's the recommended setup for local-only Claude reviews. The alternative is to keep the file as `*.yml` and gate its `on:` trigger (e.g. to a label or `workflow_dispatch:` only).
-
-If `HAS_CLAUDE_REVIEW=0`, skip every "Run Local Claude Review" step below.
+If `RUN_LOCAL_REVIEW=0`, skip every "Run Local Claude Review" step below — the GH Action will post the review comment on its own.
 
 ### 2. Review Loop
 
 #### 2.1 Run Local Claude Review and Wait for CI
 
-If `HAS_CLAUDE_REVIEW=1`, invoke the `local-review` agent on the PR (pass the PR number from step 1) so the Claude review comment is posted from your local subscription instead of being produced by GitHub Actions. The agent reads the repo's `CLAUDE.md`, fetches `gh pr diff`, and posts one `gh pr comment` that `pr-review-fixer` will absorb in step 2.2 alongside any other reviewer comments.
+If `RUN_LOCAL_REVIEW=1`, invoke the `local-review` agent on the PR (pass the PR number from step 1) so the Claude review comment is posted from your local subscription instead of being produced by GitHub Actions. The agent reads the repo's `CLAUDE.md`, fetches `gh pr diff`, and posts one `gh pr comment` that `pr-review-fixer` will absorb in step 2.2 alongside any other reviewer comments.
 
 Then wait 10 minutes after the PR was created (or after the last push) to allow CI checks and other reviewer comments to arrive.
 
@@ -110,7 +109,7 @@ git push --force-with-lease
 
 #### 3.3 Run Local Claude Review and Wait for CI
 
-If `HAS_CLAUDE_REVIEW=1`, invoke `local-review` again on the PR so the post-rebase diff gets a fresh Claude comment locally. Skip otherwise.
+If `RUN_LOCAL_REVIEW=1`, invoke `local-review` again on the PR so the post-rebase diff gets a fresh Claude comment locally. Skip otherwise.
 
 Wait 10 minutes after the force push to allow CI checks and other agent reviewers to run.
 

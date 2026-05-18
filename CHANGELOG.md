@@ -8,6 +8,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [2026-05-18]
 
 ### Added
+- `local-review` agent: Sonnet-powered local replacement for the `anthropics/claude-code-action` PR review step. Reviews an open PR via `gh pr diff`, follows the project's `CLAUDE.md` for style/conventions and project-specific flag rules, and posts a single `gh pr comment` so the same review can run without burning private GitHub Actions minutes
 - `pr-overview` skill: Read-only PR summary workflow that fetches a GitHub PR, surfaces unresolved code/review/discussion comments verbatim, runs the same parallel review agents as `pr-review-html` without applying fixes, and writes a self-contained `pr-overview.html` to the repo root for browsing before deciding what to do
 - `scripts/build_review_html.py`: Shared HTML renderer used by `pre-push-review`, `pr-review-html`, and `pr-overview`. Consumes a JSON description plus optional per-file diff fragments and emits a self-contained Prism Dark themed page with overview cards, three-level explanation tabs (CSS-only radio buttons), important-change cards with Takeaway/Rationale/Open-question callouts, per-file diff `<details>` blocks, and an optional `<script id="review-meta">` block for `pulsar publish` consumption
 

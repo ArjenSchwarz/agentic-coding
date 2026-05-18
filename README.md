@@ -11,6 +11,7 @@ The framework provides specialized AI agents for different aspects of developmen
 - **`code-simplifier`** - Reviews code for complexity reduction and maintainability improvements
 - **`design-critic`** - Provides critical review of design documents and architecture proposals (now using Sonnet model for improved efficiency)
 - **`efficiency-optimizer`** - Analyzes code for performance optimization opportunities
+- **`local-review`** - Sonnet-powered local replacement for the `anthropics/claude-code-action` PR review step. Reviews an open PR (code quality, bugs, performance, security, test coverage, plus whatever the project's `CLAUDE.md` mandates) and posts a single `gh pr comment` instead of consuming private GitHub Actions minutes
 - **`peer-review-validator`** - Validates decisions by consulting with at least two external AI systems (Gemini, Codex, or Q Developer) to ensure balanced perspective
 - **`pre-push-code-reviewer`** - Critically reviews unpushed commits before pushing to ensure code quality and spec adherence
 - **`research-agent`** - Conducts research and generates structured reports (stolen from @sammcj)

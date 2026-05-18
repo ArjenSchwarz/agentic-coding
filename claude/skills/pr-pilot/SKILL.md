@@ -46,17 +46,18 @@ gh pr view {pr_number} --json number,headRefName,state
 
 ### 1.5 Detect Claude Review Marker
 
-Check whether this repo has opted in to Claude PR reviews by looking for an **active** workflow that references the upstream action. By convention the workflow is named `claude-code-review.yml`, but the check matches by content so any filename works as long as the file is a real workflow (`*.yml` or `*.yaml`):
+Check whether this repo has opted in to Claude PR reviews by looking for a workflow file that references the upstream action. By convention the workflow is named `claude-code-review.yml`, but the check matches by content so any filename works. Both active workflows (`*.yml`, `*.yaml`) and explicitly-disabled ones (`*.yml.disabled`, `*.yaml.disabled`) count — the marker file's job is to signal "this repo wants Claude reviews", independent of whether GitHub Actions is currently executing it.
 
 ```bash
 HAS_CLAUDE_REVIEW=0
-FOUND=$(find .github/workflows -maxdepth 1 -type f \( -name '*.yml' -o -name '*.yaml' \) 2>/dev/null)
+FOUND=$(find .github/workflows -maxdepth 1 -type f \
+  \( -name '*.yml' -o -name '*.yaml' -o -name '*.yml.disabled' -o -name '*.yaml.disabled' \) 2>/dev/null)
 if [ -n "$FOUND" ] && printf '%s\n' "$FOUND" | xargs grep -lq 'anthropics/claude-code-action' 2>/dev/null; then
   HAS_CLAUDE_REVIEW=1
 fi
 ```
 
-The `find` step is the bit that matters: it deliberately excludes files GitHub Actions does not execute (`claude-code-review.yml.disabled`, `.bak`, editor swap files, etc.). Renaming the workflow to `*.yml.disabled` is the easiest way to keep the file as a marker while preventing the upstream Action from running — but doing so also turns `HAS_CLAUDE_REVIEW` off, so `local-review` will be skipped too. If you want local-only Claude reviews, keep the file as `*.yml` and gate the workflow's `on:` trigger (e.g. to a tag or label) instead of renaming.
+The `find` step deliberately excludes files GitHub Actions does not execute *and* that are not intentional markers — `.bak`, editor swap files (`.swp`/`.swo`), `~` backups, etc. — so a stray backup of an unrelated workflow that happens to contain the upstream action string will not trigger a false positive. Renaming the workflow to `*.yml.disabled` is the easiest way to stop the upstream Action from running on every push while keeping `local-review` active — that's the recommended setup for local-only Claude reviews. The alternative is to keep the file as `*.yml` and gate its `on:` trigger (e.g. to a label or `workflow_dispatch:` only).
 
 If `HAS_CLAUDE_REVIEW=0`, skip every "Run Local Claude Review" step below.
 

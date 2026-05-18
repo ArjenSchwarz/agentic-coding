@@ -40,6 +40,28 @@ This directory contains utility scripts that can be invoked by agents to perform
 
 **Output**: Formatted summary including commit count, authors, statistics, file changes, and commit messages.
 
+### build_review_html.py
+
+**Purpose**: Renders a self-contained HTML review page from a JSON description, using the Prism Dark theme. Shared renderer used by the `pre-push-review`, `pr-review-html`, and `pr-overview` skills — keep the template and palette here, not duplicated across skills.
+
+**Usage**:
+```bash
+python3 ~/.claude/scripts/build_review_html.py \
+  --data    /path/to/review.json \
+  --output  /path/to/review.html \
+  [--diff-dir /path/to/diff-fragments]   # defaults to the JSON file's directory
+```
+
+**JSON schema**: see the docstring at the top of the script. Top-level keys are `repo`, `title`, `subtitle`, `metrics`, `verdict`, `at_a_glance`, `explanation` (beginner/intermediate/expert), `commits`, `important_changes`, `decisions`, `findings`, `double_check`, `files`. Empty sections are dropped from both the body and the table of contents.
+
+**Behavior**:
+- Renders the Prism Dark palette as inline CSS — fully self-contained except for the highlight.js CDN load for diff syntax colouring.
+- Important-change cards render Takeaway (magenta) and Rationale (cyan) callouts, with an Open Question (warning) variant when `rationale_unknown: true`.
+- The three-level explanation renders as CSS-only radio-button tabs (no JS required).
+- Per-file diffs are collapsed `<details>` blocks. Missing diff fragments degrade to a placeholder rather than failing the render.
+
+**Output**: Prints the absolute path of the written HTML on success.
+
 ### copilot-pr-comments.sh
 
 **Purpose**: Fetches and displays GitHub Copilot's review comments and inline comments for the current branch's pull request.

@@ -5,7 +5,16 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [2026-05-15]
+## [2026-05-18]
+
+### Added
+- `pr-overview` skill: Read-only PR summary workflow that fetches a GitHub PR, surfaces unresolved code/review/discussion comments verbatim, runs the same parallel review agents as `pr-review-html` without applying fixes, and writes a self-contained `pr-overview.html` to the repo root for browsing before deciding what to do
+- `scripts/build_review_html.py`: Shared HTML renderer used by `pre-push-review`, `pr-review-html`, and `pr-overview`. Consumes a JSON description plus optional per-file diff fragments and emits a self-contained Prism Dark themed page with overview cards, three-level explanation tabs (CSS-only radio buttons), important-change cards with Takeaway/Rationale/Open-question callouts, per-file diff `<details>` blocks, and an optional `<script id="review-meta">` block for `pulsar publish` consumption
+
+### Changed
+- `pre-push-review` skill: Phase 7 now invokes the shared `build_review_html.py` renderer with a JSON contract instead of hand-writing HTML; Phase 6 extracts important changes, learnings, and decision rationale (with `inferred` / `unknown` markers) for the renderer even when no spec exists; new Phase 8 publishes via the optional `pulsar` binary when present; Phase 9 (formerly 8) surfaces the archived path
+- `pr-review-html` skill: Same renderer refactor as `pre-push-review`. Phase 1 now keeps PR `body`, `author`, `createdAt`, and `url` so Phase 7 can render the author's framing verbatim in a `pr_description` block; Phase 6 produces the three-level explanation plus insight material in a single pass; new Phase 8 publish step and Phase 9 summary mirror `pre-push-review`
+- `scripts/README.md`: Document `build_review_html.py` — purpose, CLI usage, JSON schema pointer, rendering behaviour, and output
 
 ### Added
 - `capture-knowledge` skill: Capture reusable cross-project technical knowledge as notes in the user's Obsidian vault under `03-Notes/Generated/`, with per-machine vault path cache, frontmatter conventions, collision handling, and Obsidian Flavored Markdown guidance

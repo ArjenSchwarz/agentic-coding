@@ -46,17 +46,17 @@ gh pr view {pr_number} --json number,headRefName,state
 
 ### 1.5 Detect Claude Review Marker
 
-Check whether this repo has opted in to Claude PR reviews by looking for a workflow that references the upstream action:
+Check whether this repo has opted in to Claude PR reviews by looking for an **active** workflow that references the upstream action. By convention the workflow is named `claude-code-review.yml`, but the check matches by content so any filename works as long as the file is a real workflow (`*.yml` or `*.yaml`):
 
 ```bash
-if grep -rq 'anthropics/claude-code-action' .github/workflows/ 2>/dev/null; then
+HAS_CLAUDE_REVIEW=0
+FOUND=$(find .github/workflows -maxdepth 1 -type f \( -name '*.yml' -o -name '*.yaml' \) 2>/dev/null)
+if [ -n "$FOUND" ] && printf '%s\n' "$FOUND" | xargs grep -lq 'anthropics/claude-code-action' 2>/dev/null; then
   HAS_CLAUDE_REVIEW=1
-else
-  HAS_CLAUDE_REVIEW=0
 fi
 ```
 
-The workflow file's *presence* is the opt-in signal. If you want this to save Actions minutes rather than duplicate them, also gate the workflow's `on:` trigger so it does not run on every push — otherwise the GH Action and `local-review` will both post a comment.
+The `find` step is the bit that matters: it deliberately excludes files GitHub Actions does not execute (`claude-code-review.yml.disabled`, `.bak`, editor swap files, etc.). Renaming the workflow to `*.yml.disabled` is the easiest way to keep the file as a marker while preventing the upstream Action from running — but doing so also turns `HAS_CLAUDE_REVIEW` off, so `local-review` will be skipped too. If you want local-only Claude reviews, keep the file as `*.yml` and gate the workflow's `on:` trigger (e.g. to a tag or label) instead of renaming.
 
 If `HAS_CLAUDE_REVIEW=0`, skip every "Run Local Claude Review" step below.
 

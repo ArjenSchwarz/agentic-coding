@@ -73,9 +73,42 @@ If a bug failed to produce a PR, exclude it from the review and merge phases. Ke
 
 For each PR that was successfully created, run the review-fix cycle. Process PRs in parallel where possible.
 
-#### 2.1 Wait for CI and Reviews
+A merge must never land code that no review ever looked at. Define a helper that counts the review comments already on a PR — a comment qualifies if its author is a Claude/GitHub bot **or** its body carries the `local-review` sentinel:
 
-Wait 10 minutes after the PR was created (or after the last push) to allow CI checks and reviewer comments to arrive.
+```bash
+count_reviews() {
+  gh api graphql -f query='
+    query($owner:String!,$repo:String!,$pr:Int!){repository(owner:$owner,name:$repo){pullRequest(number:$pr){
+      reviews(first:50){nodes{body author{login}}}
+      comments(first:100){nodes{body author{login}}}}}}' \
+    -f owner=OWNER -f repo=REPO -F pr="$1" \
+    --jq '[.data.repository.pullRequest.reviews.nodes[], .data.repository.pullRequest.comments.nodes[]]
+       | map(select((.author.login | test("claude|github-actions";"i")) or (.body | test("claude-local-review"))))
+       | length'
+}
+```
+
+#### 2.1 Wait for CI and Reviews — and guarantee one exists
+
+Record the review count before waiting, so you can tell whether a review actually lands:
+
+```bash
+PRE_REVIEWS=$(count_reviews "$pr_number")
+```
+
+Wait for CI and reviewers to arrive. Prefer polling `gh pr checks $pr_number` until the checks leave `pending`, capped at ~10 minutes after the PR was created (or after the last push). Run the poll in the background so a single failure can't cancel sibling work.
+
+**Fallback — never proceed with no review.** Once the checks conclude, confirm this round actually produced a review:
+
+```bash
+POST_REVIEWS=$(count_reviews "$pr_number")
+if [ "${POST_REVIEWS:-0}" -le "${PRE_REVIEWS:-0}" ]; then
+  echo "No new Claude/bot review landed for PR $pr_number — falling back to local-review"
+  # invoke the local-review agent on $pr_number, then give it ~1-2 min to post before continuing.
+fi
+```
+
+The delta (`POST <= PRE`) catches every empty case — a GH Action that finished `success` without commenting, a review that errored, or a token-less Action — without re-running `local-review` when a review did land. Run the fallback at most once per round. A silent, errored, or skipped GH Action therefore never leaves the loop with nothing to act on. (This is the safeguard `pr-pilot` gained after a zero-review merge slipped through; blitz-merge now has parity.)
 
 #### 2.2 Run PR Review Fixer
 
@@ -102,7 +135,23 @@ After each review-fixer run:
 
 Cap the loop at 5 iterations per PR. If still not clean after 5 rounds, flag it for manual review and exclude from the merge phase.
 
-#### 2.4 Update Transit Tickets
+#### 2.4 Generate a Reviewable Pre-Push Artifact
+
+Once a PR is review-complete (CLEAN), produce a durable review artifact you can read before it merges. The automated loop is Claude reviewing Claude, so this artifact is the independent record a human can audit — the point of blitz-merge is unattended throughput, not unattended *and* unreviewable.
+
+Spawn a subagent in the PR's worktree that runs the `/pre-push-review` skill against what the PR will actually land on `main`:
+
+```
+You are working in the git worktree at {worktree_path} with branch {branch_name} (PR #{pr_number}) checked out.
+
+Run the /pre-push-review skill, reviewing the changes this PR will add to main. Fetch origin/main first (`git fetch origin main`) and review the diff `git diff origin/main...HEAD` — NOT the already-pushed feature branch (that diff is empty). Produce the review HTML artifact and, if `pulsar` is on PATH, let the skill publish it.
+
+Report back: the path to the review artifact, and the verdict — Ready to push / Needs fixes / Requires discussion.
+```
+
+Record the artifact path per PR. If the subagent reports **Needs fixes** or **Requires discussion**, treat the PR as HAS_ISSUES and go back to step 2.1 for another round rather than merging. Only a review-complete PR **with** a generated artifact is eligible for Phase 3.
+
+#### 2.5 Update Transit Tickets
 
 When a PR passes the review loop:
 - The ticket should already be at `ready-for-review` from the fix-bug skill
@@ -147,7 +196,12 @@ For each review-complete PR:
 
 #### 3.2 Squash and Merge
 
-Once CI is green:
+Do **not** merge unless BOTH hold for this PR:
+
+1. **A review is on record** — `count_reviews {pr_number}` returns ≥ 1 (the 2.1 fallback guarantees this), and
+2. **The pre-push artifact from step 2.4 exists** and its verdict was not "Requires discussion".
+
+If either is missing, skip the merge and flag the PR for manual review. Otherwise, once CI is green:
 
 ```bash
 gh pr merge {pr_number} --squash --delete-branch

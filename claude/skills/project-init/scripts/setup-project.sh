@@ -1,5 +1,5 @@
 #!/bin/bash
-# Initialize Claude Code project settings with standard hooks and permissions
+# Initialize Claude Code project settings with standard permissions
 # Can be run standalone or via the project-init skill
 
 set -e
@@ -111,20 +111,6 @@ detect_permissions() {
     printf '%s\n' "${permissions[@]}" | jq -R . | jq -s .
 }
 
-# The SessionStart hook to add
-NEW_HOOK=$(cat <<'EOF'
-{
-  "matcher": "",
-  "hooks": [
-    {
-      "type": "command",
-      "command": "bash -c 'curl -fsSL https://raw.githubusercontent.com/ArjenSchwarz/agentic-coding/main/scripts/claude-remote.sh | bash'"
-    }
-  ]
-}
-EOF
-)
-
 # Create .claude directory if needed
 mkdir -p "$CLAUDE_DIR"
 
@@ -134,47 +120,23 @@ echo "Detected permissions based on project files:"
 echo "$PERMISSIONS" | jq -r '.[]'
 
 if [[ -f "$SETTINGS_FILE" ]]; then
-    # Check if hook already exists
-    EXISTING=$(jq -r '.hooks.SessionStart // [] | .[] | .hooks[]? | .command // empty' "$SETTINGS_FILE" 2>/dev/null || echo "")
-    HOOK_EXISTS=false
-    if echo "$EXISTING" | grep -q "claude-remote.sh"; then
-        HOOK_EXISTS=true
-    fi
-
-    # Merge permissions and optionally add hook
-    if [[ "$HOOK_EXISTS" == "true" ]]; then
-        # Only merge permissions
-        jq --argjson perms "$PERMISSIONS" '
-            .permissions //= {} |
-            .permissions.allow //= [] |
-            .permissions.allow = (.permissions.allow + $perms | unique)
-        ' "$SETTINGS_FILE" > "$SETTINGS_FILE.tmp" && mv "$SETTINGS_FILE.tmp" "$SETTINGS_FILE"
-        echo "Merged permissions into existing $SETTINGS_FILE (hook already present)"
-    else
-        # Merge both hook and permissions
-        jq --argjson newHook "$NEW_HOOK" --argjson perms "$PERMISSIONS" '
-            .hooks //= {} |
-            .hooks.SessionStart //= [] |
-            .hooks.SessionStart += [$newHook] |
-            .permissions //= {} |
-            .permissions.allow //= [] |
-            .permissions.allow = (.permissions.allow + $perms | unique)
-        ' "$SETTINGS_FILE" > "$SETTINGS_FILE.tmp" && mv "$SETTINGS_FILE.tmp" "$SETTINGS_FILE"
-        echo "Added SessionStart hook and merged permissions into $SETTINGS_FILE"
-    fi
+    # Merge permissions into the existing settings file
+    jq --argjson perms "$PERMISSIONS" '
+        .permissions //= {} |
+        .permissions.allow //= [] |
+        .permissions.allow = (.permissions.allow + $perms | unique)
+    ' "$SETTINGS_FILE" > "$SETTINGS_FILE.tmp" && mv "$SETTINGS_FILE.tmp" "$SETTINGS_FILE"
+    echo "Merged permissions into existing $SETTINGS_FILE"
 else
-    # Create new settings file with hook and permissions
-    jq -n --argjson newHook "$NEW_HOOK" --argjson perms "$PERMISSIONS" '
+    # Create new settings file with permissions
+    jq -n --argjson perms "$PERMISSIONS" '
         {
-            hooks: {
-                SessionStart: [$newHook]
-            },
             permissions: {
                 allow: $perms
             }
         }
     ' > "$SETTINGS_FILE"
-    echo "Created $SETTINGS_FILE with SessionStart hook and permissions"
+    echo "Created $SETTINGS_FILE with permissions"
 fi
 
 echo ""

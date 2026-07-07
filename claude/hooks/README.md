@@ -43,6 +43,11 @@ A `PreToolUse` hook that protects `main`/`master` branches from accidental modif
 | `git push --force-with-lease origin main` | Force-with-lease to protected branch |
 | `git push -u origin main` | Push with upstream set to protected branch |
 | `git push origin feature:main` | Refspec targeting protected branch |
+| `git push origin +main` | Force push via `+` refspec |
+| `git push origin HEAD:refs/heads/main` | Fully-qualified refspec targeting protected branch |
+| `git push origin HEAD` (while on main) | `HEAD` resolves to the protected branch |
+| `git push --mirror origin` | Rewrites every remote ref, including protected branches |
+| `git push --all origin` | Pushes every local branch, including protected ones |
 | `git push --delete origin main` | Deleting remote protected branch |
 | `git push origin :main` | Deleting remote protected branch (refspec) |
 

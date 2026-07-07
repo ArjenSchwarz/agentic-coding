@@ -5,6 +5,19 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2026-07-07]
+
+### Added
+- `no-push-main.py`: regression test (`claude/hooks/test_no_push_main.py`) covering the protected-branch push matrix, including the newly-closed bypasses. Run with `python3 claude/hooks/test_no_push_main.py`
+- `blitz-merge` skill: a review-availability guarantee (`count_reviews` — never merge a PR that no review looked at; falls back to `local-review` when a round produces no review comment) and a pre-push review artifact step (a subagent runs `/pre-push-review` against `origin/main` per PR, so a durable, human-auditable review exists before merge). Phase 3 now refuses to squash-merge unless a review is on record **and** the artifact was generated
+
+### Changed
+- `no-push-main.py`: harden `git push` protection to resolve the real destination ref — now blocks `+main` (force via refspec), `HEAD:refs/heads/main`, `HEAD` while on a protected branch, and `--mirror` / `--all`, all of which previously bypassed the hook
+- `claude/CLAUDE.md`: calibrate the workflow gate prose to reversibility — keep the approval-gate and tool-result-verification guidance, drop the blanket "do not commit/push/open a PR/merge unless asked" sentence and the "run one command per turn" rule
+
+### Removed
+- `claude-remote.sh` and its SessionStart hook wiring (project `.claude/settings.json` and `project-init`'s `setup-project.sh`): the remote `curl | bash` configuration bootstrap is no longer part of the workflow
+
 ## [2026-06-20]
 
 ### Added

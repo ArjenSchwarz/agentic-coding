@@ -3,6 +3,8 @@
 
 Blocks:
 - git push: direct, force, bare (when on protected branch), refspec targets
+  including `+main` (force via refspec), `HEAD:refs/heads/main`, and `HEAD`
+  while on a protected branch, plus `--mirror` / `--all`
 - git history rewriting: reset --hard, rebase, commit --amend
 - git destructive operations: checkout ., restore ., clean -f
 - git branch manipulation: branch -D/-f, push --delete, push origin :main
@@ -76,12 +78,39 @@ def on_protected_branch(cwd: str | None = None):
     return current if current in PROTECTED else None
 
 
+def resolve_push_target(refspec: str, cwd: str | None = None) -> str | None:
+    """Resolve a push refspec to its destination branch name.
+
+    Strips a leading `+` (force marker), takes the part after the last `:`
+    (the destination side of `src:dst`), strips a `refs/heads/` prefix, and
+    resolves a literal `HEAD` to the current branch. So `+main`,
+    `HEAD:refs/heads/main`, and (while on main) `HEAD` all resolve to `main`.
+    """
+    spec = refspec.lstrip("+")
+    dest = spec.split(":")[-1] if ":" in spec else spec
+    dest = re.sub(r"^refs/heads/", "", dest)
+    if dest == "HEAD":
+        return get_current_branch(cwd)
+    return dest
+
+
 def check_push(cmd: str, cwd: str | None = None) -> str | None:
     """Check git push commands."""
     if not re.search(r"\bgit\s+push\b", cmd):
         return None
 
-    is_force = bool(re.search(r"(?:^|\s)(-f|--force|--force-with-lease)(?:\s|$)", cmd))
+    # --mirror / --all push every local ref (including protected branches) to
+    # the remote, so they can update main without ever naming it.
+    if re.search(r"(?:^|\s)--mirror(?:\s|$)", cmd):
+        return "git push --mirror is not allowed. It rewrites every remote ref, including protected branches."
+    if re.search(r"(?:^|\s)--all(?:\s|$)", cmd):
+        return "git push --all is not allowed. It pushes every local branch, including protected ones."
+
+    # Force is signalled by an explicit flag OR a leading `+` on a refspec
+    # (e.g. `git push origin +main`).
+    is_force = bool(re.search(r"(?:^|\s)(-f|--force|--force-with-lease)(?:\s|$)", cmd)) or bool(
+        re.search(r"(?:^|\s)\+\S", cmd)
+    )
 
     # git push --delete origin main / git push origin :main
     for branch in PROTECTED:
@@ -100,9 +129,7 @@ def check_push(cmd: str, cwd: str | None = None) -> str | None:
 
     refspec = match.group(2)
 
-    target_branch = None
-    if refspec:
-        target_branch = refspec.split(":")[-1] if ":" in refspec else refspec
+    target_branch = resolve_push_target(refspec, cwd) if refspec else None
 
     if target_branch in PROTECTED:
         if is_force:

@@ -13,6 +13,8 @@ When asked to analyze or document something, first check if there's an existing 
 
 # Development Workflow
 
+- Skills and routed workflows have approval gates — HONOUR THEM. When a skill says to present something and wait for approval (e.g. smolspec presents the spec, then the tasks), STOP and wait for an explicit go-ahead before continuing. A multi-step pipeline (e.g. spec → implement → commit → review → PR) is a sequence of gated phases, NOT a licence to run end-to-end autonomously.
+- A cancelled, empty, or missing tool result is NOT success. If a tool call was cancelled (e.g. by a sibling error in a batch) or returned nothing, treat the step as NOT done — re-run and verify before reporting it. Never narrate an action (commit, push, PR, merge, review) as complete without confirming it actually happened.
 - Before editing any file, read it first. Before modifying a function, grep for all callers. Research before you edit
 - After writing code, you MUST ensure you use appropriate linters and validators.
 - When you discover a learning specific to a language that needs to be kept, add it to the related language-rule file (or create a new one if needed).

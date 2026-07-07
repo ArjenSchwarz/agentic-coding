@@ -1,6 +1,6 @@
 ---
 name: project-init
-description: Initialize Claude Code project settings with standard hooks and language-specific permissions. Use when setting up a new project for Claude Code or adding standard configuration to an existing project.
+description: Initialize Claude Code project settings with standard language-specific permissions. Use when setting up a new project for Claude Code or adding standard configuration to an existing project.
 ---
 
 # Project Init
@@ -9,8 +9,7 @@ Initialize a project with standard Claude Code configuration.
 
 ## What It Does
 
-1. Adds a SessionStart hook to `.claude/settings.json` for remote environment setup
-2. Detects project languages and adds appropriate tool permissions
+1. Detects project languages and adds appropriate tool permissions to `.claude/settings.json`
 
 ## Language Detection
 

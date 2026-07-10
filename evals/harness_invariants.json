@@ -1,0 +1,52 @@
+{
+  "_comment": "Text invariants pinning incident countermeasures into harness files. 'required' entries fail the lint if the pattern disappears — each one exists because removing that text re-opens a past incident. 'gaps' are known-missing countermeasures reported as warnings until someone adds them (then move the entry to required). Paths are relative to the repo root. Grow this file by one entry per new incident.",
+  "required": [
+    {
+      "file": "claude/hooks/no-push-main.py",
+      "pattern": "sys\\.exit\\(2\\)",
+      "reason": "Hook must block with exit code 2; it once shipped with the wrong exit code and was silently non-blocking for 3 days."
+    },
+    {
+      "file": "claude/skills/pr-review-fixer/SKILL.md",
+      "pattern": "claude-local-review",
+      "reason": "Without matching the local-review sentinel, pr-review-fixer is near-vacuous when the GitHub auto-review Action is disabled (which it is)."
+    },
+    {
+      "file": "claude/agents/local-review.md",
+      "pattern": "claude-local-review",
+      "reason": "The local-review agent must emit the sentinel that pr-review-fixer keys on."
+    },
+    {
+      "file": "claude/skills/pr-pilot/SKILL.md",
+      "pattern": "Cap the loop at \\d+ iterations",
+      "reason": "Review-fix loops must have a hard iteration cap so a non-converging review cannot loop forever."
+    },
+    {
+      "file": "claude/skills/blitz-merge/SKILL.md",
+      "pattern": "Cap the loop at \\d+ iterations",
+      "reason": "Same iteration cap requirement for the batch merge pipeline."
+    },
+    {
+      "file": "claude/skills/blitz-merge/SKILL.md",
+      "pattern": "no blockers, critical, or major issues",
+      "reason": "Pins the CLEAN severity definition; if this taxonomy line vanishes, the merge loop's exit condition becomes undefined."
+    },
+    {
+      "file": "claude/skills/blitz-merge/SKILL.md",
+      "pattern": "count_reviews",
+      "reason": "Zero-review guard added 2026-07-07 (trust-boundary PR #3): a merge must never land with no review having actually posted. If count_reviews disappears, CLEAN becomes vacuously satisfiable again."
+    }
+  ],
+  "gaps": [
+    {
+      "file": "claude/skills/blitz-merge/SKILL.md",
+      "pattern": "UNKNOWN",
+      "reason": "GitHub reports mergeability UNKNOWN for a window after rebases; blitz-merge wrongly skips behind-main PRs during it. Mitigation documented only in a Prism memory note, not in the skill."
+    },
+    {
+      "file": "claude/skills/pr-pilot/SKILL.md",
+      "pattern": "count_reviews",
+      "reason": "blitz-merge gained the zero-review guard in PR #3 but the committed pr-pilot has no equivalent; it can still declare CLEAN when no review ever landed (green-but-vacuous, cf. PR #235 which merged without compiling)."
+    }
+  ]
+}

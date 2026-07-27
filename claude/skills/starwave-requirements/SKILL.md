@@ -75,7 +75,7 @@ Before triggering skill reviews, the model MUST verify:
 
 - After updating the requirement document, the model MUST use BOTH design-critic and peer-review-validator subagents sequentially to review the document:
   1. FIRST: Use the Task tool with subagent_type="general-purpose" to run the design-critic skill (invoke the Skill tool with skill="design-critic") to perform a critical review that challenges assumptions, identifies gaps, and questions necessity
-  2. SECOND: Use the Task tool with subagent_type="peer-review-validator" to validate the requirements and critical review findings by consulting external AI systems (Gemini, Codex, Q Developer)
+  2. SECOND: Use the Task tool with subagent_type="peer-review-validator" to validate the requirements and critical review findings by consulting external AI systems (Codex, Kiro)
   3. The model MUST synthesize the findings from both reviews and present the key insights, questions, and recommendations to the user
 - After presenting the synthesized review findings, the model MUST ask the user "Do the requirements look good or do you want additional changes?"
 - If the user responds with affirmations like "yes", "looks good", "approved", or similar, consider this explicit approval and proceed to the next phase

@@ -5,6 +5,11 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2026-07-27]
+
+### Removed
+- Gemini as a peer reviewer: `peer-review-validator` no longer lists `mcp__devtools__gemini-agent` in its tools or its external-model consultation list, and the selection strategy drops the "use Gemini for general analysis" line. External-model mode now names Codex and Kiro only, with an instruction to top up from subagent mode (and say so) if one of the two is unavailable, since the two-perspective minimum no longer has slack. README and `starwave-requirements` updated to match — the latter also had a stale "Q Developer" reference, now Kiro; `fix-bug`'s "do not use these MCP agents" list drops the Gemini entry
+
 ## [2026-07-07]
 
 ### Added

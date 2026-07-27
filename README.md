@@ -6,13 +6,13 @@ The framework now includes cross-platform support with GitHub Copilot prompt fil
 
 ## Agents
 
-The framework provides specialized AI agents for different aspects of development. These are defined for use in Claude Code, and not every tool supports sub-agents like this. Some agents lean on external AI systems when available — `peer-review-validator` consults the Gemini/Codex/Kiro MCP agents, but only on personal machines (see [Personal vs. work projects](#personal-vs-work-projects-personal_projects)); elsewhere it falls back to Claude subagents so no code leaves the machine.
+The framework provides specialized AI agents for different aspects of development. These are defined for use in Claude Code, and not every tool supports sub-agents like this. Some agents lean on external AI systems when available — `peer-review-validator` consults the Codex/Kiro MCP agents, but only on personal machines (see [Personal vs. work projects](#personal-vs-work-projects-personal_projects)); elsewhere it falls back to Claude subagents so no code leaves the machine.
 
 - **`code-simplifier`** - Reviews code for complexity reduction and maintainability improvements
 - **`design-critic`** - Provides critical review of design documents and architecture proposals (now using Sonnet model for improved efficiency)
 - **`efficiency-optimizer`** - Analyzes code for performance optimization opportunities
 - **`local-review`** - Sonnet-powered local replacement for an automated CI review step. Forge-aware: it detects GitHub or GitLab from the git remote and reviews the open change request (code quality, bugs, performance, security, test coverage, plus whatever the project's `CLAUDE.md` mandates), posting a single review comment instead of consuming private CI/Actions minutes. See [Forge support](#forge-support-github--gitlab)
-- **`peer-review-validator`** - Validates decisions by obtaining at least two independent peer perspectives. On personal machines (`PERSONAL_PROJECTS=1`) it consults external AI systems (Gemini, Codex, Kiro); otherwise it spawns Claude subagents with distinct lenses so the same balanced review runs without sending code off-machine. See [Personal vs. work projects](#personal-vs-work-projects-personal_projects)
+- **`peer-review-validator`** - Validates decisions by obtaining at least two independent peer perspectives. On personal machines (`PERSONAL_PROJECTS=1`) it consults external AI systems (Codex, Kiro); otherwise it spawns Claude subagents with distinct lenses so the same balanced review runs without sending code off-machine. See [Personal vs. work projects](#personal-vs-work-projects-personal_projects)
 - **`pre-push-code-reviewer`** - Critically reviews unpushed commits before pushing to ensure code quality and spec adherence
 - **`research-agent`** - Conducts research and generates structured reports (stolen from @sammcj)
 - **`ui-ux-reviewer`** - Evaluates user interfaces for usability and accessibility improvements
@@ -68,7 +68,7 @@ A workflow runs `PREFLIGHT` to resolve the forge, reads the matching adapter, an
 
 ## Personal vs. work projects (`PERSONAL_PROJECTS`)
 
-Some agents are more useful when they can consult external AI systems (Gemini, Codex, Kiro) for a genuinely independent second opinion. On a work machine that's often not acceptable — sending source code to a third-party model can breach client or employer policy. The `PERSONAL_PROJECTS` environment variable is the switch that resolves this.
+Some agents are more useful when they can consult external AI systems (Codex, Kiro) for a genuinely independent second opinion. On a work machine that's often not acceptable — sending source code to a third-party model can breach client or employer policy. The `PERSONAL_PROJECTS` environment variable is the switch that resolves this.
 
 - **`PERSONAL_PROJECTS=1`** (set this only on your own machines) - external-model mode. Agents may send the work to external AI systems.
 - **unset, empty, or any other value** (the default) - safe mode. No code leaves the machine; agents that wanted an external opinion fall back to spawning Claude subagents with distinct review lenses instead.

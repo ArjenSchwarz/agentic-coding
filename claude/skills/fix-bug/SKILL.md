@@ -117,7 +117,7 @@ git worktree add ../{repo-name}-worktrees/fix-{bug-name}-kiro -b fix-{bug-name}-
 ```
 Then pass a prompt that includes the implementation brief and instructs Kiro to work in the worktree directory, implement the fix, run the regression tests, and run the full test suite.
 
-To be explicit: Agents 1 and 2 use the Agent tool (subagent_type: "general-purpose", isolation: "worktree"). Only Agent 3 uses mcp__devtools__kiro-agent. Do not use mcp__devtools__codex-agent, mcp__devtools__gemini-agent, or any other MCP agent tool for Agents 1 and 2.
+To be explicit: Agents 1 and 2 use the Agent tool (subagent_type: "general-purpose", isolation: "worktree"). Only Agent 3 uses mcp__devtools__kiro-agent. Do not use mcp__devtools__codex-agent or any other MCP agent tool for Agents 1 and 2.
 
 Each agent's prompt should follow this structure:
 ```

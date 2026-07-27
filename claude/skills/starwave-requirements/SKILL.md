@@ -21,6 +21,8 @@ Requirements describe what the system must do and why, in the minimum words need
 - The model MUST NOT split one behavioral check into multiple ACs (e.g., separate "accepts", "processes", "returns" bullets for a single operation). Combine into one testable outcome.
 - Non-functional requirements (performance, security, accessibility, compatibility) MUST state a concrete, measurable target tied to this feature, or MUST be omitted. Generic bullets like "SHALL be secure" or "SHALL be performant" add nothing and MUST NOT be written.
 - The model MUST NOT use hyperbolic or marketing language ("comprehensive", "robust", "seamless", "powerful").
+- The requirements state what the system must do, not how the document got there. The model MUST NOT reference earlier drafts, dropped requirements, or review feedback ("previously", "originally", "narrowed from", "as the critic noted"). When a requirement changes, rewrite it; the reason for the change goes in decision_log.md.
+- A requirement that is being cut or reduced MUST either be removed, moved to Non-Goals as a one-line entry, or rewritten to the scope that does apply. The model MUST NOT leave an argument against it in the document.
 
 **Constraints:**
 
@@ -71,6 +73,7 @@ Before triggering skill reviews, the model MUST verify:
 - [ ] No behavioral outcome is split across multiple ACs when one would suffice
 - [ ] Every non-functional requirement has a concrete, measurable target (otherwise it is omitted)
 - [ ] No hyperbolic or marketing language ("comprehensive", "robust", "seamless", etc.)
+- [ ] No references to earlier drafts, dropped requirements, or review feedback — the document reads as the current requirement set
 - [ ] A Non-Goals / Out-of-Scope section is present and lists items a reader might reasonably assume to be in scope
 
 - After updating the requirement document, the model MUST use BOTH design-critic and peer-review-validator subagents sequentially to review the document:

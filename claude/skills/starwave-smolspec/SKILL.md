@@ -125,6 +125,8 @@ The tasks.md file MUST follow the standard task format to be compatible with the
 - Tasks MUST be outcome-focused and verifiable
 - Testing MUST be distributed across tasks, not consolidated into final task
 - All tasks MUST involve writing, modifying, or testing code (no deployment, user acceptance testing, etc.)
+- smolspec.md MUST state the settled plan, not the discussion that produced it. No references to earlier drafts, superseded approaches, or critique feedback ("previously", "originally", "revised to", "as the critic noted") — write the current plan as plain fact.
+- smolspec.md MUST NOT contain a standalone objection. Where the approach departs from a requirement's implied path, an existing codebase pattern, or a suggestion from critique, the document MUST state what to do instead. The reasoning — alternatives weighed and why they were rejected — goes in `specs/{feature_name}/decision_log.md`, referenced by ID if needed.
 
 ## Workflow Process
 
@@ -143,7 +145,7 @@ The tasks.md file MUST follow the standard task format to be compatible with the
 - Ensure smolspec is self-contained (assume fresh AI session will execute without conversation history)
 - Use the design-critic skill to review the smolspec.md document
 - Incorporate the design-critic's feedback and recommendations into the smolspec.md
-- Update the document based on valid critiques before presenting to user
+- Update the document based on valid critiques before presenting to user, rewriting the affected text in place — do not append change notes or leave the superseded wording alongside the new
 - Capture any noteworthy decisions or trade-offs identified during critique inside `specs/{feature_name}/decision_log.md`
 
 **3. Self-Review Phase:**
@@ -158,6 +160,8 @@ Before presenting to user, the model MUST verify:
 - [ ] No vague language (e.g., "robust", "user-friendly" without specifics)
 - [ ] No hyperbolic or marketing language ("comprehensive", "seamless", "powerful")
 - [ ] All sections are complete and self-contained
+- [ ] No references to earlier drafts, superseded approaches, or critique feedback — the document reads as the plan, not its revision history
+- [ ] Every objection to a requirement, existing pattern, or critique suggestion is paired with the approach to take instead; the reasoning lives in decision_log.md
 - [ ] Document is concise (<100 lines) but complete
 - [ ] Red flags checked: scope creep, wrong technology, missing prerequisites
 

@@ -81,6 +81,11 @@ A task represents a meaningful unit of work that moves the feature forward. Task
 - Dependencies MUST be expressed as task IDs (e.g., `"blocked_by": ["1", "2"]`)
 - Circular dependencies are not allowed and indicate a design problem
 
+**De-risk First:**
+- Every entry in the design's Risks and Assumptions section whose verification path is an implementation task MUST map to a task in tasks.md
+- Tasks that depend on the verified outcome MUST declare that verification task in `blocked_by`, so the risk is resolved before work that would be redone if it fails
+- A verification task follows the same TDD ordering as any other task; it is not a research note or a spike without code
+
 **Work Streams for Parallel Execution:**
 - The model MUST analyze tasks to identify independent work streams that can be executed in parallel
 - A work stream is a set of tasks that can be worked on independently from other streams
@@ -159,6 +164,7 @@ After creating or updating the tasks file, the model MUST perform these checks b
 5. **No circular dependencies**: Confirm the dependency graph has no cycles
 6. **Non-goals respected**: Confirm no task implements or prepares for any capability listed in the requirements' Non-Goals / Out-of-Scope section
 7. **No granularity inflation**: Confirm no coherent change has been fragmented across multiple trivial tasks (beyond the mandated TDD test/implement pair), and that phases and streams are present only where they serve a real purpose
+8. **Risks verified early**: Confirm every Risks and Assumptions entry from design.md with a task-based verification path has a task, and that dependent tasks are blocked by it
 
 If any check fails, the model MUST fix the issue and re-run the checks before presenting to the user.
 

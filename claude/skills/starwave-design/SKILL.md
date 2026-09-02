@@ -53,6 +53,7 @@ The design document describes the system to be built, in its settled form. It is
   - Components and Interfaces (sketch types/signatures; add a one-line behavioral note when the contract is not obvious from the name)
   - Data Models (omit if no new or changed models)
   - Error Handling (omit if no new failure modes)
+  - Risks and Assumptions (omit if nothing survives the gating rule below)
   - Testing Strategy
 - When writing the Testing Strategy section, the model SHOULD evaluate acceptance criteria for property-based testing (PBT) candidates:
   - Review requirements that express universal guarantees (invariants, round-trip behavior, idempotence)
@@ -62,6 +63,16 @@ The design document describes the system to be built, in its settled form. It is
 - The model SHOULD include diagrams or visual representations when appropriate (use Mermaid for diagrams if applicable)
 - The model MUST ensure the design addresses all feature requirements identified during the clarification process
 - The model MUST use tools like context7 to retrieve relevant information about the libraries and tools
+
+**Risks and Assumptions — Only What Building Will Reveal:**
+
+The no-hedging rule above pushes every open question out of the design: it is either resolved by research or put to the user. The Risks and Assumptions section is the one place for unknowns that neither can settle — behaviour that only implementation or measurement will reveal. It is not an outlet for unresolved decisions.
+
+- An entry MAY appear only when it cannot be settled by codebase or library research and cannot be settled by asking the user. Typical cases: performance at real data volume, a third-party library's behaviour in a specific edge case, a migration against production-shaped data. If the model could answer it by reading code or asking a question, it MUST do that instead of writing an entry.
+- Each entry MUST name how it will be verified — an early implementation task, a measurement, or a fallback approach — and what happens if the assumption fails. An entry without a verification path is a hedge and MUST NOT appear.
+- Load-bearing assumptions surfaced by the beginner-level pass of the explain-like self-validation MUST be recorded here when the design depends on them and they are not otherwise stated in the design or requirements.
+- Entries use one line each in the form `Risk: {what may be wrong} | Verify: {how and when} | If wrong: {fallback}` or `Assumption: {what is taken as true} | Verify: {how and when}`.
+- Entries whose verification is an implementation task are consumed by the tasks phase, which sequences that task ahead of the work depending on it.
 
 **Contracts and Integration Points — Do Not Cut:**
 
@@ -99,6 +110,7 @@ Before triggering skill reviews, the model MUST verify:
 - [ ] Every objection to a requirement, existing pattern, or reviewed alternative is paired with the approach to take instead
 - [ ] The reasoning for rejected alternatives lives in decision_log.md, not in the design prose
 - [ ] No sections are padded with boilerplate; inapplicable sections are omitted entirely
+- [ ] No Risks and Assumptions entry restates a decision that research or a question to the user could have settled, and every entry names its verification path
 - [ ] No hyperbolic or marketing language ("comprehensive", "robust", "seamless", etc.)
 - [ ] Non-obvious behavioral contracts (idempotence, ordering, invariants, side effects, transaction/concurrency requirements) are stated, not just implied by signatures
 - [ ] Integration points with existing code are named (hook, call site, interface, event, extension point)

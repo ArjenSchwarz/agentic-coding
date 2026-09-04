@@ -1,0 +1,503 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>PR review: acme/widgets #42 &lt;golden&gt;</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script type="application/json" id="review-meta">
+{
+  "title": "PR review: acme/widgets #42",
+  "repoUrl": "https://github.com/acme/widgets",
+  "pr": 42,
+  "severity": "needs-changes",
+  "summary": "Registry lands; one major test gap skipped. Contains <\/script> to exercise escaping."
+}
+</script>
+<style>
+:root {
+  --bg: #0B1020;
+  --bg-deep: #050C1B;
+  --surface-1: #101A33;
+  --surface-2: #142042;
+  --border: #26324F;
+  --border-subtle: #1F2A45;
+  --text-primary: #EAF1FF;
+  --text-secondary: #B7C3E3;
+  --text-tertiary: #7F8BB0;
+  --accent: #44C4DC;
+  --accent-2: #E474E4;
+  --accent-3: #4C6CBC;
+  --code-bg: #0A1226;
+  --code-border: #1F2A45;
+  --success: #22C55E;
+  --warning: #FBBF24;
+  --error: #EF476F;
+  --diff-add-bg: rgba(34, 197, 94, 0.12);
+  --diff-add-fg: #86EFAC;
+  --diff-del-bg: rgba(239, 71, 111, 0.12);
+  --diff-del-fg: #FCA5A5;
+}
+
+* { box-sizing: border-box; }
+html { background: var(--bg); }
+body {
+  background: var(--bg);
+  color: var(--text-primary);
+  font-family: -apple-system, "SF Pro Text", system-ui, sans-serif;
+  line-height: 1.6;
+  margin: 0;
+  padding: 0;
+}
+
+.page { max-width: 1100px; margin: 0 auto; padding: 32px; }
+
+header.top-bar {
+  position: sticky; top: 0; z-index: 10;
+  background: var(--bg-deep);
+  border-bottom: 1px solid var(--border-subtle);
+}
+.top-stripe { height: 4px; background: linear-gradient(135deg, var(--accent-3), var(--accent-2)); }
+.top-content {
+  display: flex; gap: 16px; flex-wrap: wrap; align-items: center;
+  padding: 14px 32px; max-width: 1100px; margin: 0 auto;
+}
+.top-content .repo-title { font-weight: 600; font-size: 15px; color: var(--text-primary); }
+
+.chip {
+  display: inline-flex; align-items: center; gap: 6px;
+  background: var(--surface-1); border: 1px solid var(--border-subtle);
+  border-radius: 999px; padding: 4px 12px; font-size: 12px; color: var(--text-secondary);
+}
+.chip strong { color: var(--text-primary); }
+
+h1, h2, h3 { color: var(--text-primary); line-height: 1.3; }
+h1 { font-size: 30px; margin: 8px 0 4px; }
+h2 { font-size: 22px; margin: 32px 0 12px; padding-top: 12px; border-top: 1px solid var(--border-subtle); }
+h3 { font-size: 17px; margin: 16px 0 8px; }
+
+p { color: var(--text-secondary); }
+strong { color: var(--text-primary); }
+a { color: var(--accent); text-decoration: none; }
+a:hover { text-decoration: underline; }
+.muted { color: var(--text-tertiary); }
+code { font-family: ui-monospace, "SF Mono", Menlo, monospace; }
+
+.card-grid {
+  display: grid; grid-template-columns: repeat(2, 1fr); gap: 16px;
+  margin: 24px 0 32px;
+}
+
+.card {
+  background: var(--surface-1); border: 1px solid var(--border);
+  border-radius: 16px; padding: 20px;
+  transition: background-color 120ms ease;
+}
+.card:hover { background: var(--surface-2); }
+.card h3 {
+  margin-top: 0; font-size: 14px;
+  text-transform: uppercase; letter-spacing: 0.08em; color: var(--text-tertiary);
+}
+.card ul { margin: 8px 0 0; padding-left: 20px; }
+.card li { margin: 4px 0; color: var(--text-secondary); }
+
+.tag {
+  display: inline-block;
+  background: rgba(228, 116, 228, 0.15);
+  color: var(--accent-2);
+  border-radius: 4px;
+  padding: 0 6px;
+  font-size: 11px;
+  font-weight: 600;
+  text-transform: uppercase;
+  margin-right: 6px;
+}
+
+.verdict-pill {
+  display: inline-flex; align-items: center; gap: 8px;
+  padding: 10px 18px; border-radius: 999px;
+  font-weight: 600; font-size: 14px;
+  text-transform: uppercase; letter-spacing: 0.05em;
+}
+.verdict-success { background: rgba(34, 197, 94, 0.18); color: var(--success); border: 1px solid rgba(34,197,94,0.35); }
+.verdict-warning { background: rgba(251, 191, 36, 0.15); color: var(--warning); border: 1px solid rgba(251,191,36,0.35); }
+.verdict-error   { background: rgba(239, 71, 111, 0.15); color: var(--error);   border: 1px solid rgba(239,71,111,0.35); }
+
+.toc {
+  background: var(--surface-1); border: 1px solid var(--border);
+  border-radius: 16px; padding: 16px 20px; margin: 0 0 24px;
+}
+.toc ul { list-style: none; padding-left: 0; margin: 0; column-count: 2; column-gap: 24px; }
+.toc li { margin: 4px 0; }
+.toc a { color: var(--text-secondary); }
+.toc a:hover { color: var(--accent); }
+
+.tabs {
+  margin: 16px 0; border: 1px solid var(--border);
+  border-radius: 16px; background: var(--surface-1);
+}
+.tabs input[type="radio"] { display: none; }
+.tab-labels { display: flex; border-bottom: 1px solid var(--border-subtle); }
+.tab-labels label {
+  padding: 12px 20px; cursor: pointer; color: var(--text-tertiary);
+  font-weight: 600; font-size: 13px;
+  text-transform: uppercase; letter-spacing: 0.06em;
+  border-bottom: 2px solid transparent; margin-bottom: -1px;
+}
+.tab-labels label:hover { color: var(--text-secondary); }
+
+#tab-beginner:checked ~ .tab-labels label[for="tab-beginner"],
+#tab-intermediate:checked ~ .tab-labels label[for="tab-intermediate"],
+#tab-expert:checked ~ .tab-labels label[for="tab-expert"] {
+  color: var(--accent);
+  border-bottom-color: var(--accent);
+}
+
+.tab-panels { padding: 20px; }
+.tab-panel { display: none; }
+#tab-beginner:checked ~ .tab-panels #panel-beginner,
+#tab-intermediate:checked ~ .tab-panels #panel-intermediate,
+#tab-expert:checked ~ .tab-panels #panel-expert {
+  display: block;
+}
+
+.change-card {
+  background: var(--surface-1); border: 1px solid var(--border);
+  border-radius: 16px; padding: 20px; margin: 16px 0;
+  transition: background-color 120ms ease;
+}
+.change-card:hover { background: var(--surface-2); }
+
+.callout {
+  margin: 12px 0; padding: 10px 14px;
+  background: var(--bg-deep);
+  border-radius: 6px; font-size: 14px; color: var(--text-secondary);
+}
+.callout-takeaway  { border-left: 3px solid var(--accent-2); }
+.callout-rationale { border-left: 3px solid var(--accent); }
+.callout-warning   { border-left: 3px solid var(--warning); }
+
+table.findings {
+  width: 100%; border-collapse: collapse;
+  margin: 16px 0; background: var(--surface-1);
+  border: 1px solid var(--border); border-radius: 12px; overflow: hidden;
+}
+table.findings th, table.findings td {
+  padding: 10px 14px; text-align: left;
+  border-bottom: 1px solid var(--border-subtle);
+  font-size: 14px; vertical-align: top;
+}
+table.findings th {
+  background: var(--surface-2); color: var(--text-secondary);
+  text-transform: uppercase; font-size: 11px; letter-spacing: 0.08em;
+}
+table.findings tr:last-child td { border-bottom: none; }
+
+.pill {
+  display: inline-block; padding: 2px 10px; border-radius: 999px;
+  font-size: 11px; font-weight: 600;
+  text-transform: uppercase; letter-spacing: 0.06em;
+}
+.pill-error    { background: rgba(239,71,111,0.18); color: var(--error); }
+.pill-warning  { background: rgba(251,191,36,0.18); color: var(--warning); }
+.pill-success  { background: rgba(34,197,94,0.18); color: var(--success); }
+.pill-tertiary { background: rgba(127,139,176,0.18); color: var(--text-tertiary); }
+
+.unresolved-comment {
+  background: var(--surface-1); border: 1px solid var(--border);
+  border-left: 3px solid var(--warning);
+  border-radius: 10px; padding: 14px 16px; margin: 12px 0;
+}
+.unresolved-header {
+  display: flex; flex-wrap: wrap; gap: 8px; align-items: center;
+  font-size: 13px; color: var(--text-secondary); margin-bottom: 8px;
+}
+.unresolved-header code {
+  background: var(--code-bg); color: var(--accent);
+  padding: 1px 6px; border-radius: 4px; font-size: 12px;
+}
+.unresolved-body {
+  color: var(--text-primary); font-size: 14px; line-height: 1.55;
+  white-space: pre-wrap; word-break: break-word;
+  font-family: ui-monospace, "SF Mono", Menlo, monospace;
+}
+.replies {
+  margin-top: 10px; padding-top: 8px; border-top: 1px solid var(--border-subtle);
+}
+.replies > summary {
+  cursor: pointer; color: var(--text-tertiary); font-size: 12px;
+}
+.reply { margin: 8px 0 0 12px; padding-left: 10px; border-left: 2px solid var(--border-subtle); }
+.reply-header { font-size: 12px; color: var(--text-secondary); margin-bottom: 4px; }
+.reply-body {
+  color: var(--text-primary); font-size: 13px;
+  white-space: pre-wrap; word-break: break-word;
+  font-family: ui-monospace, "SF Mono", Menlo, monospace;
+}
+
+.commit-list { list-style: none; padding-left: 0; }
+.commit-list li { padding: 6px 0; border-bottom: 1px solid var(--border-subtle); }
+.commit-list li:last-child { border-bottom: none; }
+.commit-sha {
+  color: var(--accent); background: var(--code-bg);
+  padding: 2px 6px; border-radius: 4px;
+  font-family: ui-monospace, "SF Mono", Menlo, monospace; font-size: 12px;
+}
+.commit-subj { color: var(--text-primary); }
+.commit-meta { color: var(--text-tertiary); font-size: 13px; }
+
+.file-diff {
+  background: var(--surface-1); border: 1px solid var(--border);
+  border-radius: 12px; margin: 8px 0; overflow: hidden;
+}
+.file-diff > summary {
+  cursor: pointer; padding: 12px 16px; font-weight: 500;
+  list-style: none; display: flex; gap: 12px; align-items: center;
+}
+.file-diff > summary::-webkit-details-marker { display: none; }
+.file-diff > summary::before {
+  content: "▸"; color: var(--text-tertiary); font-size: 12px; margin-right: 4px;
+}
+.file-diff[open] > summary::before { content: "▾"; }
+.file-path { font-family: ui-monospace, "SF Mono", Menlo, monospace; color: var(--text-primary); }
+.line-stat {
+  color: var(--text-tertiary);
+  font-family: ui-monospace, "SF Mono", Menlo, monospace;
+  font-size: 12px; margin-left: auto;
+}
+
+.badge {
+  display: inline-block; font-size: 10px;
+  text-transform: uppercase; letter-spacing: 0.06em; font-weight: 700;
+  padding: 2px 8px; border-radius: 4px;
+}
+.badge-added    { background: rgba(34,197,94,0.18);  color: var(--success); }
+.badge-modified { background: rgba(68,196,220,0.18); color: var(--accent); }
+.badge-deleted  { background: rgba(239,71,111,0.18); color: var(--error); }
+.badge-renamed  { background: rgba(76,108,188,0.18); color: var(--accent-3); }
+
+.file-diff pre {
+  margin: 0; background: var(--code-bg);
+  border-top: 1px solid var(--code-border);
+  padding: 12px 0; overflow-x: auto; line-height: 1.45;
+}
+.file-diff code {
+  font-family: ui-monospace, "SF Mono", Menlo, monospace;
+  font-size: 13px; color: var(--text-secondary);
+  display: inline-block; min-width: 100%;
+}
+.diff-line {
+  display: block;
+  padding: 0 16px;
+  min-height: 1.45em;
+}
+.diff-add         { background: var(--diff-add-bg); color: var(--diff-add-fg); }
+.diff-del         { background: var(--diff-del-bg); color: var(--diff-del-fg); }
+.diff-hunk        { color: var(--accent); }
+.diff-file-header { color: var(--text-tertiary); }
+.diff-meta        { color: var(--text-tertiary); }
+.diff-context     { color: var(--text-secondary); }
+
+.pr-description {
+  background: var(--surface-1);
+  border: 1px solid var(--border);
+  border-left: 3px solid var(--accent-2);
+  border-radius: 12px;
+  padding: 16px 20px;
+  margin: 8px 0 16px;
+}
+.pr-description .meta {
+  color: var(--text-tertiary);
+  font-size: 12px;
+  margin-bottom: 12px;
+}
+.pr-description pre {
+  margin: 0;
+  background: transparent;
+  font-family: ui-monospace, "SF Mono", Menlo, monospace;
+  font-size: 13px;
+  line-height: 1.55;
+  color: var(--text-secondary);
+  white-space: pre-wrap;
+  word-wrap: break-word;
+}
+.pr-description pre code,
+.pr-description pre a { color: var(--text-primary); }
+
+footer {
+  margin-top: 64px; padding-top: 24px;
+  border-top: 1px solid var(--border-subtle);
+  color: var(--text-tertiary); font-size: 13px;
+}
+
+@media (max-width: 720px) {
+  .card-grid { grid-template-columns: 1fr; }
+  .toc ul { column-count: 1; }
+  .page { padding: 16px; }
+}
+@media (prefers-reduced-motion: reduce) {
+  * { transition: none !important; }
+}
+</style>
+</head>
+<body>
+<header class="top-bar">
+  <div class="top-stripe"></div>
+  <div class="top-content">
+    <span class="repo-title">acme/widgets</span>
+    <span class="chip">Commits <strong>3</strong></span>
+<span class="chip">Files <strong>6</strong></span>
+<span class="chip">Lines <strong>+120 / -34</strong></span>
+  </div>
+</header>
+
+<div class="page">
+  <h1>PR review: acme/widgets #42 &lt;golden&gt;</h1>
+  <p class="muted">Review of <strong>feature/golden</strong> against <code>main</code> &amp; friends</p>
+
+  <section class="card-grid">
+    <div class="card">
+      <h3>At a glance</h3>
+      <ul><li>Adds a <code>Widget</code> registry with lookup by name.</li>
+<li>Removes the legacy <code>old_registry.py</code> module.</li></ul>
+    </div>
+    <div class="card">
+      <h3>Important changes</h3>
+      <ul><li><span class="tag">key</span><a href="#change-0">Registry class</a></li><li><span class="tag">key</span><a href="#change-1">Legacy module removed</a></li><li><span class="tag">key</span><a href="#change-2">Config key renamed</a></li><li><span class="tag">key</span><a href="#change-3">Docs touch-up</a></li></ul>
+    </div>
+    <div class="card">
+      <h3>Verdict</h3>
+      <p><span class="verdict-pill verdict-warning">Needs changes</span></p>
+      <p class="muted">One <em>major</em> finding was skipped.</p>
+    </div>
+    <div class="card">
+      <h3>Review findings</h3>
+      <p>6 raised · 4 fixed · 2 skipped</p>
+      <p><a href="#findings">Jump to findings →</a></p>
+    </div>
+  </section>
+
+  <nav class="toc"><ul><li><a href="#pr-description">Author&#x27;s description</a></li>
+<li><a href="#commits">Commits</a></li>
+<li><a href="#explanation">Three-level explanation</a></li>
+<li><a href="#important-changes">Important changes (detailed)</a></li>
+<li><a href="#decisions">Key decisions</a></li>
+<li><a href="#findings">Review findings</a></li>
+<li><a href="#unresolved-comments">Unresolved comments</a></li>
+<li><a href="#diffs">Per-file diffs</a></li>
+<li><a href="#double-check">Things to double-check</a></li></ul></nav>
+
+  <section id="pr-description">
+    <h2>Author's PR description</h2>
+    <p class="muted">Shown verbatim — the markdown the author wrote, unmodified.</p>
+    <div class="pr-description">
+      <div class="meta"><a href="https://github.com/acme/widgets/pull/42">octocat</a> · 2026-09-01T10:00:00Z</div>
+      <pre>## Why
+
+The old registry was *slow* &amp; untested.
+
+- adds `Registry`
+- removes `old_registry.py`
+
+&lt;script&gt;alert(1)&lt;/script&gt;</pre>
+    </div>
+    </section>
+  <section id="commits">
+    <h2>Commits</h2>
+    <ul class="commit-list"><li><code class="commit-sha">a1b2c3d</code> <span class="commit-subj">[feat]: Add Widget registry</span> <span class="commit-meta">— octocat · 2026-09-01</span></li><li><code class="commit-sha">e4f5a6b</code> <span class="commit-subj">[chore]: Remove old registry</span> <span class="commit-meta">— octocat · 2026-09-02 · 2 files</span></li><li><code class="commit-sha">c7d8e9f</code> <span class="commit-subj">[test]: Cover lookup &amp; duplicate &lt;names&gt;</span> <span class="commit-meta">— hubot · 2026-09-03</span></li></ul>
+    </section>
+  <section id="explanation">
+    <h2>Three-level explanation</h2>
+    <div class="tabs">
+      <input type="radio" name="tabs" id="tab-beginner" checked>
+<input type="radio" name="tabs" id="tab-intermediate">
+<input type="radio" name="tabs" id="tab-expert">
+      <div class="tab-labels"><label for="tab-beginner">Beginner</label>
+<label for="tab-intermediate">Intermediate</label>
+<label for="tab-expert">Expert</label></div>
+      <div class="tab-panels"><div id="panel-beginner" class="tab-panel"><p>A registry is a lookup table. This change adds one for widgets.</p></div>
+<div id="panel-intermediate" class="tab-panel"><p>The registry replaces module-level globals with an explicit <code>Registry</code> object.</p></div>
+<div id="panel-expert" class="tab-panel"><p>Registration is idempotent; duplicate names raise <code>KeyError</code> at import time.</p></div></div>
+    </div>
+    </section>
+  <section id="important-changes">
+    <h2>Important changes — detailed</h2>
+    <div class="change-card" id="change-0">
+  <h3>Registry class</h3>
+  <p class="muted">src/widgets/registry.py</p>
+  <p><strong>Why it matters.</strong> Central lookup replaces scattered globals.</p>
+  <p><strong>What to look at.</strong> <a href="#file-c08d64c2c7">The register() and lookup() methods</a></p>
+  <div class="callout callout-takeaway"><strong>Takeaway.</strong> Registration order no longer matters.</div>
+  <div class="callout callout-rationale"><strong>Rationale.</strong> The author says globals made testing hard.</div>
+</div><div class="change-card" id="change-1">
+  <h3>Legacy module removed</h3>
+  <p class="muted">src/widgets/old_registry.py</p>
+  <p><strong>Why it matters.</strong> Dead code after the registry landed.</p>
+  <p><strong>What to look at.</strong> <a href="#file-9d982a5230">Confirm nothing else imports it</a></p>
+
+  <div class="callout callout-rationale"><strong>Rationale.</strong> Likely to reduce maintenance surface. <span class="muted">(inferred — not stated by the author)</span></div>
+</div><div class="change-card" id="change-2">
+  <h3>Config key renamed</h3>
+  <p class="muted">config/$settings.toml</p>
+  <p><strong>Why it matters.</strong> The key name changed from widget_dir to widgets.dir.</p>
+  <p><strong>What to look at.</strong> <a href="#file-d29b91093c">The [widgets] table</a></p>
+
+  <div class="callout callout-warning"><strong>Open question.</strong> Rationale not stated by the author and not inferable from the diff.</div>
+</div><div class="change-card" id="change-3">
+  <h3>Docs touch-up</h3>
+  <p class="muted"></p>
+  <p><strong>Why it matters.</strong> README mentions the new registry.</p>
+
+
+
+</div>
+    </section>
+  <section id="decisions">
+    <h2>Key decisions</h2>
+    <div class="callout callout-rationale"><strong>Registry is a plain class, not a singleton.</strong> Instances can be created per test.</div><div class="callout callout-rationale"><strong>Duplicate names raise.</strong> Silently overwriting hid bugs before. <span class="muted">(inferred — not stated by the author.)</span></div>
+    </section>
+  <section id="findings">
+    <h2>Review findings</h2>
+    <table class="findings">
+      <thead><tr><th>Severity</th><th>Area</th><th>Finding</th><th>Resolution</th></tr></thead>
+      <tbody><tr><td><span class="pill pill-error">blocking</span></td><td>Correctness</td><td>lookup() returns None on miss but callers index the result</td><td>Raise KeyError instead</td></tr><tr><td><span class="pill pill-error">major</span></td><td>Tests</td><td>No test for duplicate registration</td><td>Left for the author</td></tr><tr><td><span class="pill pill-warning">minor</span></td><td>Style</td><td>Unused import &lt;os&gt;</td><td>Removed</td></tr><tr><td><span class="pill pill-tertiary">nit</span></td><td>Naming</td><td>reg vs registry</td><td>Renamed to registry</td></tr><tr><td><span class="pill pill-tertiary">info</span></td><td>Docs</td><td>README example uses the old API</td><td>Updated</td></tr><tr><td><span class="pill pill-tertiary">unknown-level</span></td><td>Other</td><td>Severity outside the known set</td><td>Rendered as tertiary</td></tr></tbody>
+    </table>
+    </section>
+  <section id="unresolved-comments">
+    <h2>Unresolved comments</h2>
+    <p class="muted">Open review threads and PR-level comments still awaiting a response.</p>
+    <div class="unresolved-comment"><div class="unresolved-header"><span class="pill pill-warning">code</span> <strong>reviewer1</strong> · <code>src/widgets/registry.py:42</code> · <span class="muted">2026-09-02T09:00:00Z</span> · <a href="https://github.com/acme/widgets/pull/42#discussion_r1" target="_blank" rel="noopener">view on GitHub</a></div><div class="unresolved-body">Should this be a `dict` or an `OrderedDict`?<br>Order might matter for &lt;listing&gt;.</div><details class="replies"><summary>2 earlier replies</summary><div class="reply"><div class="reply-header"><strong>octocat</strong> · <span class="muted">2026-09-02T09:30:00Z</span></div><div class="reply-body">dict preserves insertion order since 3.7</div></div><div class="reply"><div class="reply-header"><strong>reviewer1</strong></div><div class="reply-body">Right, but document it?</div></div></details></div><div class="unresolved-comment"><div class="unresolved-header"><span class="pill pill-warning">review</span> <strong>reviewer2</strong> · <a href="https://github.com/acme/widgets/pull/42#pullrequestreview-1" target="_blank" rel="noopener">view on GitHub</a></div><div class="unresolved-body">Please add a changelog entry.</div><details class="replies"><summary>1 earlier reply</summary><div class="reply"><div class="reply-header"><strong>octocat</strong></div><div class="reply-body">Will do.</div></div></details></div><div class="unresolved-comment"><div class="unresolved-header"><span class="pill pill-warning">discussion</span> <strong>(unknown)</strong> · <code>README.md</code></div><div class="unresolved-body">Typo in the example.</div></div><div class="unresolved-comment"><div class="unresolved-header"><span class="pill pill-warning">discussion</span> <strong>bot</strong></div><div class="unresolved-body">Automated note without a known type.</div></div>
+    </section>
+  <section id="diffs">
+    <h2>Per-file diffs</h2>
+    <p class="muted">Click to expand.</p>
+    <details id="file-c08d64c2c7" class="file-diff">
+  <summary><span class="file-path">src/widgets/registry.py</span> <span class="badge badge-added">Added</span> <span class="line-stat">+48 / -0</span></summary>
+  <pre><code class="diff-block"><span class="diff-line diff-context">diff --git a/src/widgets/registry.py b/src/widgets/registry.py</span><span class="diff-line diff-context">new file mode 100644</span><span class="diff-line diff-file-header">--- /dev/null</span><span class="diff-line diff-file-header">+++ b/src/widgets/registry.py</span><span class="diff-line diff-hunk">@@ -0,0 +1,6 @@</span><span class="diff-line diff-add">+class Registry:</span><span class="diff-line diff-add">+    def __init__(self) -&gt; None:</span><span class="diff-line diff-add">+        self._items: dict[str, object] = {}</span><span class="diff-line diff-add">+</span><span class="diff-line diff-add">+    def register(self, name: str, item: object) -&gt; None:</span><span class="diff-line diff-add">+        self._items[name] = item  # &lt;-- &quot;quoted&quot; &amp; escaped</span></code></pre>
+</details><details id="file-9d982a5230" class="file-diff">
+  <summary><span class="file-path">src/widgets/old_registry.py</span> <span class="badge badge-deleted">Deleted</span> <span class="line-stat">+0 / -12</span></summary>
+  <pre><code class="diff-block"><span class="diff-line diff-file-header">--- a/src/widgets/old_registry.py</span><span class="diff-line diff-file-header">+++ /dev/null</span><span class="diff-line diff-hunk">@@ -1,3 +0,0 @@</span><span class="diff-line diff-del">-WIDGETS = {}</span><span class="diff-line diff-del">-def register(name, item):</span><span class="diff-line diff-del">-    WIDGETS[name] = item</span><span class="diff-line diff-meta">\ No newline at end of file</span></code></pre>
+</details><details id="file-d29b91093c" class="file-diff">
+  <summary><span class="file-path">config/$settings.toml</span> <span class="badge badge-modified">Modified</span> <span class="line-stat">+1 / -1</span></summary>
+  <pre><code class="diff-block"><span class="diff-line diff-context">diff --git a/config/$settings.toml b/config/$settings.toml</span><span class="diff-line diff-file-header">--- a/config/$settings.toml</span><span class="diff-line diff-file-header">+++ b/config/$settings.toml</span><span class="diff-line diff-hunk">@@ -1,3 +1,3 @@</span><span class="diff-line diff-context"> [widgets]</span><span class="diff-line diff-del">-widget_dir = &quot;widgets&quot;</span><span class="diff-line diff-add">+dir = &quot;widgets&quot;</span><span class="diff-line diff-context"> context &lt;tail&gt; &amp; more</span></code></pre>
+</details><details id="file-f5affc48ee" class="file-diff">
+  <summary><span class="file-path">src/widgets/lookup.py</span> <span class="badge badge-renamed">Renamed</span> <span class="line-stat">+2 / -2</span></summary>
+  <pre><code class="diff-block"><span class="diff-line diff-context">(diff fragment &#x27;golden-missing.diff&#x27; missing)</span></code></pre>
+</details><details id="file-667fb7df63" class="file-diff">
+  <summary><span class="file-path">docs/widgets.md</span> <span class="badge badge-modified">Modified</span> <span class="line-stat">+5 / -1</span></summary>
+  <pre><code class="diff-block"><span class="diff-line diff-context">(no diff provided)</span></code></pre>
+</details><details id="file-149272c650" class="file-diff">
+  <summary><span class="file-path">assets/logo.png</span> <span class="badge badge-binaryfile">Binary file</span> <span class="line-stat"></span></summary>
+  <pre><code class="diff-block"><span class="diff-line diff-context">Binary files a/assets/logo.png and b/assets/logo.png differ</span></code></pre>
+</details>
+    </section>
+  <section id="double-check">
+    <h2>Things to double-check</h2>
+    <div class="callout callout-warning"><strong>Import cycle.</strong> <code>registry.py</code> imports <code>widget.py</code> which imports the registry.</div><div class="callout callout-warning"><strong>Config migration.</strong> Existing installs still carry <code>widget_dir</code>.</div>
+    </section>
+
+  <footer>
+    Generated 2026-09-04 12:14:39 UTC · repo <code>/home/dev/widgets</code> · regenerate with <code>/pre-push-review</code>.
+  </footer>
+</div>
+</body>
+</html>

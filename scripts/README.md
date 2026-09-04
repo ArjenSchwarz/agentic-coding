@@ -62,6 +62,8 @@ python3 ~/.claude/scripts/build_review_html.py \
 
 **Output**: Prints the absolute path of the written HTML on success.
 
+**Layout**: `build_review_html.py` is a thin entry point; the renderer lives in the `review_html/` package next to it (`css.py` holds the stylesheet, `sections.py` the section renderers, `render.py` the orchestration). `sync-claude.sh` links the whole directory, so the package syncs with the script.
+
 ### copilot-pr-comments.sh
 
 **Purpose**: Fetches and displays GitHub Copilot's review comments and inline comments for the current branch's pull request.
@@ -138,6 +140,16 @@ go run . <directory>    # Convert all _test.go files in directory
 **Example transformation**:
 From: `tests := []struct { name string; ... }` with `for _, tt := range tests`
 To: `tests := map[string]struct { ... }` with `for name, tt := range tests`
+
+## Tests
+
+Run the renderer test suite from the repository root with:
+
+```bash
+make test
+```
+
+This runs `cd scripts && python3 -m unittest discover -s tests -t .`. Tests live in `scripts/tests/` with fixtures under `scripts/tests/fixtures/`. `fixtures/golden.html` is the page the renderer at commit `9da40cf` produced from `fixtures/golden.json`; `test_golden.py` renders the same JSON with the current entry point and compares the two after blanking the `<style>` contents and the `Generated …` footer line. Regenerate the golden page only when the rendering contract intentionally changes.
 
 ## Agent Usage Notes
 

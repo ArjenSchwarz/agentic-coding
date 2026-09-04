@@ -1,0 +1,156 @@
+{
+  "repo": {"name": "acme/widgets", "path": "/home/dev/widgets", "branch": "feature/golden", "remote": "origin"},
+  "title": "PR review: acme/widgets #42 <golden>",
+  "subtitle": "Review of <strong>feature/golden</strong> against <code>main</code> &amp; friends",
+  "metrics": [
+    {"label": "Commits", "value": 3},
+    {"label": "Files", "value": 6},
+    {"label": "Lines", "value": "+120 / -34"}
+  ],
+  "verdict": {"label": "Needs changes", "tone": "warning", "detail": "One <em>major</em> finding was skipped."},
+  "at_a_glance": [
+    "Adds a <code>Widget</code> registry with lookup by name.",
+    "Removes the legacy <code>old_registry.py</code> module."
+  ],
+  "pr_description": {
+    "author": "octocat",
+    "url": "https://github.com/acme/widgets/pull/42",
+    "created_at": "2026-09-01T10:00:00Z",
+    "body": "## Why\n\nThe old registry was *slow* & untested.\n\n- adds `Registry`\n- removes `old_registry.py`\n\n<script>alert(1)</script>"
+  },
+  "explanation": {
+    "beginner": "<p>A registry is a lookup table. This change adds one for widgets.</p>",
+    "intermediate": "<p>The registry replaces module-level globals with an explicit <code>Registry</code> object.</p>",
+    "expert": "<p>Registration is idempotent; duplicate names raise <code>KeyError</code> at import time.</p>"
+  },
+  "commits": [
+    {"sha": "a1b2c3d", "subject": "[feat]: Add Widget registry", "author": "octocat", "date": "2026-09-01"},
+    {"sha": "e4f5a6b", "subject": "[chore]: Remove old registry", "author": "octocat", "date": "2026-09-02", "meta": "octocat · 2026-09-02 · 2 files"},
+    {"sha": "c7d8e9f", "subject": "[test]: Cover lookup & duplicate <names>", "author": "hubot", "date": "2026-09-03"}
+  ],
+  "important_changes": [
+    {
+      "title": "Registry class",
+      "file": "src/widgets/registry.py",
+      "why": "Central lookup replaces scattered globals.",
+      "what": "The register() and lookup() methods",
+      "takeaway": "Registration order no longer matters.",
+      "rationale": "The author says globals made testing hard."
+    },
+    {
+      "title": "Legacy module removed",
+      "file": "src/widgets/old_registry.py",
+      "why": "Dead code after the registry landed.",
+      "what": "Confirm nothing else imports it",
+      "rationale": "Likely to reduce maintenance surface.",
+      "rationale_inferred": true
+    },
+    {
+      "title": "Config key renamed",
+      "file": "config/$settings.toml",
+      "why": "The key name changed from widget_dir to widgets.dir.",
+      "what": "The [widgets] table",
+      "rationale_unknown": true
+    },
+    {
+      "title": "Docs touch-up",
+      "why": "README mentions the new registry.",
+      "what": ""
+    }
+  ],
+  "decisions": [
+    {"title": "Registry is a plain class, not a singleton.", "body": "Instances can be created per test."},
+    {"title": "Duplicate names raise.", "body": "Silently overwriting hid bugs before.", "inferred": true}
+  ],
+  "findings": [
+    {"severity": "blocking", "area": "Correctness", "finding": "lookup() returns None on miss but callers index the result", "resolution": "Raise KeyError instead", "status": "fixed"},
+    {"severity": "major", "area": "Tests", "finding": "No test for duplicate registration", "resolution": "Left for the author", "status": "skipped"},
+    {"severity": "minor", "area": "Style", "finding": "Unused import <os>", "resolution": "Removed", "status": "fixed"},
+    {"severity": "nit", "area": "Naming", "finding": "reg vs registry", "resolution": "Renamed to registry"},
+    {"severity": "info", "area": "Docs", "finding": "README example uses the old API", "resolution": "Updated", "status": "fixed"},
+    {"severity": "unknown-level", "area": "Other", "finding": "Severity outside the known set", "resolution": "Rendered as tertiary", "status": "skipped"}
+  ],
+  "unresolved_comments": [
+    {
+      "author": "reviewer1",
+      "type": "code",
+      "path": "src/widgets/registry.py",
+      "line": 42,
+      "body": "Should this be a `dict` or an `OrderedDict`?\nOrder might matter for <listing>.",
+      "url": "https://github.com/acme/widgets/pull/42#discussion_r1",
+      "created_at": "2026-09-02T09:00:00Z",
+      "replies": [
+        {"author": "octocat", "body": "dict preserves insertion order since 3.7", "created_at": "2026-09-02T09:30:00Z"},
+        {"author": "reviewer1", "body": "Right, but document it?"}
+      ]
+    },
+    {
+      "author": "reviewer2",
+      "type": "review",
+      "body": "Please add a changelog entry.",
+      "url": "https://github.com/acme/widgets/pull/42#pullrequestreview-1",
+      "replies": [
+        {"author": "octocat", "body": "Will do."}
+      ]
+    },
+    {
+      "author": "",
+      "type": "discussion",
+      "path": "README.md",
+      "body": "Typo in the example."
+    },
+    {
+      "author": "bot",
+      "type": "",
+      "body": "Automated note without a known type."
+    }
+  ],
+  "double_check": [
+    {"title": "Import cycle.", "body": "<code>registry.py</code> imports <code>widget.py</code> which imports the registry."},
+    {"title": "Config migration.", "body": "Existing installs still carry <code>widget_dir</code>."}
+  ],
+  "files": [
+    {
+      "path": "src/widgets/registry.py",
+      "badge": "Added",
+      "stat": "+48 / -0",
+      "diff": "diff --git a/src/widgets/registry.py b/src/widgets/registry.py\nnew file mode 100644\n--- /dev/null\n+++ b/src/widgets/registry.py\n@@ -0,0 +1,6 @@\n+class Registry:\n+    def __init__(self) -> None:\n+        self._items: dict[str, object] = {}\n+\n+    def register(self, name: str, item: object) -> None:\n+        self._items[name] = item  # <-- \"quoted\" & escaped\n"
+    },
+    {
+      "path": "src/widgets/old_registry.py",
+      "badge": "Deleted",
+      "stat": "+0 / -12",
+      "diff": "--- a/src/widgets/old_registry.py\n+++ /dev/null\n@@ -1,3 +0,0 @@\n-WIDGETS = {}\n-def register(name, item):\n-    WIDGETS[name] = item\n\\ No newline at end of file\n"
+    },
+    {
+      "path": "config/$settings.toml",
+      "badge": "Modified",
+      "stat": "+1 / -1",
+      "diff_file": "golden-settings.diff"
+    },
+    {
+      "path": "src/widgets/lookup.py",
+      "badge": "Renamed",
+      "stat": "+2 / -2",
+      "diff_file": "golden-missing.diff"
+    },
+    {
+      "path": "docs/widgets.md",
+      "badge": "Modified",
+      "stat": "+5 / -1"
+    },
+    {
+      "path": "assets/logo.png",
+      "badge": "Binary file",
+      "stat": "",
+      "diff": "Binary files a/assets/logo.png and b/assets/logo.png differ\n"
+    }
+  ],
+  "publish_metadata": {
+    "title": "PR review: acme/widgets #42",
+    "repoUrl": "https://github.com/acme/widgets",
+    "pr": 42,
+    "severity": "needs-changes",
+    "summary": "Registry lands; one major test gap skipped. Contains </script> to exercise escaping."
+  }
+}

@@ -8,7 +8,7 @@ references:
 
 ## Foundation
 
-- [ ] 1. Write the golden-fixture regression test and the test harness scaffold <!-- id:vt4kkmn -->
+- [x] 1. Write the golden-fixture regression test and the test harness scaffold <!-- id:vt4kkmn -->
   - Create scripts/tests/__init__.py and scripts/tests/fixtures/golden.json exercising every existing section (pr_description, commits, explanation, important_changes with rationale_unknown and rationale_inferred, decisions, findings with all statuses, unresolved_comments with replies, files with inline diff and diff_file, double_check, publish_metadata)
   - Generate fixtures/golden.html by running `git show 9da40cf:scripts/build_review_html.py` from a temp file against golden.json; commit the HTML
   - The golden test renders via `python3 scripts/build_review_html.py` by repo-relative path, replaces the `<style>` contents and the `Generated …` footer line in both documents, and asserts equality
@@ -17,7 +17,7 @@ references:
   - Requirements: [6.1](requirements.md#6.1), [6.5](requirements.md#6.5), [6.6](requirements.md#6.6)
   - References: scripts/build_review_html.py, scripts/tests/, Makefile
 
-- [ ] 2. Restructure the renderer into the review_html package with a thin entry point <!-- id:vt4kkmo -->
+- [x] 2. Restructure the renderer into the review_html package with a thin entry point <!-- id:vt4kkmo -->
   - Modules: __init__.py exporting render; common.py with escape, digest (sha1[:10]), file_anchor, severity_pill; sections.py with the existing renderers; css.py; template.py; render.py with render(); every module starts with `from __future__ import annotations`
   - Entry point keeps argparse and the command line, inserts Path(__file__).resolve().parent on sys.path before `import review_html`
   - New placeholders are not added yet; the golden test must still pass
@@ -27,7 +27,7 @@ references:
   - Requirements: [6.1](requirements.md#6.1), [6.3](requirements.md#6.3), [6.5](requirements.md#6.5), [2.11](requirements.md#2.11)
   - References: scripts/build_review_html.py, scripts/review_html/
 
-- [ ] 3. Write tests for inputs.read_guarded and the Warnings collector <!-- id:vt4kkmp -->
+- [x] 3. Write tests for inputs.read_guarded and the Warnings collector <!-- id:vt4kkmp -->
   - read_guarded rejects a file over 50 MB by stat (use a sparse temp file), rejects xml=True inputs whose first 64 KB contain `<!DOCTYPE`, returns None with a warning for non-UTF-8 content, and returns text otherwise
   - Warnings.add appends and prints `warning: …` to stderr immediately; items preserves order
   - Blocked-by: vt4kkmo (Restructure the renderer into the review_html package with a thin entry point)
@@ -35,13 +35,13 @@ references:
   - Requirements: [2.10](requirements.md#2.10), [2.11](requirements.md#2.11)
   - References: scripts/review_html/inputs.py, scripts/review_html/warnings.py
 
-- [ ] 4. Implement inputs.read_guarded and Warnings to pass the tests <!-- id:vt4kkmq -->
+- [x] 4. Implement inputs.read_guarded and Warnings to pass the tests <!-- id:vt4kkmq -->
   - Both modules are pure standard library; read_guarded is the only file reader the rest of the package uses
   - Blocked-by: vt4kkmp (Write tests for inputs.read_guarded and the Warnings collector)
   - Stream: 1
   - Requirements: [2.10](requirements.md#2.10), [2.11](requirements.md#2.11)
 
-- [ ] 5. Write tests for diffs: load_fragments, added_lines, is_binary, and render_diff with uncovered marks <!-- id:vt4kkmr -->
+- [x] 5. Write tests for diffs: load_fragments, added_lines, is_binary, and render_diff with uncovered marks <!-- id:vt4kkmr -->
   - added_lines: hunk headers `@@ -a,b +c,d @@`, multiple hunks, renames, `\ No newline at end of file`, a `/dev/null` fragment from `git diff --no-index`
   - is_binary: lines starting `Binary files ` or `GIT binary patch`
   - load_fragments: inline diff wins over diff_file; missing file yields the existing `(diff fragment 'x' missing)` placeholder; non-UTF-8 yields `(diff fragment 'x' is not UTF-8)` plus a warning
@@ -51,7 +51,7 @@ references:
   - Requirements: [3.8](requirements.md#3.8), [2.10](requirements.md#2.10), [3.6](requirements.md#3.6)
   - References: scripts/review_html/diffs.py
 
-- [ ] 6. Implement diffs.py and wire load_fragments into render_files <!-- id:vt4kkms -->
+- [x] 6. Implement diffs.py and wire load_fragments into render_files <!-- id:vt4kkms -->
   - render() calls load_fragments once and passes the dict to render_files together with an uncovered map (empty for now)
   - Append the `.diff-uncovered` rule to css.py: 3 px `--error` left border and a `▌` gutter marker via ::before
   - Golden test still passes

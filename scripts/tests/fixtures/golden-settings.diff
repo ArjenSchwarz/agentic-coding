@@ -1,0 +1,8 @@
+diff --git a/config/$settings.toml b/config/$settings.toml
+--- a/config/$settings.toml
++++ b/config/$settings.toml
+@@ -1,3 +1,3 @@
+ [widgets]
+-widget_dir = "widgets"
++dir = "widgets"
+ context <tail> & more

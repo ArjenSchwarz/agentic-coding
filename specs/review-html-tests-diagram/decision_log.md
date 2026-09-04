@@ -76,6 +76,11 @@
 | Q70 | 2026-09-04 | The `tool` row carries `name` and `format` (`go-list-json` or `pairs`) besides `deps` and `granularity` | `go list -json` needs its own parser and `tool:<name>` needs a name; `pairs` lets tests stub a tool with plain output |
 | Q71 | 2026-09-04 | Python `from X import Y` captures both parts joined with `.`, relying on the `roots` drop-last retry | A single group cannot tell `from a.b import c` importing module `a/b/c.py` from importing symbol `c` out of `a/b.py` |
 | Q72 | 2026-09-04 | With `--remote`, changed-file and module-file blob reads always run; the 500-call cap refuses only dependents-scan reads | The design says dependencies are unaffected by the cap, which is only true if their reads are never refused |
+| Q73 | 2026-09-04 | A single changed file with two suffix candidates of different depth (`util.py` and `a/util.py` for `src/a/util.py`) is ambiguous; the design's example is the two-file case where pass 3 removes the shared entry | Pass 4 sees two distinct residuals, and per Q19 a wrong match is worse than no data; preferring the longer suffix would be a new rule |
+| Q74 | 2026-09-04 | `redact.clean_message` redacts then truncates to 500 characters (499 plus `…`); `redact` alone never truncates | The section needs one call that does both in the required order; keeping `redact` pure keeps its tests simple |
+| Q75 | 2026-09-04 | The availability line counts files actually read (`2 of 3 files read`), not files listed | A listed but unreadable file is not available data |
+| Q76 | 2026-09-04 | The two `summary` lines print only when a `tests` block is present and the classification is not `docs-only` | Docs-only output must be silent; the skills treat absent lines as "no test data" and apply no floor |
+| Q77 | 2026-09-04 | With no JUnit read and `no_data_reason` null, the no-data card still renders, derived from the CI states for `source: ci` and otherwise a generic sentence | A skill that forgot the reason should not produce a page with no Tests card at all |
 
 ## Decision 1: Constrained pure-SVG layout instead of Graphviz
 

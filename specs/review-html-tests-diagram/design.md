@@ -318,7 +318,7 @@ Keys the script reads: `extensions`, `test_files`, `test_decl` (group 1 is the n
     "tool": {"name": "go list", "deps": "go list -json ./...", "format": "go-list-json", "granularity": "package"},
     "runners": [{"name": "gotestsum", "detect": {"files": ["go.mod"]},
       "recipe": "gotestsum --junitfile {junit} -- -coverprofile={coverage} -coverpkg=./... ./...",
-      "requires": ["gotestsum"], "coverage_format": "coverprofile", "install": "go mod download",
+      "requires": ["go", "gotestsum"], "coverage_format": "coverprofile", "install": "go mod download",
       "junit_flags": ["--junitfile"]}]
   },
   "typescript": {
@@ -342,7 +342,7 @@ Keys the script reads: `extensions`, `test_files`, `test_decl` (group 1 is the n
 }
 ```
 
-`npx --no-install` fails rather than downloading a runner the project does not declare. Initial rows: Go; Python (`roots` resolver with `source_roots: [".", "src"]`, `separator: "."`, runner pytest with `--junitxml={junit} --cov --cov-report=xml:{coverage}`); TypeScript/JavaScript as above; Swift (`unit` resolver with `target_root: "Sources"`, runner `swift test --enable-code-coverage --xunit-output {junit}` followed by `xcrun llvm-cov export -format=lcov` into `{coverage}`); Rust (`mod\s+(\w+);` with `relative` and `index_files: ["mod.rs"]`, `use crate::` with `roots` and `separator: "::"`, runner nextest with a `config_files` template `nextest.toml` written to `{inputs}` and passed as `--config-file`, plus `cargo llvm-cov --lcov --output-path {coverage}`). Known holes, recorded on the row as `notes`: Swift files inside one target never import each other, so only cross-target edges appear; Xcode projects without `Sources/<Target>` yield no unit and fall to directory grouping; `go list` needs a resolvable module graph and its failure leaves the scanned edges in place with a warning. A row without `runners` still supports diagrams.
+`npx --no-install` fails rather than downloading a runner the project does not declare. Initial rows: Go; Python (`roots` resolver with `source_roots: [".", "src"]`, `separator: "."`, runner pytest with `--junitxml={junit} --cov --cov-report=xml:{coverage}`); TypeScript/JavaScript as above; Swift (`unit` resolver with `target_root: "Sources"`, runner `swift test --enable-code-coverage --xunit-output {junit}` followed by `xcrun llvm-cov export -format=lcov` into `{coverage}`); Rust (`mod\s+(\w+);` with `relative` and `index_files: ["mod.rs"]`, `use crate::` with `roots` and `separator: "::"`, runner nextest with a `config_files` template `nextest.toml` written to `{inputs}` and passed as `--config-file`, run as one `cargo llvm-cov nextest --lcov --output-path {coverage}` command so the suite executes once). Known holes, recorded on the row as `notes`: Swift files inside one target never import each other, so only cross-target edges appear; Xcode projects without `Sources/<Target>` yield no unit and fall to directory grouping; `go list` needs a resolvable module graph and its failure leaves the scanned edges in place with a warning. A row without `runners` still supports diagrams.
 
 ## Data Models
 

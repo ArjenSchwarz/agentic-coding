@@ -1,0 +1,74 @@
+{
+  "go": {
+    "extensions": [".go"],
+    "test_files": ["_test\\.go$"],
+    "test_decl": "^func ((?:Test|Fuzz|Benchmark)\\w+)\\s*\\(",
+    "unit": {"kind": "module_file", "module_file": "go.mod", "module_regex": "^module\\s+(\\S+)"},
+    "imports": [
+      {"regex": "^\\s*(?:import\\s+)?(?:[\\w.]+\\s+)?\"([^\"]+)\"", "resolve": "unit"}
+    ],
+    "tool": {"name": "go list", "deps": "go list -json ./...", "format": "go-list-json", "granularity": "package"},
+    "notes": [
+      "Imports name packages, so scanned edges expand to every file in the package.",
+      "go list needs a resolvable module graph; when it fails the scanned edges stay in place with a warning."
+    ]
+  },
+  "python": {
+    "extensions": [".py"],
+    "test_files": ["(^|/)test_[^/]*\\.py$", "_test\\.py$", "(^|/)tests?/", "(^|/)conftest\\.py$"],
+    "test_decl": "^\\s*(?:async\\s+)?def (test\\w*)\\s*\\(",
+    "unit": {"kind": "directory"},
+    "imports": [
+      {"regex": "^\\s*from\\s+([\\w.]+)\\s+import\\s+\\(?\\s*(\\w+)", "resolve": "roots", "separator": "."},
+      {"regex": "^\\s*import\\s+([\\w.]+)", "resolve": "roots", "separator": "."}
+    ],
+    "source_roots": [".", "src"],
+    "index_files": ["__init__.py"],
+    "notes": [
+      "Absolute imports resolve under the repository root and src/; namespace packages elsewhere yield no edge."
+    ]
+  },
+  "typescript": {
+    "extensions": [".ts", ".tsx", ".js", ".jsx", ".mjs", ".cjs"],
+    "test_files": ["\\.(test|spec)\\.[tj]sx?$", "(^|/)__tests__/"],
+    "test_decl": "^\\s*(?:it|test)\\(\\s*['\"`]([^'\"`]+)",
+    "unit": {"kind": "directory"},
+    "imports": [
+      {"regex": "(?:from|import|require\\()\\s*['\"]([^'\"]+)['\"]", "resolve": "relative"}
+    ],
+    "index_files": ["index.ts", "index.tsx", "index.js"],
+    "extension_map": {".js": [".ts", ".tsx", ".js"], ".jsx": [".tsx", ".jsx"]},
+    "notes": [
+      "Only relative imports resolve; path aliases from tsconfig paths yield no edge."
+    ]
+  },
+  "swift": {
+    "extensions": [".swift"],
+    "test_files": ["(^|/)Tests/", "Tests\\.swift$"],
+    "test_decl": "(?:@Test\\b[^{]*?func\\s+|^\\s*func\\s+(?=test))(\\w+)",
+    "unit": {"kind": "target_root", "target_root": "Sources"},
+    "imports": [
+      {"regex": "^\\s*(?:@testable\\s+)?import\\s+(\\w+)", "resolve": "unit"}
+    ],
+    "notes": [
+      "Swift files inside one target never import each other, so only cross-target edges appear.",
+      "Xcode projects without Sources/<Target> yield no unit and fall to directory grouping."
+    ]
+  },
+  "rust": {
+    "extensions": [".rs"],
+    "test_files": ["(^|/)tests/", "_test\\.rs$"],
+    "test_decl": "#\\[(?:\\w+::)?test\\]\\s*\\n\\s*(?:pub\\s+)?(?:async\\s+)?fn\\s+(\\w+)",
+    "unit": {"kind": "directory"},
+    "imports": [
+      {"regex": "^\\s*(?:pub(?:\\([^)]*\\))?\\s+)?mod\\s+(\\w+)\\s*;", "resolve": "relative"},
+      {"regex": "^\\s*(?:pub(?:\\([^)]*\\))?\\s+)?use\\s+crate::([\\w:]+)", "resolve": "roots", "separator": "::"}
+    ],
+    "source_roots": ["src"],
+    "index_files": ["mod.rs"],
+    "notes": [
+      "use crate:: resolves under src/ at the repository root; workspace crates elsewhere yield no edge.",
+      "#[cfg(test)] modules inside a source file are not flagged as test files."
+    ]
+  }
+}

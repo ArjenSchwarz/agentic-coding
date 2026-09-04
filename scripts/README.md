@@ -54,6 +54,8 @@ python3 ~/.claude/scripts/build_review_html.py \
 
 **JSON schema**: see the docstring at the top of the script. Top-level keys are `repo`, `title`, `subtitle`, `metrics`, `verdict`, `at_a_glance`, `explanation` (beginner/intermediate/expert), `commits`, `important_changes`, `decisions`, `findings`, `double_check`, `files`. Empty sections are dropped from both the body and the table of contents.
 
+Optional keys: `diagram_file` names a `diagram.json` written by `blast_radius.py`, read relative to `--diff-dir`, and rendered as the Blast radius section (inline SVG, before the per-file diffs). `change_classification: "docs-only"` suppresses that section without a warning. An absent or invalid diagram file prints a warning to stderr, omits the section, and still exits 0.
+
 **Behavior**:
 - Renders the Prism Dark palette as inline CSS — fully self-contained except for the highlight.js CDN load for diff syntax colouring.
 - Important-change cards render Takeaway (magenta) and Rationale (cyan) callouts, with an Open Question (warning) variant when `rationale_unknown: true`.
@@ -62,7 +64,53 @@ python3 ~/.claude/scripts/build_review_html.py \
 
 **Output**: Prints the absolute path of the written HTML on success.
 
-**Layout**: `build_review_html.py` is a thin entry point; the renderer lives in the `review_html/` package next to it (`css.py` holds the stylesheet, `sections.py` the section renderers, `render.py` the orchestration). `sync-claude.sh` links the whole directory, so the package syncs with the script.
+**Layout**: `build_review_html.py` is a thin entry point; the renderer lives in the `review_html/` package next to it (`css.py` holds the stylesheet, `sections.py` the section renderers, `diagram.py` the blast-radius projection and SVG, `render.py` the orchestration). `sync-claude.sh` links the whole directory, so the package syncs with the script.
+
+### blast_radius.py
+
+**Purpose**: Derives the one-hop dependency graph around a change (the changed files, the files that import them, and the files they import) from git trees, and writes it as `diagram.json` for the renderer, plus `diff-tests.json` listing test declarations added and removed in changed test files. Used by the `pre-push-review`, `pr-review-html`, and `pr-overview` skills.
+
+**Usage**:
+```bash
+python3 ~/.claude/scripts/blast_radius.py \
+  --repo DIR \                     # repository directory (default: .)
+  --snapshot (SHA|working-tree) \  # the tree the page describes
+  --base SHA \                     # the tree it is compared against
+  [--remote OWNER/REPO] \          # read both trees through the GitHub API (no clone needed)
+  [--ecosystems FILE] \            # defaults to ecosystems.json next to the script
+  [--tools] \                      # run each ecosystem row's dependency tool in --repo
+  --out DIR                        # writes DIR/diagram.json and DIR/diff-tests.json
+```
+
+**Prerequisites**: git, or the GitHub CLI (`gh`) authenticated for `--remote`. `--remote` needs a commit SHA snapshot and cannot be combined with `--tools`.
+
+**Behavior**:
+- Changed files come from `git diff --name-status -M -C` (copies count as added, type changes as modified) plus untracked files as added for a working-tree snapshot; with `--remote`, from the compare API.
+- Trees come from `git ls-tree`, the working tree, or the trees API. Symlinks, submodules, and blobs over 1 MB are never scanned; skipped blobs are listed in `skipped`. Files whose extension has no row in `ecosystems.json` are not scanned.
+- Imports are matched with each row's patterns and resolved to files by the row's resolver: `relative` (path relative to the importer, trying `extension_map`, `extensions`, then `index_files`), `roots` (segments joined under each `source_roots` entry, retrying once with the last segment dropped for symbol imports), or `unit` (a package, module, or target expanded to every file in it, recorded with `granularity: package`). Only edges touching a changed file are kept; each carries `method` (`import`, `expansion`, or `tool:<name>`), `granularity`, and `tree` (`snapshot` or `base`).
+- Deleted files and the old paths of renamed files are scanned in the base tree, so their edges carry `tree: base`.
+- `column_status` reports `complete`, `partial: remote scan cap reached` (the blob API is capped at 500 calls; dependencies of the changed files are always read), or `failed: <reason>` (`no import patterns for <extensions>`, `tree listing truncated`). A failed column is rendered as its reason, never as an empty column.
+- With `--tools`, a row's `tool.deps` command runs in `--repo` and its edges replace the scanned edges for the same file pair; a failing tool leaves the scanned edges in place with a warning.
+- `diff-tests.json` scans the diff of each changed test file with the row's `test_decl`; test files whose row has no pattern are listed in `unpatterned_files`.
+
+**Output**: Prints the paths of the two files written. Exit status 1 on git or API errors, 2 on invalid arguments.
+
+### ecosystems.json
+
+One row per language, read by `blast_radius.py` and by the review skills. Keys the script reads:
+
+| Key | Meaning |
+|-----|---------|
+| `extensions` | file extensions the row covers |
+| `test_files` | regexes marking a path as a test file (files with no row fall back to a `test`/`spec` name or directory rule) |
+| `test_decl` | regex whose first group (or whole match minus the leading keyword) is a test name; matched over the added and removed lines of a diff |
+| `unit` | grouping rule: `{"kind": "directory"}`, `{"kind": "module_file", "module_file": "go.mod", "module_regex": ...}`, or `{"kind": "target_root", "target_root": "Sources"}` |
+| `imports` | list of `{"regex", "resolve": "relative" \| "roots" \| "unit", "separator"}`; multiple groups are joined with the separator |
+| `source_roots`, `index_files`, `extension_map` | inputs to the `roots` and `relative` resolvers |
+| `tool` | `{"name", "deps", "format": "go-list-json" \| "pairs", "granularity"}`; `pairs` output is one `from<TAB>to` line per edge |
+| `notes` | known holes in the row, shown to the agent |
+
+Runner recipes (`runners[]`) that tell the skills how to emit JUnit XML and coverage live on the same rows and are read by the agent, not the script.
 
 ### copilot-pr-comments.sh
 

@@ -1,12 +1,15 @@
 """Page orchestration: turn a review JSON document into the final HTML."""
 from __future__ import annotations
 
+import json
 from datetime import datetime, timezone
 from pathlib import Path
 
 from .common import escape
 from .css import CSS
+from .diagram import render_diagram
 from .diffs import load_fragments
+from .inputs import read_guarded
 from .sections import (
     build_toc,
     render_at_a_glance,
@@ -27,6 +30,31 @@ from .sections import (
 )
 from .template import PAGE_TEMPLATE
 from .warnings import Warnings
+
+
+def build_diagram(data: dict, diff_dir: Path | None, warnings: Warnings) -> str:
+    """Section HTML for ``diagram_file``, or ``""``.
+
+    A docs-only change suppresses the section silently; an absent, unreadable,
+    or invalid description warns (naming the file) and omits it.
+    """
+    if data.get("change_classification") == "docs-only":
+        return ""
+    name = data.get("diagram_file")
+    if not name:
+        return ""
+    if diff_dir is None:
+        warnings.add(f"{name}: diagram_file given but no diff directory to read it from")
+        return ""
+    text = read_guarded(diff_dir / name, warnings)
+    if text is None:
+        return ""
+    try:
+        desc = json.loads(text)
+    except ValueError as exc:
+        warnings.add(f"{name}: diagram description is not valid JSON ({exc})")
+        return ""
+    return render_diagram(desc, warnings)
 
 
 def render(data: dict, diff_dir: Path | None) -> str:
@@ -55,6 +83,7 @@ def render(data: dict, diff_dir: Path | None) -> str:
         "decisions": render_decisions(data.get("decisions", [])),
         "findings": render_findings_table(findings),
         "unresolved-comments": render_unresolved_comments(data.get("unresolved_comments", [])),
+        "diagram": build_diagram(data, diff_dir, warnings),
         "diffs": render_files(files, fragments, uncovered),
         "double-check": render_double_check(data.get("double_check", [])),
     }
@@ -67,6 +96,7 @@ def render(data: dict, diff_dir: Path | None) -> str:
         "decisions": "Key decisions",
         "findings": "Review findings",
         "unresolved-comments": "Unresolved comments",
+        "diagram": "Blast radius",
         "diffs": "Per-file diffs",
         "double-check": "Things to double-check",
     }
@@ -95,6 +125,7 @@ def render(data: dict, diff_dir: Path | None) -> str:
         decisions_section=sections["decisions"],
         findings_section=sections["findings"],
         unresolved_comments_section=sections["unresolved-comments"],
+        diagram_section=sections["diagram"],
         files_section=sections["diffs"],
         double_check_section=sections["double-check"],
         timestamp=timestamp,

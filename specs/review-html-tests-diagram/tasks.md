@@ -61,7 +61,7 @@ references:
 
 ## Blast radius
 
-- [ ] 7. Write unit and property tests for diagram.project <!-- id:vt4kkmt -->
+- [x] 7. Write unit and property tests for diagram.project <!-- id:vt4kkmt -->
   - Column assignment: changed to centre, unchanged with an edge into changed to dependents, unchanged with an edge from changed to dependencies, both to dependents
   - Order: test exclusion, expansion collapse, cap; test counts include changed test files; collapse only groups with more than 3 nodes whose every centre edge has granularity package; nodes with any file-granular edge stay
   - Collapsed node: label `<group> (N files)`, id digest of member paths joined with newline, rank key sum of member edges; cap ranks by (-edges_to_changed, path) with first member path for collapsed nodes; centre never capped
@@ -72,13 +72,13 @@ references:
   - Requirements: [4.6](requirements.md#4.6), [4.7](requirements.md#4.7), [4.8](requirements.md#4.8), [4.10](requirements.md#4.10), [4.11](requirements.md#4.11)
   - References: scripts/review_html/diagram.py
 
-- [ ] 8. Implement diagram.project to pass the tests <!-- id:vt4kkmu -->
+- [x] 8. Implement diagram.project to pass the tests <!-- id:vt4kkmu -->
   - Define the Projected dataclass per the design; keep project() free of any SVG concerns so layout tests can build Projected directly
   - Blocked-by: vt4kkmt (Write unit and property tests for diagram.project)
   - Stream: 2
   - Requirements: [4.6](requirements.md#4.6), [4.7](requirements.md#4.7), [4.8](requirements.md#4.8), [4.10](requirements.md#4.10), [4.11](requirements.md#4.11)
 
-- [ ] 9. Write unit and property tests for diagram.layout and render_diagram <!-- id:vt4kkmv -->
+- [x] 9. Write unit and property tests for diagram.layout and render_diagram <!-- id:vt4kkmv -->
   - Constants: ADV 7.2, PAD 10, BOX_H 26, ROW_GAP 8, GROUP_PAD 8, GROUP_HEADER 18, GROUP_GAP 14, GUTTER 56, LANE 24, CONTENT_W 1036, COL_W 308, SIDE_BOX_W 292, CENTRE_BOX_W 268; budgets 37 and 30
   - Property: every text element's textLength + 2·PAD ≤ its box width, including badges and group labels; declared width equals 1036; centre-to-centre path x coordinates stay within the lane
   - Markup: node `<g id="n-<digest>">` with `<title>`, rect, label text, `⚑N` badge only on changed nodes with N > 0; changed nodes wrapped in `<a href="#file-<digest>">`; edges with class `edge e-<src> e-<dst>`, data-from, data-to, marker-end; side edges attach right-middle to left-middle or the reverse when the target is left of the source
@@ -90,7 +90,7 @@ references:
   - Requirements: [5.1](requirements.md#5.1), [5.2](requirements.md#5.2), [5.3](requirements.md#5.3), [5.4](requirements.md#5.4), [5.5](requirements.md#5.5), [5.6](requirements.md#5.6), [5.7](requirements.md#5.7), [5.8](requirements.md#5.8), [5.9](requirements.md#5.9), [5.10](requirements.md#5.10), [5.11](requirements.md#5.11), [5.12](requirements.md#5.12)
   - References: scripts/review_html/diagram.py, scripts/review_html/css.py
 
-- [ ] 10. Implement diagram.layout and render_diagram and wire the diagram section into render <!-- id:vt4kkmw -->
+- [x] 10. Implement diagram.layout and render_diagram and wire the diagram section into render <!-- id:vt4kkmw -->
   - Wire into render(): `diagram_file` loaded through read_guarded relative to the diff directory; top-level `change_classification == "docs-only"` suppresses the section without warnings
   - Append `$unresolved_comments_section$diagram_section` on the existing template line; add `"diagram": "Blast radius"` to toc_labels
   - CSS for .blast-scroll (overflow-x auto) and legend; golden test still passes
@@ -98,7 +98,7 @@ references:
   - Stream: 2
   - Requirements: [5.1](requirements.md#5.1), [5.2](requirements.md#5.2), [5.3](requirements.md#5.3), [5.4](requirements.md#5.4), [5.5](requirements.md#5.5), [5.6](requirements.md#5.6), [5.7](requirements.md#5.7), [5.8](requirements.md#5.8), [5.9](requirements.md#5.9), [5.10](requirements.md#5.10), [5.11](requirements.md#5.11), [5.12](requirements.md#5.12), [3.11](requirements.md#3.11), [6.1](requirements.md#6.1), [6.4](requirements.md#6.4)
 
-- [ ] 11. Write tests for blast_radius.py against a generated git repository <!-- id:vt4kkmx -->
+- [x] 11. Write tests for blast_radius.py against a generated git repository <!-- id:vt4kkmx -->
   - Build a repository with `git init` in tempfile holding Go (two packages, go.mod), Python (src layout, relative and absolute imports), TypeScript (relative imports, index.ts, .js-to-.ts mapping), and Rust (`mod foo;` and `use crate::`); commit a base, then a snapshot with added, modified, deleted, renamed, copied (-C), and type-changed files, one untracked file for working-tree mode, one 1 MB+ blob, a symlink, and test files importing changed files
   - Assert diagram.json: nodes with status, group, is_test, old_path; edges with method, granularity, tree (base for deleted and old renamed paths); column_status complete, failed for an extension without patterns, partial for the remote cap; skipped entries
   - Assert diff-tests.json: added and removed names from test_decl on the diff, unpatterned_files
@@ -108,7 +108,7 @@ references:
   - Requirements: [4.1](requirements.md#4.1), [4.2](requirements.md#4.2), [4.3](requirements.md#4.3), [4.4](requirements.md#4.4), [4.5](requirements.md#4.5), [4.9](requirements.md#4.9), [4.10](requirements.md#4.10), [4.12](requirements.md#4.12), [1.12](requirements.md#1.12)
   - References: scripts/blast_radius.py, scripts/ecosystems.json, scripts/tests/
 
-- [ ] 12. Implement blast_radius.py and the script-read rows of ecosystems.json <!-- id:vt4kkmy -->
+- [x] 12. Implement blast_radius.py and the script-read rows of ecosystems.json <!-- id:vt4kkmy -->
   - Steps and resolvers per the design: changed files via `git diff --name-status -M -C -z` with C as added and T as modified; tree via `git ls-tree -r -l -z` parsed with partition('\t'), skipping modes 120000 and 160000 and blobs over 1 MB; `git cat-file --batch` for SHA trees; trees and blobs API for --remote with the 500-call cap and truncated check
   - Resolvers relative, roots (separator, source_roots, one-segment retry), unit (module_file with module_regex, target_root, directory)
   - Write ecosystems.json with the script-read keys for go, python, typescript, swift, rust; runner keys come in task 23

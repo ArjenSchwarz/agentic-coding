@@ -43,7 +43,7 @@ $publish_metadata
   $important_changes_section
   $decisions_section
   $findings_section
-  $unresolved_comments_section
+  $unresolved_comments_section$diagram_section
   $files_section
   $double_check_section
 

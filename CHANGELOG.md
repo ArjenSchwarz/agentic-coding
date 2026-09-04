@@ -5,6 +5,16 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2026-09-04]
+
+### Added
+- Test harness for the review renderer: `make test` runs `scripts/tests/` via unittest. A golden fixture (`fixtures/golden.json` and the page the renderer at `9da40cf` produced from it) pins the existing output; unit tests cover guarded reads, the warning collector, hunk arithmetic, binary detection, fragment loading, and uncovered-line marks (review-html-tests-diagram, phase 1)
+- `review_html/inputs.py` and `warnings.py`: `read_guarded` refuses inputs over 50 MB, non-UTF-8 content, and XML carrying a DOCTYPE, and warns to stderr through a `Warnings` collector
+- `review_html/diffs.py`: `load_fragments`, `added_lines`, `is_binary`, and `render_diff` with an optional set of uncovered new-file line numbers; a `.diff-uncovered` rule marks those lines with a red left border and gutter marker
+
+### Changed
+- `scripts/build_review_html.py` is now a thin entry point over the `scripts/review_html/` package (`common`, `sections`, `css`, `template`, `render`); the command line and output are unchanged, and the golden test proves it. A non-UTF-8 diff fragment now renders a placeholder instead of crashing the run
+
 ## [2026-07-27]
 
 ### Removed

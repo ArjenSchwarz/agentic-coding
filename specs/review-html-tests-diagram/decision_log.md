@@ -68,6 +68,8 @@
 | Q62 | 2026-09-04 | SVG fills and strokes use CSS variables with literal fallbacks | With the stylesheet removed a bare `var()` is invalid and edges vanish, breaching requirement 5.5 |
 | Q63 | 2026-09-04 | Tool-derived edges carry a granularity from the ecosystem row, and the package-granularity note covers them | `go list` edges are package-level; Decision 4's honesty rule applies to them as much as to expansion |
 | Q64 | 2026-09-04 | The diff directory is `$CLAUDE_JOB_DIR/review-inputs`, or `$(mktemp -d)/review-inputs` when the job directory is unset, always passed as an absolute path | A relative path inside the fallback's subshell resolved into the worktree or the user's clone |
+| Q65 | 2026-09-04 | `read_guarded` returns `None` with a warning for a missing or unreadable file, not only for size, DOCTYPE, and encoding rejections | Requirement 2.10 asks for a warning naming the file; callers that need the historic silent placeholder (missing diff fragments) check existence first |
+| Q66 | 2026-09-04 | `load_fragments` owns every diff placeholder (`missing`, `is not UTF-8`, `no diff provided`); `render_files` only looks paths up in the dict | One place decides what a file's diff text is, so the Tests section and the per-file blocks cannot disagree |
 
 ## Decision 1: Constrained pure-SVG layout instead of Graphviz
 

@@ -307,15 +307,15 @@ Resolvers: `relative` resolves a path relative to the importing file, trying `ex
 
 ### `scripts/ecosystems.json`
 
-Keys the script reads: `extensions`, `test_files`, `test_decl` (group 1 is the name, else the whole match with the leading keyword removed), `unit` (`kind`: `directory` | `target_root` | `module_file`; `module_file`, `module_regex`, `target_root`), `imports` (`regex`, `resolve`, `separator`), `source_roots`, `index_files`, `extension_map`, `tool` (`deps`, `granularity`). Keys the agent reads: `runners[]` with `name`, `detect` (`files` globs or `package_json_keys`), `recipe`, `requires`, `coverage_format`, `install`, `junit_flags`, `env`, `config_files`, and the row's `notes`.
+Keys the script reads: `extensions`, `test_files`, `test_decl` (group 1 is the name, else the whole match with the leading keyword removed), `unit` (`kind`: `directory` | `target_root` | `module_file`; `module_file`, `module_regex`, `target_root`), `imports` (`regex`, `resolve`, `separator`), `source_roots`, `index_files`, `extension_map`, `tool` (`name`, `deps`, `format`: `go-list-json` | `pairs`, `granularity`). Keys the agent reads: `runners[]` with `name`, `detect` (`files` globs or `package_json_keys`), `recipe`, `requires`, `coverage_format`, `install`, `junit_flags`, `env`, `config_files`, and the row's `notes`.
 
 ```jsonc
 {
   "go": {
-    "extensions": [".go"], "test_files": ["_test\\.go$"], "test_decl": "^func (Test|Fuzz|Benchmark)(\\w+)",
+    "extensions": [".go"], "test_files": ["_test\\.go$"], "test_decl": "^func ((?:Test|Fuzz|Benchmark)\\w+)\\s*\\(",
     "unit": {"kind": "module_file", "module_file": "go.mod", "module_regex": "^module\\s+(\\S+)"},
     "imports": [{"regex": "^\\s*(?:import\\s+)?(?:[\\w.]+\\s+)?\"([^\"]+)\"", "resolve": "unit"}],
-    "tool": {"deps": "go list -json ./...", "granularity": "package"},
+    "tool": {"name": "go list", "deps": "go list -json ./...", "format": "go-list-json", "granularity": "package"},
     "runners": [{"name": "gotestsum", "detect": {"files": ["go.mod"]},
       "recipe": "gotestsum --junitfile {junit} -- -coverprofile={coverage} -coverpkg=./... ./...",
       "requires": ["gotestsum"], "coverage_format": "coverprofile", "install": "go mod download",

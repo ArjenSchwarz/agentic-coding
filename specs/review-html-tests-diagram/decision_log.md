@@ -70,6 +70,12 @@
 | Q64 | 2026-09-04 | The diff directory is `$CLAUDE_JOB_DIR/review-inputs`, or `$(mktemp -d)/review-inputs` when the job directory is unset, always passed as an absolute path | A relative path inside the fallback's subshell resolved into the worktree or the user's clone |
 | Q65 | 2026-09-04 | `read_guarded` returns `None` with a warning for a missing or unreadable file, not only for size, DOCTYPE, and encoding rejections | Requirement 2.10 asks for a warning naming the file; callers that need the historic silent placeholder (missing diff fragments) check existence first |
 | Q66 | 2026-09-04 | `load_fragments` owns every diff placeholder (`missing`, `is not UTF-8`, `no diff provided`); `render_files` only looks paths up in the dict | One place decides what a file's diff text is, so the Tests section and the per-file blocks cannot disagree |
+| Q67 | 2026-09-04 | The 15-node cap counts real nodes; the `+N more` node is a 16th box | Requirement 4.8 keeps 15 ranked nodes *and* collapses the rest into one node, so the overflow node sits outside the count |
+| Q68 | 2026-09-04 | `+N more` counts files, not nodes, and lists the flattened member paths | Consistent with `<group> (N files)`; a collapsed group inside the overflow would otherwise hide its size |
+| Q69 | 2026-09-04 | Go `test_decl` is `^func ((?:Test\|Fuzz\|Benchmark)\w+)\s*\(`, one capture group | The design's two-group form made group 1 the keyword, not the name |
+| Q70 | 2026-09-04 | The `tool` row carries `name` and `format` (`go-list-json` or `pairs`) besides `deps` and `granularity` | `go list -json` needs its own parser and `tool:<name>` needs a name; `pairs` lets tests stub a tool with plain output |
+| Q71 | 2026-09-04 | Python `from X import Y` captures both parts joined with `.`, relying on the `roots` drop-last retry | A single group cannot tell `from a.b import c` importing module `a/b/c.py` from importing symbol `c` out of `a/b.py` |
+| Q72 | 2026-09-04 | With `--remote`, changed-file and module-file blob reads always run; the 500-call cap refuses only dependents-scan reads | The design says dependencies are unaffected by the cap, which is only true if their reads are never refused |
 
 ## Decision 1: Constrained pure-SVG layout instead of Graphviz
 

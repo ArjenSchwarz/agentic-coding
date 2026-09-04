@@ -120,7 +120,7 @@ references:
 
 ## Test results
 
-- [ ] 13. Write tests for junit.parse_junit <!-- id:vt4kkmz -->
+- [x] 13. Write tests for junit.parse_junit <!-- id:vt4kkmz -->
   - Fixtures: nested testsuites, empty classname falling back to the testsuite name, Surefire flakyFailure and rerunFailure, pytest `rerun` with one element per attempt sharing (suite, name), skipped, error, message attribute versus element text
   - Assert per-source collapse: duplicates within one file become one case with the last element's outcome and flaky when an earlier attempt failed; identical identities across two source files stay separate
   - Assert source is the input file name
@@ -129,13 +129,13 @@ references:
   - Requirements: [2.1](requirements.md#2.1), [2.2](requirements.md#2.2)
   - References: scripts/review_html/junit.py
 
-- [ ] 14. Implement junit.py to pass the tests <!-- id:vt4kkn0 -->
+- [x] 14. Implement junit.py to pass the tests <!-- id:vt4kkn0 -->
   - Use read_guarded with xml=True; outcome precedence failure, error, flaky elements, skipped, passed
   - Blocked-by: vt4kkmz (Write tests for junit.parse_junit)
   - Stream: 1
   - Requirements: [2.1](requirements.md#2.1), [2.2](requirements.md#2.2)
 
-- [ ] 15. Write unit and property tests for coverage parsing, path mapping, matching, diff coverage, and overall <!-- id:vt4kkn1 -->
+- [x] 15. Write unit and property tests for coverage parsing, path mapping, matching, diff coverage, and overall <!-- id:vt4kkn1 -->
   - Parsers: lcov with repeated SF for one file, Cobertura with two source roots producing aliases, coverprofile in set and count modes with overlapping blocks taking the maximum
   - apply_path_map on primary paths and aliases after normalisation, whole segments only
   - match as five passes: the util.py plus a/util.py versus src/a/util.py case must match a/util.py; exact match leaves the pool; an entry in two pools is removed once and both files report ambiguous; distinct residuals report ambiguous; equal residuals merge by summing hits; an entry whose aliases equal two changed files is ambiguous for both
@@ -146,13 +146,13 @@ references:
   - Requirements: [2.3](requirements.md#2.3), [2.4](requirements.md#2.4), [2.5](requirements.md#2.5), [2.6](requirements.md#2.6), [2.7](requirements.md#2.7), [2.8](requirements.md#2.8)
   - References: scripts/review_html/coverage.py
 
-- [ ] 16. Implement coverage.py to pass the tests <!-- id:vt4kkn2 -->
+- [x] 16. Implement coverage.py to pass the tests <!-- id:vt4kkn2 -->
   - Entry dataclass with paths (primary first) and hits; Coverage = list[Entry]; parse_coverage sniffs the format from content and uses read_guarded (xml=True for Cobertura)
   - Blocked-by: vt4kkn1 (Write unit and property tests for coverage parsing, path mapping, matching, diff coverage, and overall)
   - Stream: 1
   - Requirements: [2.3](requirements.md#2.3), [2.4](requirements.md#2.4), [2.5](requirements.md#2.5), [2.6](requirements.md#2.6), [2.7](requirements.md#2.7), [2.8](requirements.md#2.8)
 
-- [ ] 17. Write tests for redact.redact <!-- id:vt4kkn3 -->
+- [x] 17. Write tests for redact.redact <!-- id:vt4kkn3 -->
   - One assertion per pattern: Bearer tokens, AKIA keys, gh tokens, Slack tokens, `AWS_SECRET_ACCESS_KEY=…`, bare `KEY=…`, `password: …`, URLs with userinfo, PEM private key blocks
   - Assert that redaction happens before truncation to 500 characters by placing a secret at position 480
   - Blocked-by: vt4kkms (Implement diffs.py and wire load_fragments into render_files)
@@ -160,13 +160,13 @@ references:
   - Requirements: [3.4](requirements.md#3.4)
   - References: scripts/review_html/redact.py
 
-- [ ] 18. Implement redact.py to pass the tests <!-- id:vt4kkn4 -->
+- [x] 18. Implement redact.py to pass the tests <!-- id:vt4kkn4 -->
   - PATTERNS list in the design's order; redact applies them sequentially
   - Blocked-by: vt4kkn3 (Write tests for redact.redact)
   - Stream: 1
   - Requirements: [3.4](requirements.md#3.4)
 
-- [ ] 19. Write tests for tests_section.build_tests and the render wiring <!-- id:vt4kkn5 -->
+- [x] 19. Write tests for tests_section.build_tests and the render wiring <!-- id:vt4kkn5 -->
   - Card: three lines with n/a values and a section link when there is no data
   - Section order: provenance with CI link and both states; availability line; coverage_scope; totals with flaky alongside; pending runs; per-job rows with counts only when attributed, per-artifact rows otherwise; failed tests with job or artifact; new and removed by identity from baseline or by name from diff_tests_file with the source label and the cross-source note; per-file table excluding Deleted badges and binary fragments and showing 'no coverage data' for no candidate, ambiguous, and zero-denominator files; overall coverage with delta and cross-source note; unmatched report; run_touched_files, skipped_artifacts, warnings
   - No-data card derived from no_data_reason, ci_state, and fallback_state, with the upload sentence for no run, artifacts absent, and artifacts expired
@@ -176,14 +176,14 @@ references:
   - Requirements: [3.1](requirements.md#3.1), [3.2](requirements.md#3.2), [3.3](requirements.md#3.3), [3.4](requirements.md#3.4), [3.5](requirements.md#3.5), [3.6](requirements.md#3.6), [3.7](requirements.md#3.7), [3.8](requirements.md#3.8), [3.9](requirements.md#3.9), [3.10](requirements.md#3.10), [3.11](requirements.md#3.11), [2.8](requirements.md#2.8), [2.9](requirements.md#2.9), [1.6](requirements.md#1.6), [1.12](requirements.md#1.12), [3.12](requirements.md#3.12)
   - References: scripts/review_html/tests_section.py, scripts/review_html/render.py
 
-- [ ] 20. Implement tests_section.py and wire the Tests card, section, uncovered marks, and summary lines into render <!-- id:vt4kkn6 -->
+- [x] 20. Implement tests_section.py and wire the Tests card, section, uncovered marks, and summary lines into render <!-- id:vt4kkn6 -->
   - TestsResult dataclass per the design; append `$findings_summary$tests_card` and `$findings_section$tests_section` on the existing template lines; add `"tests": "Tests"` to toc_labels; CSS for the Tests section tables and the warning-bordered no-data card matching the unresolved-comment card treatment
   - render() prints `summary coverage:` and `summary tests:` after all other output; golden test still passes
   - Blocked-by: vt4kkn5 (Write tests for tests_section.build_tests and the render wiring)
   - Stream: 1
   - Requirements: [3.1](requirements.md#3.1), [3.2](requirements.md#3.2), [3.3](requirements.md#3.3), [3.4](requirements.md#3.4), [3.5](requirements.md#3.5), [3.6](requirements.md#3.6), [3.7](requirements.md#3.7), [3.8](requirements.md#3.8), [3.9](requirements.md#3.9), [3.10](requirements.md#3.10), [3.11](requirements.md#3.11), [2.8](requirements.md#2.8), [2.9](requirements.md#2.9), [1.6](requirements.md#1.6), [6.1](requirements.md#6.1), [6.4](requirements.md#6.4)
 
-- [ ] 21. Write the timing tests with generated large inputs <!-- id:vt4kkn7 -->
+- [x] 21. Write the timing tests with generated large inputs <!-- id:vt4kkn7 -->
   - Generate a 10 MB lcov file and a 5,000-case JUnit file in a temp directory; assert each parses in under 5 seconds
   - Skip when os.getloadavg is unavailable or its first value exceeds os.cpu_count()
   - Blocked-by: vt4kkn0 (Implement junit.py to pass the tests), vt4kkn2 (Implement coverage.py to pass the tests)

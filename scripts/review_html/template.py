@@ -32,7 +32,7 @@ $publish_metadata
     $at_a_glance
     $important_links
     $verdict_card
-    $findings_summary
+    $findings_summary$tests_card
   </section>
 
   $toc
@@ -42,7 +42,7 @@ $publish_metadata
   $explanation_section
   $important_changes_section
   $decisions_section
-  $findings_section
+  $findings_section$tests_section
   $unresolved_comments_section$diagram_section
   $files_section
   $double_check_section

@@ -2,6 +2,7 @@
 from __future__ import annotations
 
 import json
+import sys
 from datetime import datetime, timezone
 from pathlib import Path
 
@@ -29,6 +30,7 @@ from .sections import (
     render_verdict_card,
 )
 from .template import PAGE_TEMPLATE
+from .tests_section import TestsResult, build_tests
 from .warnings import Warnings
 
 
@@ -70,10 +72,13 @@ def render(data: dict, diff_dir: Path | None) -> str:
     files = data.get("files", [])
 
     # Fragments are read once; the Tests section and the per-file diff blocks
-    # both consume this dict. Uncovered line marks arrive with the Tests
-    # section; until then every file has none.
+    # both consume this dict. The Tests section supplies the uncovered line
+    # marks the diff blocks draw, so it is built first.
     fragments = load_fragments(files, diff_dir, warnings)
-    uncovered: dict[str, set[int]] = {}
+    tests: TestsResult | None = None
+    if data.get("tests") is not None and data.get("change_classification") != "docs-only":
+        tests = build_tests(data["tests"], files, fragments, diff_dir, warnings)
+    uncovered = tests.uncovered if tests else {}
 
     sections = {
         "pr-description": render_pr_description(data.get("pr_description", {})),
@@ -82,6 +87,7 @@ def render(data: dict, diff_dir: Path | None) -> str:
         "important-changes": render_important_changes(important_changes),
         "decisions": render_decisions(data.get("decisions", [])),
         "findings": render_findings_table(findings),
+        "tests": tests.section_html if tests else "",
         "unresolved-comments": render_unresolved_comments(data.get("unresolved_comments", [])),
         "diagram": build_diagram(data, diff_dir, warnings),
         "diffs": render_files(files, fragments, uncovered),
@@ -95,6 +101,7 @@ def render(data: dict, diff_dir: Path | None) -> str:
         "important-changes": "Important changes (detailed)",
         "decisions": "Key decisions",
         "findings": "Review findings",
+        "tests": "Tests",
         "unresolved-comments": "Unresolved comments",
         "diagram": "Blast radius",
         "diffs": "Per-file diffs",
@@ -104,7 +111,7 @@ def render(data: dict, diff_dir: Path | None) -> str:
 
     timestamp = datetime.now(timezone.utc).strftime("%Y-%m-%d %H:%M:%S UTC")
 
-    return PAGE_TEMPLATE.substitute(
+    page = PAGE_TEMPLATE.substitute(
         title_plain=escape(title),
         title_html=escape(title),
         css=CSS,
@@ -117,6 +124,7 @@ def render(data: dict, diff_dir: Path | None) -> str:
         important_links=render_important_links(important_changes),
         verdict_card=render_verdict_card(data.get("verdict", {})),
         findings_summary=render_findings_summary_card(findings),
+        tests_card=tests.card_html if tests else "",
         toc=build_toc(toc_entries),
         pr_description_section=sections["pr-description"],
         commits_section=sections["commits"],
@@ -124,9 +132,19 @@ def render(data: dict, diff_dir: Path | None) -> str:
         important_changes_section=sections["important-changes"],
         decisions_section=sections["decisions"],
         findings_section=sections["findings"],
+        tests_section=sections["tests"],
         unresolved_comments_section=sections["unresolved-comments"],
         diagram_section=sections["diagram"],
         files_section=sections["diffs"],
         double_check_section=sections["double-check"],
         timestamp=timestamp,
     )
+
+    # The skill greps these two lines to apply the severity floor; they must
+    # be the last thing on stderr, after every warning.
+    if tests:
+        c = tests.counts
+        print(f"summary coverage: matched={c['matched']} unmatched={c['unmatched']}", file=sys.stderr)
+        print(f"summary tests: passed={c['passed']} failed={c['failed']} errored={c['errored']} "
+              f"skipped={c['skipped']} flaky={c['flaky']}", file=sys.stderr)
+    return page

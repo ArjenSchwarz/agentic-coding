@@ -167,21 +167,33 @@ code { font-family: ui-monospace, "SF Mono", Menlo, monospace; }
 .callout-rationale { border-left: 3px solid var(--accent); }
 .callout-warning   { border-left: 3px solid var(--warning); }
 
-table.findings {
+table.findings, table.tests {
   width: 100%; border-collapse: collapse;
   margin: 16px 0; background: var(--surface-1);
   border: 1px solid var(--border); border-radius: 12px; overflow: hidden;
 }
-table.findings th, table.findings td {
+table.findings th, table.findings td,
+table.tests th, table.tests td {
   padding: 10px 14px; text-align: left;
   border-bottom: 1px solid var(--border-subtle);
   font-size: 14px; vertical-align: top;
 }
-table.findings th {
+table.findings th, table.tests th {
   background: var(--surface-2); color: var(--text-secondary);
   text-transform: uppercase; font-size: 11px; letter-spacing: 0.08em;
 }
-table.findings tr:last-child td { border-bottom: none; }
+table.findings tr:last-child td, table.tests tr:last-child td { border-bottom: none; }
+table.tests td:last-child { white-space: pre-wrap; word-break: break-word; }
+table.tests a { font-family: ui-monospace, "SF Mono", Menlo, monospace; font-size: 13px; }
+
+.tests-provenance, .tests-availability, .tests-totals, .tests-matching {
+  font-size: 14px; color: var(--text-secondary);
+}
+.tests-nodata {
+  border-left: 3px solid var(--warning);
+  margin: 16px 0;
+}
+.tests-nodata:hover { background: var(--surface-1); }
 
 .pill {
   display: inline-block; padding: 2px 10px; border-radius: 999px;

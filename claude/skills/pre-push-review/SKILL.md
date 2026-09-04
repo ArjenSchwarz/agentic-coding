@@ -11,7 +11,15 @@ Review and fix unpushed commits before they reach the remote repository.
 
 Determine which commits haven't been pushed to the remote repository. Use `git diff origin/<branch>..HEAD` to get the full diff of unpushed changes. Show the user which commits will be reviewed.
 
-If there is no remote tracking branch yet, diff against `origin/main`.
+If there is no remote tracking branch yet, diff against `origin/main`. Record the base as `BASE` (`origin/<branch>` or `origin/main`); Phase 7 compares the working tree against it.
+
+**Working directory.** Every generated input — diff fragments, JUnit and coverage files, the diagram, the review JSON itself — lives in `$INPUTS`, outside the working tree so nothing lands in `git status`:
+
+```bash
+INPUTS="${CLAUDE_JOB_DIR:-$(mktemp -d)}/review-inputs"; mkdir -p "$INPUTS"
+```
+
+Both `$CLAUDE_JOB_DIR` and `mktemp -d` yield absolute paths; never use a relative one.
 
 ## Phase 2: Locate Relevant Specifications
 
@@ -72,11 +80,25 @@ Wait for all agents to complete. Aggregate their findings and fix each issue dir
 
 ## Phase 5: Verify
 
-After all fixes are applied:
+The verification run is also the source of the page's test results, so choose a command that emits JUnit XML before running anything, and run it once.
 
-1. Run the project's test suite (use Makefile commands if available). All tests must pass.
-2. Run linters and validators as specified in project configuration.
-3. If any test fails, investigate whether the fix introduced a regression and revert or adjust the fix — do not modify the test to make it pass.
+### Choose the command
+
+Read `~/.claude/scripts/ecosystems.json`. The language row is the one whose `extensions` cover the most changed files; the runner within it is the first whose `detect` rule matches (`files` globs at the repo root, or top-level `package_json_keys` in `package.json`). Then, reading text only and executing nothing, take the first tier that applies:
+
+1. **Makefile target.** A target whose literal recipe lines (read from the Makefile — never `make -n`, which still expands `$(shell …)` and runs `+` lines) contain one of the runner's `junit_flags`. Pass over a target whose output path is a `$(VAR)` reference you cannot read. Run the target and copy the outputs the recipe names into `$INPUTS`.
+2. **Project instructions.** A command in CLAUDE.md or the README described as the test command, if it contains such a flag.
+3. **Ecosystem recipe.** The runner's `recipe` with `{junit}`, `{coverage}`, and `{inputs}` replaced by absolute paths under `$INPUTS`, its `env` exported, and any `config_files` templates written under `$INPUTS` first. Every binary in `requires` must be on PATH; a missing one records `no_data_reason: "required tool missing"`. No row, or no runner whose `detect` rule matches, records `runner not detected`. Read the row's `notes` — they say where the coverage file lands, which extra JUnit files appear, and what the install line assumes.
+
+A Makefile target or project command that emits nothing structured is passed over in favour of the next tier, not run as a second suite. `coverage_scope` is `repository` for tier 3 and `project-configured` for tiers 1 and 2; the page shows it.
+
+### Run once
+
+1. **Before:** record `git status --porcelain -z` and copy every dirty tracked file to `$INPUTS/pre-run/<path>` — those are the Phase 4 fixes and must survive.
+2. **Run** the chosen command in one Bash call with `timeout: 600000` (the tool's maximum; it covers dependency installation and the tests) with every output under `$INPUTS`. The exit status becomes `run_outcome` (`passed` or `failed`). All tests must pass. Run linters and validators as specified in project configuration as well.
+3. **After:** for each tracked file whose content differs from before, restore a file that was clean pre-run with `git checkout -- <path>` and copy a file that was dirty pre-run back from `$INPUTS/pre-run/`. Untracked files that appeared outside `$INPUTS` are reported, never deleted. List touched and appeared paths in `tests.run_touched_files`. Never use `git stash` — it would carry away the fixes the run exists to verify.
+4. **On timeout:** keep whatever JUnit XML was written, set `run_outcome: "timed_out"` and `partial: true`, and add "fix verification incomplete: test run timed out" to `verdict.detail`.
+5. If any test fails, investigate whether the fix introduced a regression and revert or adjust the fix — do not modify the test to make it pass. If you re-run after adjusting, repeat the before/after steps; the last run is the one the page reports.
 
 ## Phase 6: Generate Implementation Explanation and Insight Material
 
@@ -115,7 +137,19 @@ Overwrite any existing file.
 
 ### Step 1: Write per-file diff fragments
 
-For each changed file, dump the unified diff (`git diff $BASE -- <path>` or equivalent) to a separate `.txt` file. Pick a working directory next to where the JSON will live, e.g. `{repo-root}/.claude/review-diffs/` or `$CLAUDE_JOB_DIR`. Keep the filenames simple (e.g. `diff-main.go.txt`); the JSON references them by name.
+Diffs come from the working tree after the fixes, so the coverage marks land on the lines the reader sees. For each changed file (`git diff --name-status -M $BASE`), write `git diff $BASE -- <path>` to `$INPUTS/<name>.txt`. Files listed by `git ls-files --others --exclude-standard -z` are untracked additions: write `git diff --no-index /dev/null <path>` for them (exit status 1 is normal) and badge them `Added`. Keep the filenames simple (e.g. `diff-main.go.txt`); the JSON references them by name.
+
+### Step 1b: Blast radius and classification
+
+Run after Phase 5 so the working tree holds the fixes:
+
+```bash
+python3 ~/.claude/scripts/blast_radius.py --repo . --snapshot working-tree --base "$BASE" --tools --out "$INPUTS"
+```
+
+This writes `$INPUTS/diagram.json` (the one-hop dependency graph) and `$INPUTS/diff-tests.json` (test declarations added and removed in changed test files). Reference both by file name; never transcribe them into the JSON. There is no forge lookup in this skill, so there is no baseline: new and removed tests always come from `diff-tests.json`.
+
+**Classification** — the change is `docs-only` when every changed file is documentation (`.md`, `.rst`, `.adoc`, anything under a `docs/` directory), a `README`, `CHANGELOG`, `LICENSE`, `CONTRIBUTING`, or `CODEOWNERS` file with any extension, an image, a lockfile, or an editor/VCS dotfile such as `.gitignore`. Anything else — CI workflows, build configuration, dependency manifests, `.txt` files elsewhere — makes it `code`.
 
 ### Step 2: Assemble `review.json`
 
@@ -177,6 +211,27 @@ Write a JSON file with this shape. Every top-level key is optional except `repo`
      "diff_file": "diff-publish.go.txt"}      // OR "diff": "<inline diff text>"
   ],
 
+  "change_classification": "code",            // from Step 1b: code | docs-only
+  "diagram_file": "diagram.json",             // written by blast_radius.py, relative to $INPUTS
+
+  "tests": {                                  // from Phase 5 and Step 1b; present for every code change,
+    "provenance": {                           // with no_data_reason set when nothing could be collected
+      "source":    "local",
+      "timestamp": "2026-09-04T10:22:00+10:00",
+      "snapshot":  {"sha": "<HEAD sha>", "dirty": true}   // dirty once fixes are applied
+    },
+    "baseline_provenance": null,              // always null: no forge lookup pre-push
+    "coverage_scope": "repository",           // repository (tier 3) | project-configured (tiers 1-2)
+    "run_outcome": "passed",                  // passed | failed | timed_out | not_run
+    "partial": false,                         // true when a timeout cut the run short
+    "junit":    ["junit.xml"],                // file names under $INPUTS
+    "coverage": ["coverage.out"],
+    "path_map": {"strip": null, "prepend": null},   // only when suffix matching cannot resolve coverage paths
+    "run_touched_files": [],                  // from the Phase 5 restore step
+    "diff_tests_file": "diff-tests.json",     // written by blast_radius.py
+    "no_data_reason": null                    // no tests found | runner not detected | required tool missing |
+  },                                          // local run failed | local run timed out
+
   "publish_metadata": {                       // always populate (see Phase 8).
     "title":    "Pre-push review: <branch>",
     "repoUrl":  "https://github.com/owner/repo",
@@ -187,13 +242,17 @@ Write a JSON file with this shape. Every top-level key is optional except `repo`
 }
 ```
 
+With `change_classification: "docs-only"` the Tests card, Tests section, and diagram are all omitted, whatever else is present.
+
 **Rendering contract** the script implements (you don't have to):
 - Pass-through HTML fields: `subtitle`, `at_a_glance` items, `verdict.detail`, every `explanation` panel, `decisions[].body`, `double_check[].body`. Write actual HTML here (e.g. `<p>`, `<ul>`, `<code>`).
 - Every other field is HTML-escaped automatically. Write plain text, no escaping.
-- Diffs are escaped and dropped into `<pre><code class="language-diff">…</code></pre>`; highlight.js paints them and the stylesheet overrides additions/deletions to the Prism Dark green/red tokens.
+- Diffs are escaped and coloured by the script's own stylesheet — no external assets. Added lines that have coverage data and zero hits carry an uncovered mark; added lines in files with no coverage data carry none.
 - The three-level explanation renders as CSS-only radio-button tabs in Beginner → Intermediate → Expert order. The first level present is checked by default.
 - Important-change cards render a magenta-bordered Takeaway callout and a cyan-bordered Rationale callout. `rationale_unknown: true` swaps the Rationale for a warning-bordered "Open question" callout. `rationale_inferred: true` appends a muted `(inferred — not stated by the author)`.
 - Findings counts (raised / fixed / skipped) are derived from the `status` field.
+- `tests` renders a Tests card in the overview grid (pass rate, new tests, diff coverage) and a Tests section: provenance, availability of run / JUnit / coverage / baseline as independent states, totals with the flaky count, failed tests with messages redacted for secrets and truncated to 500 characters, new and removed tests by declaration name from `diff_tests_file` (labelled diff-derived), a per-file diff-coverage table, touched files, and any warnings. With no readable results it renders a no-data card from `no_data_reason`.
+- `diagram_file` renders the Blast radius section as inline SVG before the per-file diffs: dependents, changed files, dependencies, grouped by package or directory, changed nodes linked to their diff. Test files leave the side columns, packages with more than 3 expansion-only files collapse, side columns cap at 15 nodes. An absent or invalid file warns and omits the section.
 - The TOC, overview cards, and per-section anchors are generated automatically; sections with no data are dropped.
 - `publish_metadata` is emitted as a `<script type="application/json" id="review-meta">` block in `<head>`, JSON-encoded with `</` escaped. Required by `pulsar publish` (see `docs/agent-contract.md` in the pulsar repo); harmless in browsers when present, ignored when absent.
 
@@ -201,16 +260,20 @@ Write a JSON file with this shape. Every top-level key is optional except `repo`
 
 ```bash
 python3 ~/.claude/scripts/build_review_html.py \
-  --data    /path/to/review.json \
+  --data    "$INPUTS/review.json" \
   --output  /path/to/pre-push-review.html \
-  --diff-dir /path/to/diff-fragments     # defaults to the JSON file's directory
+  --diff-dir "$INPUTS"
 ```
 
-The script prints the output path on success. Surface that path to the user so they can open it in a browser. If the JSON is malformed or a referenced diff fragment is missing, the script still renders the page — missing diffs become a `(diff fragment 'name.txt' missing)` placeholder so the rest of the review remains usable.
+Always pass `--diff-dir` explicitly; every file the JSON references (fragments, JUnit, coverage, `diagram.json`, `diff-tests.json`) is resolved against it. The script prints the output path on success. Surface that path to the user so they can open it in a browser.
 
-### When to edit the script vs the SKILL.md
+**Error handling.** Missing diff fragments show as `(diff fragment 'name.txt' missing)` placeholders. A test, coverage, or diagram input that is missing, malformed, not UTF-8, over 50 MB, or XML with a `DOCTYPE` prints a `warning:` line naming the file, is listed in the Tests section, and the rest of the page still renders with exit status 0. A malformed or unreadable `review.json` does not render: the script prints one line naming the problem and exits non-zero, so fix the JSON and run it again.
 
-- **Edit the script** when you need a new card, callout colour, layout tweak, or theme adjustment. The Prism Dark palette lives in the `CSS` constant inside the script.
+**Severity floor.** When a `tests` block is present and the change is not docs-only, the script's last two stderr lines are `summary coverage: matched=N unmatched=N` and `summary tests: passed=N failed=N errored=N skipped=N flaky=N`. Grep stderr for the `summary tests:` prefix. If `failed` or `errored` is non-zero: set `verdict.tone` to `warning` unless it is already `error`, prepend the failure count to `verdict.detail` (e.g. "3 failing tests — "), raise `publish_metadata.severity` to `needs-changes` unless it is already `blocking`, and run the script again to the same output path. When the line is absent there is no test data and no floor applies. Flaky tests and coverage values never change the verdict or severity.
+
+### When to edit the renderer vs the SKILL.md
+
+- **Edit the renderer** (the `~/.claude/scripts/review_html/` package; `build_review_html.py` is only the command line) when you need a new card, callout colour, layout tweak, or theme adjustment. The Prism Dark palette lives in `review_html/css.py`; section markup in `sections.py`, the Tests section in `tests_section.py`, the diagram in `diagram.py`. Changes there are shared with `pr-review-html` and `pr-overview`; `make test` in the agentic-coding repo covers them.
 - **Edit the SKILL.md** when you change the JSON contract, the location-priority logic, or the upstream phase semantics.
 
 ### Populating `publish_metadata`
@@ -220,7 +283,7 @@ Always populate this field. Mapping rules:
 - `title`: human-readable, mirror the H1 (e.g. `Pre-push review: <branch>`).
 - `repoUrl`: from `git remote get-url origin`; the binary normalises SSH → HTTPS and strips `.git`.
 - `branch`: the current branch name. **Do not** set `pr` for a pre-push review — no PR exists yet.
-- `severity`: derive from the verdict tone and findings — `success`/no major findings → `lgtm`; `warning` with only nits → `suggestions`; major findings raised → `needs-changes`; blocking/security/correctness issues → `blocking`.
+- `severity`: derive from the verdict tone and findings — `success`/no major findings → `lgtm`; `warning` with only nits → `suggestions`; major findings raised → `needs-changes`; blocking/security/correctness issues → `blocking`. Failing or errored tests floor it at `needs-changes` (Step 3).
 - `summary`: 1–3 sentences leading with the headline finding (not "I reviewed X"). This is what shows up in the user's feed reader.
 
 ## Phase 8: Publish

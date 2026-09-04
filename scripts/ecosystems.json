@@ -8,9 +8,21 @@
       {"regex": "^\\s*(?:import\\s+)?(?:[\\w.]+\\s+)?\"([^\"]+)\"", "resolve": "unit"}
     ],
     "tool": {"name": "go list", "deps": "go list -json ./...", "format": "go-list-json", "granularity": "package"},
+    "runners": [
+      {
+        "name": "gotestsum",
+        "detect": {"files": ["go.mod"]},
+        "recipe": "gotestsum --junitfile {junit} -- -coverprofile={coverage} -coverpkg=./... ./...",
+        "requires": ["go", "gotestsum"],
+        "coverage_format": "coverprofile",
+        "install": "go mod download",
+        "junit_flags": ["--junitfile"]
+      }
+    ],
     "notes": [
       "Imports name packages, so scanned edges expand to every file in the package.",
-      "go list needs a resolvable module graph; when it fails the scanned edges stay in place with a warning."
+      "go list needs a resolvable module graph; when it fails the scanned edges stay in place with a warning.",
+      "gotestsum writes the JUnit file and go test writes the coverprofile even when tests fail."
     ]
   },
   "python": {
@@ -24,8 +36,21 @@
     ],
     "source_roots": [".", "src"],
     "index_files": ["__init__.py"],
+    "runners": [
+      {
+        "name": "pytest",
+        "detect": {"files": ["pytest.ini", "conftest.py", "pyproject.toml", "setup.cfg", "tox.ini"]},
+        "recipe": "python3 -m pytest --junitxml={junit} --cov --cov-report=xml:{coverage}",
+        "requires": ["python3", "pytest"],
+        "coverage_format": "cobertura",
+        "install": "python3 -m pip install -e . pytest pytest-cov",
+        "junit_flags": ["--junitxml", "--junit-xml"]
+      }
+    ],
     "notes": [
-      "Absolute imports resolve under the repository root and src/; namespace packages elsewhere yield no edge."
+      "Absolute imports resolve under the repository root and src/; namespace packages elsewhere yield no edge.",
+      "The recipe needs pytest-cov; when it is not installed drop the two --cov flags, run without coverage, and leave the coverage list empty.",
+      "The install line assumes a pyproject.toml or setup.py; a project that installs from requirements files needs its own install command."
     ]
   },
   "typescript": {
@@ -38,8 +63,32 @@
     ],
     "index_files": ["index.ts", "index.tsx", "index.js"],
     "extension_map": {".js": [".ts", ".tsx", ".js"], ".jsx": [".tsx", ".jsx"]},
+    "runners": [
+      {
+        "name": "vitest",
+        "detect": {"files": ["vitest.config.*", "vitest.workspace.*"]},
+        "recipe": "npx --no-install vitest run --reporter=junit --outputFile={junit} --coverage --coverage.reporter=lcov --coverage.reportsDirectory={inputs}/cov",
+        "requires": ["npx"],
+        "coverage_format": "lcov",
+        "install": "npm ci",
+        "junit_flags": ["--reporter=junit", "--reporter junit"]
+      },
+      {
+        "name": "jest",
+        "detect": {"files": ["jest.config.*"], "package_json_keys": ["jest"]},
+        "recipe": "npx --no-install jest --ci --reporters=default --reporters=jest-junit --coverage --coverageReporters=lcov --coverageDirectory={inputs}/cov",
+        "requires": ["npx"],
+        "coverage_format": "lcov",
+        "install": "npm ci",
+        "junit_flags": ["--reporters=jest-junit", "--reporters jest-junit"],
+        "env": {"JEST_JUNIT_OUTPUT_FILE": "{junit}"}
+      }
+    ],
     "notes": [
-      "Only relative imports resolve; path aliases from tsconfig paths yield no edge."
+      "Only relative imports resolve; path aliases from tsconfig paths yield no edge.",
+      "Both runners write lcov to {inputs}/cov/lcov.info; reference that file as the coverage input.",
+      "npx --no-install fails rather than downloading a runner the project does not declare; vitest coverage needs @vitest/coverage-v8 or @vitest/coverage-istanbul, and jest needs jest-junit, both as project dependencies.",
+      "A repository using pnpm or yarn needs the matching install command in place of npm ci."
     ]
   },
   "swift": {
@@ -50,9 +99,22 @@
     "imports": [
       {"regex": "^\\s*(?:@testable\\s+)?import\\s+(\\w+)", "resolve": "unit"}
     ],
+    "runners": [
+      {
+        "name": "swift test",
+        "detect": {"files": ["Package.swift"]},
+        "recipe": "swift test --enable-code-coverage --xunit-output {junit} && xcrun llvm-cov export -format=lcov -instr-profile .build/debug/codecov/default.profdata .build/debug/*.xctest/Contents/MacOS/*PackageTests > {coverage}",
+        "requires": ["swift", "xcrun"],
+        "coverage_format": "lcov",
+        "install": "swift package resolve",
+        "junit_flags": ["--xunit-output"]
+      }
+    ],
     "notes": [
       "Swift files inside one target never import each other, so only cross-target edges appear.",
-      "Xcode projects without Sources/<Target> yield no unit and fall to directory grouping."
+      "Xcode projects without Sources/<Target> yield no unit and fall to directory grouping.",
+      "The xctest bundle path in the recipe is the macOS layout; on Linux the test binary is .build/debug/*PackageTests.xctest itself. Coverage is exported only when the tests pass, the JUnit file is written either way.",
+      "Swift 6 writes Swift Testing (@Test) results to a second file beside {junit} with a -swift-testing suffix; reference both files as JUnit inputs."
     ]
   },
   "rust": {
@@ -66,9 +128,23 @@
     ],
     "source_roots": ["src"],
     "index_files": ["mod.rs"],
+    "runners": [
+      {
+        "name": "cargo nextest",
+        "detect": {"files": ["Cargo.toml"]},
+        "recipe": "cargo llvm-cov nextest --workspace --lcov --output-path {coverage} --config-file {inputs}/nextest.toml",
+        "requires": ["cargo", "cargo-nextest", "cargo-llvm-cov"],
+        "coverage_format": "lcov",
+        "install": "cargo fetch",
+        "junit_flags": ["--config-file"],
+        "config_files": {"nextest.toml": "[profile.default.junit]\npath = \"{junit}\"\n"}
+      }
+    ],
     "notes": [
       "use crate:: resolves under src/ at the repository root; workspace crates elsewhere yield no edge.",
-      "#[cfg(test)] modules inside a source file are not flagged as test files."
+      "#[cfg(test)] modules inside a source file are not flagged as test files.",
+      "nextest emits JUnit only through its config file, so a Makefile target passing --config-file counts as a JUnit recipe only when the named file sets profile.<name>.junit.path.",
+      "cargo llvm-cov needs the llvm-tools-preview rustup component; cargo-nextest and cargo-llvm-cov are separate installs."
     ]
   }
 }

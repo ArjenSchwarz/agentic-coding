@@ -110,7 +110,7 @@ One row per language, read by `blast_radius.py` and by the review skills. Keys t
 | `tool` | `{"name", "deps", "format": "go-list-json" \| "pairs", "granularity"}`; `pairs` output is one `from<TAB>to` line per edge |
 | `notes` | known holes in the row, shown to the agent |
 
-Runner recipes (`runners[]`) that tell the skills how to emit JUnit XML and coverage live on the same rows and are read by the agent, not the script.
+Runner recipes (`runners[]`) that tell the skills how to emit JUnit XML and coverage live on the same rows and are read by the agent, not the script. Each runner has `name`, `detect` (`files` globs and/or `package_json_keys`), `recipe`, `requires` (binaries that must be on PATH), `coverage_format` (`lcov`, `cobertura`, or `coverprofile`), `install`, `junit_flags` (the flags a Makefile target must contain to count as emitting JUnit), and optionally `env` and `config_files` (templates written under the inputs directory). Recipes, env values, and templates use only the placeholders `{junit}`, `{coverage}`, and `{inputs}`. `scripts/tests/test_ecosystems.py` checks both key sets.
 
 ### copilot-pr-comments.sh
 

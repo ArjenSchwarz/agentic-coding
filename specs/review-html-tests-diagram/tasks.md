@@ -192,21 +192,21 @@ references:
 
 ## Ecosystem file and skills
 
-- [ ] 22. Write a schema validation test for ecosystems.json covering script and runner keys <!-- id:vt4kkn8 -->
+- [x] 22. Write a schema validation test for ecosystems.json covering script and runner keys <!-- id:vt4kkn8 -->
   - Assert every row has extensions, test_files, unit, and either imports or notes; every regex compiles; test_decl has at most one group; every runner has name, detect, recipe, requires, coverage_format in {lcov, cobertura, coverprofile}, install, junit_flags; recipes only use the placeholders {junit}, {coverage}, {inputs}; env and config_files are objects when present; tool has deps and granularity
   - Blocked-by: vt4kkmy (Implement blast_radius.py and the script-read rows of ecosystems.json)
   - Stream: 3
   - Requirements: [1.5](requirements.md#1.5), [1.6](requirements.md#1.6), [4.4](requirements.md#4.4)
   - References: scripts/ecosystems.json
 
-- [ ] 23. Add the runners, notes, and detection rules to ecosystems.json to pass the schema test <!-- id:vt4kkn9 -->
+- [x] 23. Add the runners, notes, and detection rules to ecosystems.json to pass the schema test <!-- id:vt4kkn9 -->
   - Runners per the design: gotestsum for Go; pytest with --junitxml and --cov-report=xml; vitest and jest with detection rules, `npx --no-install`, and JEST_JUNIT_OUTPUT_FILE; swift test with --xunit-output plus llvm-cov export; cargo nextest with a nextest.toml config_files template and cargo llvm-cov
   - Add notes for the Swift same-target and Xcode holes and the go list failure behaviour
   - Blocked-by: vt4kkn8 (Write a schema validation test for ecosystems.json covering script and runner keys)
   - Stream: 3
   - Requirements: [1.5](requirements.md#1.5), [1.6](requirements.md#1.6)
 
-- [ ] 24. Update the pr-review-html skill for collection, diagram, JSON blocks, and severity floor <!-- id:vt4kkna -->
+- [x] 24. Update the pr-review-html skill for collection, diagram, JSON blocks, and severity floor <!-- id:vt4kkna -->
   - Phase 1: record headRefOid, isCrossRepository, baseRefName; merge base after checkout; disclosure sentence that Phases 4 and 5 execute the branch's install scripts and tests, fork PRs included
   - Phase 5: recipe selection tiers reading Makefile text, run once into $INPUTS with the 600,000 ms budget, restore procedure with pre-run copies, timed_out verdict wording
   - Phase 7: fragments from `git diff <merge-base> -- <path>` and `/dev/null` for untracked files; baseline lookup; blast_radius.py invocation with --tools; tests block, diagram_file, change_classification, diff_tests_file; severity floor via the `summary tests:` line and second render
@@ -216,7 +216,7 @@ references:
   - Requirements: [1.1](requirements.md#1.1), [1.5](requirements.md#1.5), [1.6](requirements.md#1.6), [1.7](requirements.md#1.7), [1.8](requirements.md#1.8), [1.11](requirements.md#1.11), [1.12](requirements.md#1.12), [1.13](requirements.md#1.13), [3.10](requirements.md#3.10), [3.11](requirements.md#3.11), [3.12](requirements.md#3.12), [4.1](requirements.md#4.1), [6.2](requirements.md#6.2), [6.4](requirements.md#6.4)
   - References: claude/skills/pr-review-html/SKILL.md
 
-- [ ] 25. Update the pr-overview skill for CI artifacts, the worktree fallback, baseline, diagram, and JSON blocks <!-- id:vt4kknb -->
+- [x] 25. Update the pr-overview skill for CI artifacts, the worktree fallback, baseline, diagram, and JSON blocks <!-- id:vt4kknb -->
   - Phase 1: pin headRefOid; fetch refs/pull/<n>/head and verify FETCH_HEAD; diffs from the pinned SHA or the compare API without a clone, noting omitted patches; replace the `gh api` file-reading paragraph; read-only statement gains the 1.3 sentence and the .git ref note
   - Phase 1b: gh commands with -R and --paginate, artifact size cap, sniffing, `<run_id>-<artifact>--<basename>` naming, ordered CI-state rules, token-set job attribution, pending_runs; worktree fallback block with $WT, prune, status capture, blast_radius --tools before removal, removal on timeout
   - Phase 6: baseline with the is-ancestor exit-128 rule and compare-API fallback; blast_radius without --tools when 1b produced no diagram, --remote without a clone; JSON blocks; severity floor
@@ -226,7 +226,7 @@ references:
   - Requirements: [1.2](requirements.md#1.2), [1.3](requirements.md#1.3), [1.4](requirements.md#1.4), [1.5](requirements.md#1.5), [1.6](requirements.md#1.6), [1.7](requirements.md#1.7), [1.8](requirements.md#1.8), [1.9](requirements.md#1.9), [1.10](requirements.md#1.10), [1.11](requirements.md#1.11), [1.12](requirements.md#1.12), [1.13](requirements.md#1.13), [1.14](requirements.md#1.14), [1.15](requirements.md#1.15), [3.10](requirements.md#3.10), [3.11](requirements.md#3.11), [3.12](requirements.md#3.12), [4.1](requirements.md#4.1), [4.12](requirements.md#4.12), [6.2](requirements.md#6.2), [6.4](requirements.md#6.4)
   - References: claude/skills/pr-overview/SKILL.md
 
-- [ ] 26. Update the pre-push-review skill for the local run, diagram, JSON blocks, and severity floor <!-- id:vt4kknc -->
+- [x] 26. Update the pre-push-review skill for the local run, diagram, JSON blocks, and severity floor <!-- id:vt4kknc -->
   - Phase 5: same recipe selection, single run, restore, and timeout wording as pr-review-html
   - Phase 7: untracked files as added with /dev/null fragments; blast_radius.py with --snapshot working-tree --base $BASE --tools; tests block without baseline; diff_tests_file; change_classification; severity floor
   - Remove the claim that malformed JSON still renders; $INPUTS definition; --diff-dir; drop the highlight.js claim; when-to-edit paragraph

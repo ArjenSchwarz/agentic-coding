@@ -15,7 +15,6 @@ from pathlib import Path
 from .warnings import Warnings
 
 MAX_INPUT_BYTES = 50 * 1024 * 1024
-DOCTYPE_SCAN_BYTES = 64 * 1024
 
 
 def read_guarded(path: Path, warnings: Warnings, xml: bool = False) -> str | None:
@@ -28,7 +27,9 @@ def read_guarded(path: Path, warnings: Warnings, xml: bool = False) -> str | Non
     except OSError as exc:
         warnings.add(f"{path.name}: cannot read ({exc.strerror or exc})")
         return None
-    if xml and b"<!DOCTYPE" in raw[:DOCTYPE_SCAN_BYTES]:
+    # The whole buffer, not a window: comments and processing instructions
+    # may precede the DOCTYPE, so a window could be padded past.
+    if xml and b"<!DOCTYPE" in raw:
         warnings.add(f"{path.name}: skipped, XML contains a DOCTYPE declaration")
         return None
     try:

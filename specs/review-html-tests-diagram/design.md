@@ -148,7 +148,7 @@ Skill-side rule in each SKILL.md. The renderer prints, as its last two stderr li
 def read_guarded(path: Path, warnings: Warnings, xml: bool = False) -> str | None
 ```
 
-Rejects by `stat` over 50 MB, decodes UTF-8 with a warning on failure, and when `xml` scans the first 64 KB for `<!DOCTYPE` (which must precede the root element) and rejects on a match. Every input read (JUnit, coverage, baseline files, diff fragments, `diagram.json`, `diff-tests.json`) goes through it.
+Rejects by `stat` over 50 MB, decodes UTF-8 with a warning on failure, and when `xml` scans the whole buffer for `<!DOCTYPE` and rejects on a match (comments and processing instructions may precede the declaration, so a fixed window could be padded past). Every input read (JUnit, coverage, baseline files, diff fragments, `diagram.json`, `diff-tests.json`) goes through it.
 
 ### `review_html/warnings.py`
 

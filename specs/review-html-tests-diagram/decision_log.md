@@ -89,6 +89,7 @@
 | Q83 | 2026-09-05 | With no coverage input parsed, the per-file diff-coverage table, overall coverage, and unmatched report are omitted and the stderr line reports matched=0 unmatched=0 | A table of all "no coverage data" rows says nothing the availability line does not already say |
 | Q84 | 2026-09-05 | The stderr coverage line carries counts only; per-file unmatched reasons live in the Tests section | The skills grep one line for the floor; per-file reasons on stderr would be noise no skill reads |
 | Q85 | 2026-09-05 | Files with no ecosystem row are test files only by whole-token name (`test_x`, `x_test`, `x.test.ts`, `x.spec.js`, `XTests.swift`, `conftest.py`) or a parent directory named `test`, `tests`, `__tests__`, or `spec` | A substring rule flagged every file under `specs/` and `docs/testing.md` as tests, excluding them from the diagram's side columns and listing them as unpatterned |
+| Q86 | 2026-09-05 | `read_guarded` scans the whole buffer for `<!DOCTYPE`, not the first 64 KB | XML comments and processing instructions may precede the declaration, so a fixed window is bypassed by padding; the buffer is already in memory and the scan is a substring search |
 
 ## Decision 1: Constrained pure-SVG layout instead of Graphviz
 

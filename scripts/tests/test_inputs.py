@@ -59,7 +59,22 @@ class ReadGuardedTest(unittest.TestCase):
         self.assertIn("huge.xml", self.warnings.items[0])
         self.assertIn("50 MB", self.warnings.items[0])
 
-    def test_rejects_doctype_in_first_64_kb_when_xml(self) -> None:
+    def test_rejects_doctype_after_more_than_64_kb_of_comment_when_xml(self) -> None:
+        # Comments and processing instructions may precede the DOCTYPE, so the
+        # scan covers the whole buffer; a 64 KB window could be padded past.
+        path = self.dir / "padded.xml"
+        padding = "<!-- " + "y" * 70_000 + " -->\n"
+        path.write_text(
+            '<?xml version="1.0"?>\n' + padding +
+            '<!DOCTYPE lolz [<!ENTITY lol "lol">]>\n<testsuites/>\n',
+            encoding="utf-8",
+        )
+        self.assertGreater(path.stat().st_size, 64 * 1024)
+        self.assertIsNone(read_guarded(path, self.warnings, xml=True))
+        self.assertEqual(len(self.warnings.items), 1)
+        self.assertIn("DOCTYPE", self.warnings.items[0])
+
+    def test_rejects_doctype_when_xml(self) -> None:
         path = self.dir / "evil.xml"
         padding = "<!-- " + "x" * 60_000 + " -->\n"
         path.write_text(

@@ -9,9 +9,9 @@ Review and fix unpushed commits before they reach the remote repository.
 
 ## Phase 1: Identify Changes
 
-Determine which commits haven't been pushed to the remote repository. Use `git diff origin/<branch>..HEAD` to get the full diff of unpushed changes. Show the user which commits will be reviewed.
+Determine which commits haven't been pushed to the remote repository. Record the base as the merge base, `BASE=$(git merge-base origin/<branch> HEAD)`, and use `git diff $BASE..HEAD` to get the full diff of unpushed changes; a two-dot diff straight against `origin/<branch>` shows reverse changes when the branch is behind it. Show the user which commits will be reviewed.
 
-If there is no remote tracking branch yet, diff against `origin/main`. Record the base as `BASE` (`origin/<branch>` or `origin/main`); Phase 7 compares the working tree against it.
+If there is no remote tracking branch yet, use `origin/main` in place of `origin/<branch>`. Phase 7 compares the working tree against `BASE`.
 
 **Working directory.** Every generated input — diff fragments, JUnit and coverage files, the diagram, the review JSON itself — lives in `$INPUTS`, outside the working tree so nothing lands in `git status`:
 

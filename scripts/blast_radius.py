@@ -38,7 +38,13 @@ STATUS_CODES = {"A": "added", "M": "modified", "D": "deleted", "R": "renamed",
                 "C": "added", "T": "modified"}
 REMOTE_STATUSES = {"added": "added", "modified": "modified", "removed": "deleted",
                    "renamed": "renamed", "copied": "added", "changed": "modified"}
-_FALLBACK_TEST = re.compile(r"test|spec", re.IGNORECASE)
+# Without an ecosystem row: test-looking file names (test_x, x_test, x.test.ts,
+# x.spec.js, XTests.swift, conftest.py) or a parent directory that is itself a
+# test directory. Whole tokens only, so ``specs/`` and ``docs/testing.md`` are
+# not tests.
+_FALLBACK_TEST_NAME = re.compile(
+    r"^(test[_-]|conftest\.py$)|[_-]tests?\.\w+$|\.(test|spec)\.\w+$|Tests?\.\w+$")
+_FALLBACK_TEST_DIRS = frozenset({"test", "tests", "__tests__", "spec"})
 
 
 def warn(message: str) -> None:
@@ -105,7 +111,7 @@ def is_test_file(path: str, row) -> bool:
         return any(p.search(path) for p in row.test_files)
     name = posixpath.basename(path)
     parent = posixpath.basename(posixpath.dirname(path))
-    return bool(_FALLBACK_TEST.search(name) or _FALLBACK_TEST.search(parent))
+    return bool(_FALLBACK_TEST_NAME.search(name)) or parent in _FALLBACK_TEST_DIRS
 
 
 # --- changed files ----------------------------------------------------------
@@ -279,7 +285,9 @@ class WorkingTree(Tree):
     def __init__(self, repo: Path) -> None:
         super().__init__()
         self.repo = repo
-        listing = git(repo, "ls-files", "-z") + git(repo, "ls-files", "--others", "--exclude-standard", "-z")
+        tracked = git(repo, "ls-files", "-z")
+        self.tracked = set(tracked.split("\0"))
+        listing = tracked + git(repo, "ls-files", "--others", "--exclude-standard", "-z")
         for path in listing.split("\0"):
             if not path:
                 continue
@@ -483,12 +491,17 @@ class Resolver:
         return None
 
 
+def _groups(m: re.Match) -> list:
+    """The match's participating capture groups, in order."""
+    return [g for g in m.groups() if g is not None]
+
+
 def scan_imports(text: str, row: Row) -> list:
     """``[(import string, spec), ...]`` in source order."""
     out = []
     for spec in row.imports:
         for m in spec.regex.finditer(text):
-            groups = [g for g in m.groups() if g is not None]
+            groups = _groups(m)
             if not groups:
                 name = m.group(0)
             elif len(groups) == 1:
@@ -567,7 +580,7 @@ def tool_edges(row: Row, repo: Path) -> list:
 def _decl_names(text: str, row: Row) -> set:
     names = set()
     for m in row.test_decl.finditer(text):
-        groups = [g for g in m.groups() if g is not None]
+        groups = _groups(m)
         if groups:
             names.add(groups[0])
         else:
@@ -663,10 +676,11 @@ def _build(args, eco, repo, changed, patches, snap_tree, base_tree, budget) -> t
     if failed:
         column_status = {"dependents": "failed: " + failed, "dependencies": "failed: " + failed}
     else:
-        def add_edge(a: str, b: str, method: str, granularity: str, tree_label: str) -> None:
+        def add_edge(a: str, b: str, method: str, granularity: str, tree_label: str,
+                     replace: bool = False) -> None:
             if a == b or (a not in changed_set and b not in changed_set):
                 return
-            if (a, b) in graph.edges:
+            if (a, b) in graph.edges and not replace:
                 return
             graph.edges[(a, b)] = {"from": a, "to": b, "method": method,
                                    "granularity": granularity, "tree": tree_label}
@@ -734,17 +748,11 @@ def _build(args, eco, repo, changed, patches, snap_tree, base_tree, budget) -> t
                     warn(f"tool {tool_name} failed, keeping scanned edges: {exc}")
                     continue
                 for a, b in pairs:
-                    if a == b or (a not in changed_set and b not in changed_set):
-                        continue
-                    graph.edges[(a, b)] = {"from": a, "to": b, "method": f"tool:{tool_name}",
-                                           "granularity": row.tool.get("granularity", "package"),
-                                           "tree": "snapshot"}
-                    ensure_node(a, "snapshot")
-                    ensure_node(b, "snapshot")
+                    add_edge(a, b, f"tool:{tool_name}", row.tool.get("granularity", "package"),
+                             "snapshot", replace=True)
 
     # Diff-derived tests.
     added, removed, unpatterned = set(), set(), []
-    tracked = None
     for c in changed:
         row = eco.row_for(c.path)
         if not is_test_file(c.path, row):
@@ -755,9 +763,9 @@ def _build(args, eco, repo, changed, patches, snap_tree, base_tree, budget) -> t
         if args.remote:
             diff = patches.get(c.path, "")
         else:
-            if tracked is None:
-                tracked = set(git(repo, "ls-files", "-z").split("\0"))
-            is_tracked = c.path in tracked or c.status == "deleted" or args.snapshot != "working-tree"
+            # A working-tree snapshot is a WorkingTree, which lists the tracked files.
+            is_tracked = (args.snapshot != "working-tree" or c.status == "deleted"
+                          or c.path in snap_tree.tracked)
             diff = local_diff(repo, args.base, args.snapshot, c, is_tracked)
         a, r = diff_test_names(diff, row)
         added |= a

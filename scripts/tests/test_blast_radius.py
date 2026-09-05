@@ -584,7 +584,11 @@ class ParserTest(unittest.TestCase):
             "web/lib/x.test.ts": True, "web/__tests__/y.ts": True, "web/lib/x.ts": False,
             "Tests/CoreTests/CoreTests.swift": True, "Sources/Core/core.swift": False,
             "tests/integration.rs": True, "src/lib.rs": False,
-            "spec/foo_spec.rb": True, "lib/foo.rb": False, "docs/testing.md": True,
+            "spec/foo_spec.rb": True, "lib/foo.rb": False, "docs/testing.md": False,
+            # No row: whole-token names and directories only.
+            "specs/review-html-tests-diagram/design.md": False, "specs/overview.md": False,
+            "contest/latest.md": False, "lib/foo-test.sh": True, "lib/foo.spec.rb": True,
+            "app/test/Helpers.kt": True, "Sources/App/AppTests.kt": True,
         }
         for path, expected in cases.items():
             with self.subTest(path=path):

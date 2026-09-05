@@ -14,7 +14,7 @@ PATTERNS: list[re.Pattern] = [
     re.compile(r"AKIA[0-9A-Z]{16}"),
     re.compile(r"gh[pousr]_[A-Za-z0-9]{36,}"),
     re.compile(r"xox[abprs]-[A-Za-z0-9-]+"),
-    re.compile(r"(?i)[A-Za-z0-9_]*(key|token|secret|password|passwd|pwd)\s*[=:]\s*\S+"),
+    re.compile(r"""(?i)[A-Za-z0-9_]*(key|token|secret|password|passwd|pwd)["']?\s*[=:]\s*\S+"""),
     re.compile(r"[a-z][a-z0-9+.-]*://[^/\s:@]+:[^@\s]+@"),
     re.compile(r"-----BEGIN [A-Z ]*PRIVATE KEY-----[\s\S]*?-----END [A-Z ]*PRIVATE KEY-----"),
 ]

@@ -333,7 +333,7 @@ class SectionTest(SectionCase):
         self.assertIn("Coverage: none", html)
         self.assertEqual(result.uncovered, {})
         self.assertEqual(result.counts["matched"], 0)
-        self.assertEqual(result.counts["unmatched"], 4)
+        self.assertEqual(result.counts["unmatched"], 0)
 
     def test_unmatched_report(self) -> None:
         result = self.build(block())

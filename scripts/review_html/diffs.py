@@ -51,7 +51,11 @@ def _walk(diff: str) -> Iterator[tuple[str, str, int | None]]:
     ``new_file_number`` is set only on ``+`` lines and is the line's number in
     the new file, tracked from the ``@@`` headers. Context and ``+`` lines
     advance the counter; ``-`` lines, headers, and ``\\`` markers do not.
-    Line classes match the renderer's historic prefix rules exactly.
+    Line classes match the renderer's historic prefix rules, except that
+    ``+++`` and ``---`` are file headers only before a file section's first
+    ``@@``; inside a hunk they are added or removed lines whose content
+    happens to start with ``++`` or ``--``. A ``diff --git`` line starts a
+    new file section.
     """
     if not diff:
         return
@@ -61,7 +65,10 @@ def _walk(diff: str) -> Iterator[tuple[str, str, int | None]]:
     next_new: int | None = None
     for line in lines:
         number = None
-        if line.startswith(("+++", "---")):
+        if line.startswith("diff --git "):
+            cls = "diff-context"
+            next_new = None
+        elif next_new is None and line.startswith(("+++", "---")):
             cls = "diff-file-header"
         elif line.startswith("@@"):
             cls = "diff-hunk"

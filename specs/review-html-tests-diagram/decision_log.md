@@ -86,6 +86,9 @@
 | Q80 | 2026-09-04 | The Go runner requires `go` as well as `gotestsum`; the Swift coverage export is `&&`-chained after `swift test` | gotestsum cannot run without `go`; llvm-cov has no profile to export when the test binary did not build, while the JUnit file is written either way |
 | Q81 | 2026-09-04 | Local-source `tests.provenance` in pr-review-html and pre-push-review omits `ci_state` and `fallback_state` | Neither skill queries head CI; the renderer reads both keys with `.get` |
 | Q82 | 2026-09-04 | `git diff --no-index` exits 1 when the files differ and the skills say so | An agent that treats exit 1 as failure would drop every untracked file's fragment |
+| Q83 | 2026-09-05 | With no coverage input parsed, the per-file diff-coverage table, overall coverage, and unmatched report are omitted and the stderr line reports matched=0 unmatched=0 | A table of all "no coverage data" rows says nothing the availability line does not already say |
+| Q84 | 2026-09-05 | The stderr coverage line carries counts only; per-file unmatched reasons live in the Tests section | The skills grep one line for the floor; per-file reasons on stderr would be noise no skill reads |
+| Q85 | 2026-09-05 | Files with no ecosystem row are test files only by whole-token name (`test_x`, `x_test`, `x.test.ts`, `x.spec.js`, `XTests.swift`, `conftest.py`) or a parent directory named `test`, `tests`, `__tests__`, or `spec` | A substring rule flagged every file under `specs/` and `docs/testing.md` as tests, excluding them from the diagram's side columns and listing them as unpatterned |
 
 ## Decision 1: Constrained pure-SVG layout instead of Graphviz
 

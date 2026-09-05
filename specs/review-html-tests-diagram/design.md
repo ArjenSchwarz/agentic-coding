@@ -219,7 +219,7 @@ PATTERNS: list[re.Pattern]   # applied in order, each match replaced with "[reda
 def redact(text: str) -> str
 ```
 
-Patterns: `Bearer\s+[A-Za-z0-9\-._~+/]+=*`; `AKIA[0-9A-Z]{16}`; `gh[pousr]_[A-Za-z0-9]{36,}`; `xox[abprs]-[A-Za-z0-9-]+`; `(?i)[A-Za-z0-9_]*(key|token|secret|password|passwd|pwd)\s*[=:]\s*\S+`; `[a-z][a-z0-9+.-]*://[^/\s:@]+:[^@\s]+@`; `-----BEGIN [A-Z ]*PRIVATE KEY-----[\s\S]*?-----END [A-Z ]*PRIVATE KEY-----`. Redaction runs before truncation to 500 characters.
+Patterns: `Bearer\s+[A-Za-z0-9\-._~+/]+=*`; `AKIA[0-9A-Z]{16}`; `gh[pousr]_[A-Za-z0-9]{36,}`; `xox[abprs]-[A-Za-z0-9-]+`; `(?i)[A-Za-z0-9_]*(key|token|secret|password|passwd|pwd)["']?\s*[=:]\s*\S+`; `[a-z][a-z0-9+.-]*://[^/\s:@]+:[^@\s]+@`; `-----BEGIN [A-Z ]*PRIVATE KEY-----[\s\S]*?-----END [A-Z ]*PRIVATE KEY-----`. Redaction runs before truncation to 500 characters.
 
 ### `review_html/tests_section.py`
 

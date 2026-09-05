@@ -1,7 +1,6 @@
 """Page orchestration: turn a review JSON document into the final HTML."""
 from __future__ import annotations
 
-import json
 import sys
 from datetime import datetime, timezone
 from pathlib import Path
@@ -10,7 +9,8 @@ from .common import escape
 from .css import CSS
 from .diagram import render_diagram
 from .diffs import load_fragments
-from .inputs import read_guarded
+from .inputs import read_json
+from .junit import OUTCOMES
 from .sections import (
     build_toc,
     render_at_a_glance,
@@ -48,13 +48,8 @@ def build_diagram(data: dict, diff_dir: Path | None, warnings: Warnings) -> str:
     if diff_dir is None:
         warnings.add(f"{name}: diagram_file given but no diff directory to read it from")
         return ""
-    text = read_guarded(diff_dir / name, warnings)
-    if text is None:
-        return ""
-    try:
-        desc = json.loads(text)
-    except ValueError as exc:
-        warnings.add(f"{name}: diagram description is not valid JSON ({exc})")
+    desc = read_json(diff_dir / name, warnings, "diagram description")
+    if desc is None:
         return ""
     return render_diagram(desc, warnings)
 
@@ -145,6 +140,6 @@ def render(data: dict, diff_dir: Path | None) -> str:
     if tests:
         c = tests.counts
         print(f"summary coverage: matched={c['matched']} unmatched={c['unmatched']}", file=sys.stderr)
-        print(f"summary tests: passed={c['passed']} failed={c['failed']} errored={c['errored']} "
-              f"skipped={c['skipped']} flaky={c['flaky']}", file=sys.stderr)
+        tallies = " ".join(f"{o}={c[o]}" for o in OUTCOMES + ("flaky",))
+        print(f"summary tests: {tallies}", file=sys.stderr)
     return page

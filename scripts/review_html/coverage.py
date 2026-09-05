@@ -7,11 +7,10 @@ global passes, and only its last pass (and ``overall``) sums hits.
 from __future__ import annotations
 
 import posixpath
-import xml.etree.ElementTree as ET
 from dataclasses import dataclass
 from pathlib import Path
 
-from .inputs import read_guarded
+from .inputs import read_guarded, xml_root
 from .warnings import Warnings
 
 
@@ -115,13 +114,8 @@ def _parse_coverprofile(text: str, name: str, warnings: Warnings) -> Coverage:
 
 
 def _parse_cobertura(text: str, name: str, warnings: Warnings) -> Coverage:
-    try:
-        root = ET.fromstring(text)
-    except ET.ParseError as exc:
-        warnings.add(f"{name}: skipped, coverage XML is malformed ({exc})")
-        return []
-    if root.tag != "coverage":
-        warnings.add(f"{name}: skipped, root element is <{root.tag}>, not Cobertura <coverage>")
+    root = xml_root(text, name, warnings, ("coverage",), "coverage XML", "Cobertura <coverage>")
+    if root is None:
         return []
     sources = [s.text.strip() for s in root.iter("source") if s.text and s.text.strip()]
     cov: Coverage = []
@@ -149,12 +143,6 @@ def normalise(path: str) -> str:
     return posixpath.normpath(path.replace("\\", "/"))
 
 
-def _strip(path: str, prefix: str) -> str:
-    if path.startswith(prefix + "/"):
-        return path[len(prefix) + 1:]
-    return path
-
-
 def apply_path_map(cov: Coverage, strip: str | None, prepend: str | None) -> Coverage:
     """Normalise every path, then strip and prepend whole leading segments."""
     strip = normalise(strip) if strip else None
@@ -165,7 +153,7 @@ def apply_path_map(cov: Coverage, strip: str | None, prepend: str | None) -> Cov
         for p in e.paths:
             p = normalise(p)
             if strip:
-                p = _strip(p, strip)
+                p = p.removeprefix(strip + "/")
             if prepend:
                 p = normalise(f"{prepend}/{p}")
             paths.append(p)
@@ -176,13 +164,11 @@ def apply_path_map(cov: Coverage, strip: str | None, prepend: str | None) -> Cov
 # --- matching ---------------------------------------------------------------
 
 def _segments(path: str) -> tuple[str, ...]:
-    return tuple(normalise(path).split("/"))
+    return tuple(path.split("/"))
 
 
-def _residual(entry_path: str, changed: str) -> tuple[str, tuple[str, ...]] | None:
-    """Direction and uncovered segments when one path is a whole-segment suffix of the other."""
-    e = _segments(entry_path)
-    c = _segments(changed)
+def _residual(e: tuple[str, ...], c: tuple[str, ...]) -> tuple[str, tuple[str, ...]] | None:
+    """Direction and uncovered segments when one segment tuple is a whole-segment suffix of the other."""
     if len(e) > len(c) and e[-len(c):] == c:
         return ("entry", e[:-len(c)])
     if len(c) > len(e) and c[-len(e):] == e:
@@ -208,12 +194,24 @@ def match(cov: Coverage, changed: list[str]) -> tuple[dict[str, dict[int, int]],
     unmatched: dict[str, str] = {}
     norm = {c: normalise(c) for c in changed}
     epaths = [[normalise(p) for p in e.paths] for e in cov]
+    esegs = [[_segments(p) for p in paths] for paths in epaths]
     pool = set(range(len(cov)))
+    # Entry indexes by path (pass 1) and by last segment (pass 2): a
+    # whole-segment suffix relation needs equal last segments, so only
+    # those entries can hold a residual for a changed file.
+    by_path: dict[str, list[int]] = {}
+    by_base: dict[str, list[int]] = {}
+    for i, paths in enumerate(epaths):
+        for p in set(paths):
+            by_path.setdefault(p, []).append(i)
+        for base in {segs[-1] for segs in esegs[i]}:
+            by_base.setdefault(base, []).append(i)
 
     # 1. Exact.
     exact_files: dict[int, list[str]] = {}
-    for i in pool:
-        exact_files[i] = [c for c in changed if norm[c] in epaths[i]]
+    for c in changed:
+        for i in by_path.get(norm[c], ()):
+            exact_files.setdefault(i, []).append(c)
     for i, files in exact_files.items():
         if len(files) > 1:
             for c in files:
@@ -222,7 +220,7 @@ def match(cov: Coverage, changed: list[str]) -> tuple[dict[str, dict[int, int]],
     for c in changed:
         if c in unmatched:
             continue
-        hits = [i for i in pool if norm[c] in epaths[i]]
+        hits = [i for i in by_path.get(norm[c], ()) if i in pool]
         if hits:
             matched[c] = _merge([cov[i] for i in hits])
             pool.difference_update(hits)
@@ -232,9 +230,12 @@ def match(cov: Coverage, changed: list[str]) -> tuple[dict[str, dict[int, int]],
     pools: dict[str, dict[int, tuple[str, tuple[str, ...]]]] = {}
     for c in remaining:
         pools[c] = {}
-        for i in pool:
-            for p in epaths[i]:
-                residual = _residual(p, norm[c])
+        csegs = _segments(norm[c])
+        for i in by_base.get(csegs[-1], ()):
+            if i not in pool:
+                continue
+            for segs in esegs[i]:
+                residual = _residual(segs, csegs)
                 if residual is not None:
                     pools[c][i] = residual
                     break
@@ -280,13 +281,11 @@ def diff_coverage(added: set[int], hits: dict[int, int]) -> tuple[int, int] | No
 
 def overall(cov: Coverage) -> tuple[int, int]:
     """``(covered, instrumented)`` after merging entries by normalised primary path."""
-    by_path: dict[str, dict[int, int]] = {}
+    by_path: dict[str, list[Entry]] = {}
     for e in cov:
-        if not e.paths:
-            continue
-        merged = by_path.setdefault(normalise(e.paths[0]), {})
-        for n, h in e.hits.items():
-            merged[n] = merged.get(n, 0) + h
-    covered = sum(1 for hits in by_path.values() for h in hits.values() if h > 0)
-    instrumented = sum(len(hits) for hits in by_path.values())
+        if e.paths:
+            by_path.setdefault(normalise(e.paths[0]), []).append(e)
+    merged = [_merge(entries) for entries in by_path.values()]
+    covered = sum(1 for hits in merged for h in hits.values() if h > 0)
+    instrumented = sum(len(hits) for hits in merged)
     return covered, instrumented

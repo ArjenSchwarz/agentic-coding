@@ -11,18 +11,19 @@ import xml.etree.ElementTree as ET
 from dataclasses import dataclass
 from pathlib import Path
 
-from .inputs import read_guarded
+from .inputs import read_guarded, xml_root
 from .warnings import Warnings
 
 FLAKY_ELEMENTS = ("flakyFailure", "flakyError", "rerunFailure", "rerunError", "rerun")
 SUITE_TAGS = ("testsuites", "testsuite")
+OUTCOMES = ("passed", "failed", "errored", "skipped")
 
 
 @dataclass
 class Case:
     suite: str
     name: str
-    outcome: str        # passed | failed | skipped | errored
+    outcome: str        # one of OUTCOMES
     flaky: bool
     message: str
     source: str         # input file name, for job attribution
@@ -70,13 +71,8 @@ def _parse_one(path: Path, warnings: Warnings) -> list[Case]:
     text = read_guarded(path, warnings, xml=True)
     if text is None:
         return []
-    try:
-        root = ET.fromstring(text)
-    except ET.ParseError as exc:
-        warnings.add(f"{path.name}: skipped, JUnit XML is malformed ({exc})")
-        return []
-    if root.tag not in SUITE_TAGS:
-        warnings.add(f"{path.name}: skipped, root element is <{root.tag}>, not a JUnit suite")
+    root = xml_root(text, path.name, warnings, SUITE_TAGS, "JUnit XML", "a JUnit suite")
+    if root is None:
         return []
 
     source = path.name

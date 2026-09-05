@@ -54,10 +54,10 @@ python3 ~/.claude/scripts/build_review_html.py \
 
 **JSON schema**: see the docstring at the top of the script. Top-level keys are `repo`, `title`, `subtitle`, `metrics`, `verdict`, `at_a_glance`, `explanation` (beginner/intermediate/expert), `commits`, `important_changes`, `decisions`, `findings`, `double_check`, `files`. Empty sections are dropped from both the body and the table of contents.
 
-Optional keys: `diagram_file` names a `diagram.json` written by `blast_radius.py`, read relative to `--diff-dir`, and rendered as the Blast radius section (inline SVG, before the per-file diffs). `change_classification: "docs-only"` suppresses that section without a warning. An absent or invalid diagram file prints a warning to stderr, omits the section, and still exits 0.
+Optional keys: `tests` holds the test-results block (JUnit and coverage file names, provenance, jobs, artifacts; see the spec's design document) rendered as the Tests card and section. `diagram_file` names a `diagram.json` written by `blast_radius.py`, read relative to `--diff-dir`, and rendered as the Blast radius section (inline SVG, before the per-file diffs). `change_classification: "docs-only"` suppresses both the Tests and Blast radius sections without a warning. An absent or invalid diagram file prints a warning to stderr, omits the section, and still exits 0. A review JSON that cannot be read or parsed prints one `error:` line and exits 2.
 
 **Behavior**:
-- Renders the Prism Dark palette as inline CSS — fully self-contained except for the highlight.js CDN load for diff syntax colouring.
+- Renders the Prism Dark palette as inline CSS — fully self-contained, with no external assets.
 - Important-change cards render Takeaway (magenta) and Rationale (cyan) callouts, with an Open Question (warning) variant when `rationale_unknown: true`.
 - The three-level explanation renders as CSS-only radio-button tabs (no JS required).
 - Per-file diffs are collapsed `<details>` blocks. Missing diff fragments degrade to a placeholder rather than failing the render.

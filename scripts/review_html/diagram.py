@@ -62,7 +62,7 @@ FONT = 'ui-monospace, "SF Mono", Menlo, monospace'
 
 def budget(box_w: int, reserve: int = 0) -> int:
     """Largest label length L with (L + reserve) * ADV + 2 * PAD <= box_w."""
-    return int(math.floor((box_w - 2 * PAD) / ADV)) - reserve
+    return math.floor((box_w - 2 * PAD) / ADV) - reserve
 
 
 SIDE_BUDGET = budget(SIDE_BOX_W)                       # 37
@@ -208,19 +208,22 @@ def project(desc: dict) -> Projected:
         kept_paths.update(side_members[col])
     edges = {k: g for k, g in edges.items() if k[0] in kept_paths and k[1] in kept_paths}
 
-    def edge_count(p: str) -> int:
-        return sum(1 for (a, b) in edges if (a == p and b in changed) or (b == p and a in changed))
-
-    def all_package(p: str) -> bool:
-        return all(g == "package" for (a, b), g in edges.items()
-                   if (a == p and b in changed) or (b == p and a in changed))
+    # Per path: the number of edges to a changed node, and whether every
+    # such edge is package-granular (vacuously true with none).
+    edge_count: dict = {}
+    all_package: dict = {}
+    for (a, b), g in edges.items():
+        for p, other in ((a, b), (b, a)):
+            if other in changed:
+                edge_count[p] = edge_count.get(p, 0) + 1
+                all_package[p] = all_package.get(p, True) and g == "package"
 
     # Node objects; ``owner`` maps a path to the node that represents it.
     owner = {}
     columns = {}
     for p in sorted(changed):
         node = PNode(node_id(p), p, p, group_of[p], status_of[p], [],
-                     test_count[p], edge_count(p))
+                     test_count[p], edge_count.get(p, 0))
         owner[p] = node
     columns["changed"] = _group_nodes([owner[p] for p in changed])
 
@@ -231,19 +234,20 @@ def project(desc: dict) -> Projected:
         for p in side_members[col]:
             by_group.setdefault(group_of[p], []).append(p)
         for group, members in by_group.items():
-            collapsible = sorted(p for p in members if all_package(p))
-            singles = [p for p in members if p not in collapsible]
+            collapsible = sorted(p for p in members if all_package.get(p, True))
+            collapsed = set(collapsible)
+            singles = [p for p in members if p not in collapsed]
             if len(collapsible) > COLLAPSE_ABOVE:
                 node = PNode(node_id("\n".join(collapsible)), collapsible[0],
                              f"{group} ({len(collapsible)} files)", group, "collapsed",
-                             collapsible, 0, sum(edge_count(p) for p in collapsible))
+                             collapsible, 0, sum(edge_count.get(p, 0) for p in collapsible))
                 for p in collapsible:
                     owner[p] = node
                 nodes.append(node)
             else:
                 singles += collapsible
             for p in singles:
-                node = PNode(node_id(p), p, p, group, "unchanged", [], 0, edge_count(p))
+                node = PNode(node_id(p), p, p, group, "unchanged", [], 0, edge_count.get(p, 0))
                 owner[p] = node
                 nodes.append(node)
         # 3. Cap.
@@ -267,7 +271,7 @@ def project(desc: dict) -> Projected:
         if a in changed and b in changed:
             col = "changed"
         elif a in changed:
-            col = "dependents" if column_of[b] == "dependents" else "dependencies"
+            col = column_of[b]
         else:
             col = column_of[a]
         key = (src.id, dst.id)
@@ -344,6 +348,7 @@ class Layout:
     headers: list           # list[Header]
     width: int
     height: int
+    content_top: int        # y where the column contents start, below the header notes
 
 
 def _wrap(text: str, limit: int) -> list:
@@ -423,7 +428,7 @@ def layout(p: Projected) -> Layout:
                 x1, x2 = src.x, dst.x + dst.w
             d = f"M {_n(x1)} {_n(sy)} C {_n(mid)} {_n(sy)} {_n(mid)} {_n(dy)} {_n(x2)} {_n(dy)}"
         edges.append(EdgePath(e.src, e.dst, e.column, d))
-    return Layout(boxes, frames, edges, headers, CONTENT_W, height)
+    return Layout(boxes, frames, edges, headers, CONTENT_W, height, content_top)
 
 
 def _n(v: float) -> str:
@@ -449,7 +454,6 @@ def render_svg(p: Projected, lay: Layout) -> str:
         'markerWidth="7" markerHeight="7" orient="auto">'
         f'<path d="M 0 0 L 10 5 L 0 10 z" fill="{EDGE}"/></marker></defs>',
     ]
-    content_top = NOTES_Y + LINE_H * max(len(h.notes) for h in lay.headers)
     out.append('<g class="headers">')
     for h in lay.headers:
         x = COL_X[h.column] + PAD
@@ -457,7 +461,7 @@ def render_svg(p: Projected, lay: Layout) -> str:
         for i, note in enumerate(h.notes):
             out.append(_text(x, NOTES_Y + LINE_H * i, note, MUTED, cls="col-note"))
         for i, line in enumerate(h.reason):
-            out.append(_text(x, content_top + LINE_H * i + LINE_H / 2, line, MUTED, cls="col-reason"))
+            out.append(_text(x, lay.content_top + LINE_H * i + LINE_H / 2, line, MUTED, cls="col-reason"))
     out.append("</g>")
 
     out.append('<g class="frames">')

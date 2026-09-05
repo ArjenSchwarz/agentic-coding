@@ -38,6 +38,11 @@ class RedactTest(unittest.TestCase):
     def test_password_colon(self) -> None:
         self.assertEqual(redact("password: hunter2\nnext"), "[redacted]\nnext")
 
+    def test_quoted_json_key(self) -> None:
+        cleaned = redact('{"api_key": "sk-abc123"}')
+        self.assertIn("[redacted]", cleaned)
+        self.assertNotIn("sk-abc123", cleaned)
+
     def test_url_with_userinfo(self) -> None:
         self.assertEqual(redact("dial postgres://user:s3cret@db.internal:5432/app failed"),
                          "dial [redacted]db.internal:5432/app failed")

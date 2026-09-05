@@ -126,6 +126,14 @@ class AddedLinesTest(unittest.TestCase):
         self.assertEqual(added_lines(""), set())
         self.assertEqual(added_lines("(diff fragment 'x' missing)"), set())
 
+    def test_added_line_starting_with_plus_plus_is_not_a_header(self) -> None:
+        self.assertEqual(added_lines("@@ -1,2 +1,4 @@\n a\n+++i;\n+b\n c\n"), {2, 3})
+
+    def test_second_file_section_resets_the_counter(self) -> None:
+        diff = ("diff --git a/x b/x\n--- a/x\n+++ b/x\n@@ -1 +1,2 @@\n a\n+b\n"
+                "diff --git a/y b/y\n--- a/y\n+++ b/y\n@@ -5 +5,2 @@\n c\n+d\n")
+        self.assertEqual(added_lines(diff), {2, 6})
+
 
 class IsBinaryTest(unittest.TestCase):
     def test_binary_files_differ(self) -> None:
@@ -215,6 +223,16 @@ class RenderDiffTest(unittest.TestCase):
 
     def test_empty_uncovered_set_matches_none(self) -> None:
         self.assertEqual(render_diff(TWO_HUNKS, set()), render_diff(TWO_HUNKS, None))
+
+    def test_plus_plus_inside_hunk_renders_as_added_line(self) -> None:
+        # The legacy renderer classed this line as a file header; the new
+        # walk classes it by its position, which is the correct rendering.
+        diff = "@@ -1,2 +1,4 @@\n a\n+++i;\n+b\n c\n"
+        html = render_diff(diff, None)
+        self.assertIn('<span class="diff-line diff-add">+++i;</span>', html)
+        self.assertNotIn("diff-file-header", html)
+        self.assertIn('<span class="diff-line diff-file-header">+++ b/f</span>',
+                      render_diff("--- a/f\n+++ b/f\n@@ -1 +1 @@\n+x\n", None))
 
 
 if __name__ == "__main__":

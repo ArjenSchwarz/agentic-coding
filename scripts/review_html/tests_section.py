@@ -6,15 +6,14 @@ sets for the per-file diffs, and the counts behind the ``summary`` lines.
 """
 from __future__ import annotations
 
-import json
 from dataclasses import dataclass, field
 from pathlib import Path
 
 from .common import escape, file_anchor
 from .coverage import Coverage, apply_path_map, diff_coverage, match, overall, parse_coverage
 from .diffs import added_lines, is_binary
-from .inputs import read_guarded
-from .junit import Case, parse_junit
+from .inputs import read_json
+from .junit import OUTCOMES, Case, parse_junit
 from .redact import clean_message
 from .warnings import Warnings
 
@@ -68,7 +67,7 @@ def _link(url: object, text: str) -> str:
 
 
 def _tally(cases: list[Case]) -> dict[str, int]:
-    counts = {"passed": 0, "failed": 0, "errored": 0, "skipped": 0, "flaky": 0}
+    counts = dict.fromkeys(OUTCOMES + ("flaky",), 0)
     for c in cases:
         counts[c.outcome] = counts.get(c.outcome, 0) + 1
         if c.flaky:
@@ -240,13 +239,7 @@ def _new_removed(block: dict, head: list[Case], base: list[Case],
 
     name = block.get("diff_tests_file")
     if name and diff_dir is not None:
-        text = read_guarded(diff_dir / name, warnings)
-        data = None
-        if text is not None:
-            try:
-                data = json.loads(text)
-            except ValueError as exc:
-                warnings.add(f"{name}: diff-derived test list is not valid JSON ({exc})")
+        data = read_json(diff_dir / name, warnings, "diff-derived test list")
         if isinstance(data, dict):
             added = [str(x) for x in data.get("added") or []]
             removed = [str(x) for x in data.get("removed") or []]
@@ -270,8 +263,11 @@ def _coverage_parts(block: dict, files: list[dict], fragments: dict[str, str],
     """Diff-coverage table, overall coverage, and unmatched report.
 
     Returns the HTML, the uncovered sets, the matched/unmatched counts, and
-    the card's diff-coverage value.
+    the card's diff-coverage value. With no coverage entries there is
+    nothing to match: every part is omitted and both counts are zero.
     """
+    if not cov:
+        return "", {}, {"matched": 0, "unmatched": 0}, "n/a"
     eligible = [f.get("path", "") for f in files
                 if f.get("badge") != "Deleted" and not is_binary(fragments.get(f.get("path", ""), ""))]
     hits, unmatched = match(cov, eligible)
@@ -293,8 +289,6 @@ def _coverage_parts(block: dict, files: list[dict], fragments: dict[str, str],
                 uncovered[path] = zero
         rows.append(f'<tr><td><a href="#{file_anchor(path)}">{escape(path)}</a></td>'
                     f"<td>{len(added)}</td>{cell}</tr>")
-    if not cov:
-        return "", uncovered, counts, "n/a"
 
     parts = ["<h3>Diff coverage</h3>"]
     if rows:

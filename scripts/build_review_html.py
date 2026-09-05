@@ -39,6 +39,11 @@ JSON schema (see SKILL.md "Phase 7" for the contract):
       "double_check":    [{"title", "body": "<html>"}, ...],
       "files":           [{"path", "badge", "stat",
                             "diff"?: "<text>", "diff_file"?: "name.txt"}, ...],
+      "tests":           {...},              // optional; the Tests card and section, see
+                                             // specs/review-html-tests-diagram/design.md
+      "diagram_file":    "diagram.json",     // optional; written by blast_radius.py, read
+                                             // relative to --diff-dir (Blast radius section)
+      "change_classification": "docs-only",  // optional; suppresses Tests and Blast radius
       "publish_metadata": {                  // optional; emits a <script id="review-meta">
         "title":    "...",                   // block in <head> consumable by `pulsar publish`
         "repoUrl":  "https://...",
@@ -89,7 +94,11 @@ def main() -> int:
         return 1
 
     diff_dir = args.diff_dir if args.diff_dir is not None else args.data.parent
-    data = json.loads(args.data.read_text(encoding="utf-8"))
+    try:
+        data = json.loads(args.data.read_text(encoding="utf-8"))
+    except (ValueError, OSError) as exc:
+        print(f"error: {args.data}: {exc}", file=sys.stderr)
+        return 2
 
     args.output.parent.mkdir(parents=True, exist_ok=True)
     args.output.write_text(review_html.render(data, diff_dir), encoding="utf-8")

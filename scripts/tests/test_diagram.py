@@ -926,6 +926,21 @@ class RenderWiringTest(unittest.TestCase):
         self.assertIn("absent.json", result.stderr)
         self.assertNotIn('id="diagram"', out.read_text(encoding="utf-8"))
 
+    def test_entry_point_exits_two_on_malformed_review_json(self) -> None:
+        (self.dir / "review.json").write_text('{"repo": ', encoding="utf-8")
+        out = self.dir / "review.html"
+        result = subprocess.run(
+            [sys.executable, "scripts/build_review_html.py",
+             "--data", str(self.dir / "review.json"), "--output", str(out)],
+            cwd=REPO_ROOT, capture_output=True, text=True,
+        )
+        self.assertEqual(result.returncode, 2, result.stderr)
+        lines = result.stderr.splitlines()
+        self.assertEqual(len(lines), 1, result.stderr)
+        self.assertTrue(lines[0].startswith("error: "), lines[0])
+        self.assertIn("review.json", lines[0])
+        self.assertFalse(out.exists())
+
 
 if __name__ == "__main__":
     unittest.main()

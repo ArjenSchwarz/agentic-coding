@@ -5,6 +5,11 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2026-09-08]
+
+### Changed
+- Blast-radius diagram: `scripts/blast_radius.py` drops documentation, data, and asset files (Markdown, text, JSON, YAML, TOML, lock files, images, fonts) before building the graph, so a changed README or lock file no longer pads the centre column. Code in a language without an ecosystem row still gets a node. A change touching only such files reports both columns as `failed: no code files changed`
+
 ## [2026-09-04]
 
 ### Added

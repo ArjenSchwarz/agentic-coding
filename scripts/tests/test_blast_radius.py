@@ -136,6 +136,10 @@ def build_repo(repo: Path) -> dict:
 
     git(repo, "checkout", "-q", "-b", "docs")
     write(repo, "README.md", "# readme\n\nmore\n")
+    write(repo, "config.yaml", "key: value\n")
+    git(repo, "add", "-A")
+    git(repo, "commit", "-q", "-m", "docs only")
+    docs_only = git(repo, "rev-parse", "HEAD").strip()
     write(repo, "spec/foo_spec.rb", 'describe "foo" do\n  it "works better" do\n  end\nend\n')
     git(repo, "add", "-A")
     git(repo, "commit", "-q", "-m", "docs")
@@ -143,7 +147,7 @@ def build_repo(repo: Path) -> dict:
     git(repo, "checkout", "-q", "main")
 
     write(repo, "pkg/untracked.go", 'package pkg\n\nimport "example.com/m/util"\n\nfunc N() string { return util.U() }\n')
-    return {"base": base, "snapshot": snapshot, "docs": docs}
+    return {"base": base, "snapshot": snapshot, "docs": docs, "docs_only": docs_only}
 
 
 def run(args: list, stderr: io.StringIO = None) -> tuple:
@@ -230,7 +234,6 @@ EXPECTED_NODES = {
     "Sources/Core/core.swift": ("modified", "Core", False, None),
     "Sources/App/main.swift": ("unchanged", "App", False, None),
     "Tests/CoreTests/CoreTests.swift": ("modified", "Tests/CoreTests", True, None),
-    "notes.txt": ("modified", ".", False, None),
     "spec/foo_spec.rb": ("added", "spec", True, None),
 }
 
@@ -260,7 +263,8 @@ class RepoTestCase(unittest.TestCase):
                 self.assertEqual(n["is_test"], is_test)
                 self.assertEqual(n["old_path"], old_path)
         for absent in ("link_to_a.go", "web/index.ts", "web/app.ts", "go.mod", "README.md",
-                       "fmt", "testing", "strings", "src/app/models.py", "src/app/__init__.py"):
+                       "notes.txt", "fmt", "testing", "strings", "src/app/models.py",
+                       "src/app/__init__.py"):
             self.assertNotIn(absent, nodes, absent)
         edges = edge_map(diagram)
         for key, (method, granularity, tree) in EXPECTED_EDGES.items():
@@ -305,12 +309,24 @@ class ShaSnapshotTest(RepoTestCase):
             ["--repo", str(self.repo), "--snapshot", self.shas["docs"], "--base", self.shas["snapshot"]])
         self.assertEqual(code, 0, err)
         self.assertEqual(diagram["column_status"], {
-            "dependents": "failed: no import patterns for .md, .rb",
-            "dependencies": "failed: no import patterns for .md, .rb",
+            "dependents": "failed: no import patterns for .rb",
+            "dependencies": "failed: no import patterns for .rb",
         })
         self.assertEqual(diagram["edges"], [])
-        self.assertEqual(sorted(node_map(diagram)), ["README.md", "spec/foo_spec.rb"])
+        self.assertEqual(sorted(node_map(diagram)), ["spec/foo_spec.rb"])
         self.assertEqual(diff_tests, {"added": [], "removed": [], "unpatterned_files": ["spec/foo_spec.rb"]})
+
+    def test_non_code_changes_leave_no_nodes(self) -> None:
+        code, diagram, diff_tests, err = run(
+            ["--repo", str(self.repo), "--snapshot", self.shas["docs_only"], "--base", self.shas["snapshot"]])
+        self.assertEqual(code, 0, err)
+        self.assertEqual(diagram["nodes"], [])
+        self.assertEqual(diagram["edges"], [])
+        self.assertEqual(diagram["column_status"], {
+            "dependents": "failed: no code files changed",
+            "dependencies": "failed: no code files changed",
+        })
+        self.assertEqual(diff_tests, {"added": [], "removed": [], "unpatterned_files": []})
 
     def test_script_runs_from_the_command_line(self) -> None:
         with tempfile.TemporaryDirectory() as out:
@@ -593,6 +609,18 @@ class ParserTest(unittest.TestCase):
         for path, expected in cases.items():
             with self.subTest(path=path):
                 self.assertEqual(blast_radius.is_test_file(path, eco.row_for(path)), expected)
+
+    def test_code_detection(self) -> None:
+        cases = {
+            "pkg/a.go": True, "lib/foo.rb": True, "deploy.sh": True, "Makefile": True,
+            "main.tf": True, ".gitignore": True,
+            "README.md": False, "docs/design.MD": False, "notes.txt": False, "guide.rst": False,
+            "package.json": False, "config.yaml": False, "Cargo.toml": False, "go.sum": True,
+            "Cargo.lock": False, "logo.png": False, "icon.svg": False, "fonts/a.woff2": False,
+        }
+        for path, expected in cases.items():
+            with self.subTest(path=path):
+                self.assertEqual(blast_radius.is_code(path), expected)
 
 
 if __name__ == "__main__":

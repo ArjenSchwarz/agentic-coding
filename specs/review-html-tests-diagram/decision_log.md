@@ -90,6 +90,7 @@
 | Q84 | 2026-09-05 | The stderr coverage line carries counts only; per-file unmatched reasons live in the Tests section | The skills grep one line for the floor; per-file reasons on stderr would be noise no skill reads |
 | Q85 | 2026-09-05 | Files with no ecosystem row are test files only by whole-token name (`test_x`, `x_test`, `x.test.ts`, `x.spec.js`, `XTests.swift`, `conftest.py`) or a parent directory named `test`, `tests`, `__tests__`, or `spec` | A substring rule flagged every file under `specs/` and `docs/testing.md` as tests, excluding them from the diagram's side columns and listing them as unpatterned |
 | Q86 | 2026-09-05 | `read_guarded` scans the whole buffer for `<!DOCTYPE`, not the first 64 KB | XML comments and processing instructions may precede the declaration, so a fixed window is bypassed by padding; the buffer is already in memory and the scan is a substring search |
+| Q87 | 2026-09-08 | `blast_radius.py` drops documentation, data, and asset files by extension before building the graph; unknown code languages keep their nodes | A changed README or lock file has no imports and no importers, so its box only pads the centre column; filtering by "no ecosystem row" would also hide Ruby or shell changes, which the centre should still list |
 
 ## Decision 1: Constrained pure-SVG layout instead of Graphviz
 

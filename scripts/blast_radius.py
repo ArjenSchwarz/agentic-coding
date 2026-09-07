@@ -45,6 +45,15 @@ REMOTE_STATUSES = {"added": "added", "modified": "modified", "removed": "deleted
 _FALLBACK_TEST_NAME = re.compile(
     r"^(test[_-]|conftest\.py$)|[_-]tests?\.\w+$|\.(test|spec)\.\w+$|Tests?\.\w+$")
 _FALLBACK_TEST_DIRS = frozenset({"test", "tests", "__tests__", "spec"})
+# Documentation, data, and asset files never enter the diagram, changed or
+# not. Code in a language without an ecosystem row keeps its node so the
+# centre column still lists it.
+_NON_CODE_EXTENSIONS = frozenset({
+    ".md", ".markdown", ".mdx", ".rst", ".txt", ".adoc", ".asciidoc",
+    ".json", ".yaml", ".yml", ".toml", ".xml", ".ini", ".cfg", ".csv", ".lock",
+    ".png", ".jpg", ".jpeg", ".gif", ".svg", ".ico", ".webp", ".pdf",
+    ".woff", ".woff2", ".ttf", ".otf",
+})
 
 
 def warn(message: str) -> None:
@@ -112,6 +121,11 @@ def is_test_file(path: str, row) -> bool:
     name = posixpath.basename(path)
     parent = posixpath.basename(posixpath.dirname(path))
     return bool(_FALLBACK_TEST_NAME.search(name)) or parent in _FALLBACK_TEST_DIRS
+
+
+def is_code(path: str) -> bool:
+    """False for documentation, data, and asset files by extension."""
+    return posixpath.splitext(path)[1].lower() not in _NON_CODE_EXTENSIONS
 
 
 # --- changed files ----------------------------------------------------------
@@ -643,6 +657,7 @@ def build(args: argparse.Namespace, eco: Ecosystems) -> tuple:
 
 
 def _build(args, eco, repo, changed, patches, snap_tree, base_tree, budget) -> tuple:
+    changed = [c for c in changed if is_code(c.path)]
     changed_set = {c.path for c in changed}
     deleted = {c.path for c in changed if c.status == "deleted"}
     old_to_new = {c.old_path: c.path for c in changed if c.old_path}
@@ -670,6 +685,8 @@ def _build(args, eco, repo, changed, patches, snap_tree, base_tree, budget) -> t
     failed = None
     if snap_tree.truncated or base_tree.truncated:
         failed = "tree listing truncated"
+    elif not changed:
+        failed = "no code files changed"
     elif not any(eco.row_for(c.path) and eco.row_for(c.path).imports for c in changed):
         exts = sorted({posixpath.splitext(c.path)[1] or "(none)" for c in changed})
         failed = "no import patterns for " + ", ".join(exts)
@@ -679,6 +696,8 @@ def _build(args, eco, repo, changed, patches, snap_tree, base_tree, budget) -> t
         def add_edge(a: str, b: str, method: str, granularity: str, tree_label: str,
                      replace: bool = False) -> None:
             if a == b or (a not in changed_set and b not in changed_set):
+                return
+            if not is_code(a) or not is_code(b):
                 return
             if (a, b) in graph.edges and not replace:
                 return

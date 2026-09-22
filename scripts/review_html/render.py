@@ -5,6 +5,7 @@ import sys
 from datetime import datetime, timezone
 from pathlib import Path
 
+from .classify import is_docs_only
 from .common import escape
 from .css import CSS
 from .diagram import render_diagram
@@ -34,13 +35,25 @@ from .tests_section import TestsResult, build_tests
 from .warnings import Warnings
 
 
+def docs_only(data: dict) -> bool:
+    """Whether the change is docs-only.
+
+    An explicit ``change_classification`` wins; otherwise the change is
+    docs-only when no ``files[]`` entry classifies as code.
+    """
+    explicit = data.get("change_classification")
+    if explicit is not None:
+        return explicit == "docs-only"
+    return is_docs_only(data.get("files", []))
+
+
 def build_diagram(data: dict, diff_dir: Path | None, warnings: Warnings) -> str:
     """Section HTML for ``diagram_file``, or ``""``.
 
     A docs-only change suppresses the section silently; an absent, unreadable,
     or invalid description warns (naming the file) and omits it.
     """
-    if data.get("change_classification") == "docs-only":
+    if docs_only(data):
         return ""
     name = data.get("diagram_file")
     if not name:
@@ -71,7 +84,7 @@ def render(data: dict, diff_dir: Path | None) -> str:
     # marks the diff blocks draw, so it is built first.
     fragments = load_fragments(files, diff_dir, warnings)
     tests: TestsResult | None = None
-    if data.get("tests") is not None and data.get("change_classification") != "docs-only":
+    if data.get("tests") is not None and not docs_only(data):
         tests = build_tests(data["tests"], files, fragments, diff_dir, warnings)
     uncovered = tests.uncovered if tests else {}
 

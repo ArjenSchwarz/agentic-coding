@@ -1,10 +1,12 @@
 """Golden-fixture regression test for the review renderer.
 
-``fixtures/golden.html`` was produced once by the renderer as it existed at
+``fixtures/golden.html`` was produced by the renderer as it existed at
 commit ``9da40cf`` (``git show 9da40cf:scripts/build_review_html.py``) from
-``fixtures/golden.json``. The current renderer, invoked as a script by its
-repo-relative path, must produce the same document apart from the contents
-of the ``<style>`` element and the generation timestamp in the footer.
+``fixtures/golden.json``, and regenerated when the per-file diffs section
+gained its code/docs/other grouping (the only body change at that point).
+The current renderer, invoked as a script by its repo-relative path, must
+produce the same document apart from the contents of the ``<style>`` element
+and the generation timestamp in the footer.
 """
 from __future__ import annotations
 

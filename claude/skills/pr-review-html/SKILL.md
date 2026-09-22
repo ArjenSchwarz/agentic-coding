@@ -153,7 +153,7 @@ python3 ~/.claude/scripts/blast_radius.py --repo . --snapshot working-tree --bas
 
 This writes `$INPUTS/diagram.json` (the one-hop dependency graph) and `$INPUTS/diff-tests.json` (test declarations added and removed in changed test files). Reference both by file name; never transcribe them into the JSON.
 
-**Classification** — the change is `docs-only` when every changed file is documentation (`.md`, `.rst`, `.adoc`, anything under a `docs/` directory), a `README`, `CHANGELOG`, `LICENSE`, `CONTRIBUTING`, or `CODEOWNERS` file with any extension, an image, a lockfile, or an editor/VCS dotfile such as `.gitignore`. Anything else — CI workflows, build configuration, dependency manifests, `.txt` files elsewhere — makes it `code`.
+**Classification** — the renderer classifies every `files[]` entry as `code`, `docs` (`.md`, `.rst`, `.adoc` and similar, anything under a `docs/` directory, and `README`, `CHANGELOG`, `LICENSE`, `CONTRIBUTING`, or `CODEOWNERS` files with any extension), or `other` (images, lockfiles, editor/VCS dotfiles such as `.gitignore`); groups the per-file diffs by kind; and treats the change as docs-only when no file is `code`. CI workflows, build configuration, dependency manifests, and `.txt` files outside `docs/` are `code`. Set `files[].kind` to override one file, or `change_classification` (`code` | `docs-only`) to override the whole change; otherwise leave both out.
 
 ### Step 2: Assemble `review.json`
 
@@ -222,9 +222,10 @@ Schema (every top-level key is optional except `repo` and `files` — empty sect
   "files": [
     {"path": "services/foo.go", "badge": "Modified", "stat": "+140 / -22",
      "diff_file": "diff-services-foo.txt"}    // OR "diff": "<inline diff text>"
+                                              // optional "kind": code | docs | other (Step 1b)
   ],
 
-  "change_classification": "code",            // from Step 1b: code | docs-only
+  "change_classification": "code",            // optional override (Step 1b): code | docs-only
   "diagram_file": "diagram.json",             // written by blast_radius.py, relative to $INPUTS
 
   "tests": {                                  // from Phase 5 and Step 1b; present for every code change,
@@ -258,13 +259,14 @@ Schema (every top-level key is optional except `repo` and `files` — empty sect
 }
 ```
 
-With `change_classification: "docs-only"` the Tests card, Tests section, and diagram are all omitted, whatever else is present.
+For a docs-only change (derived, or `change_classification: "docs-only"`) the Tests card, Tests section, and diagram are all omitted, whatever else is present.
 
 **Rendering contract** (implemented by the script — informational, you don't enforce it):
 - Pass-through HTML fields: `subtitle`, `at_a_glance` items, `verdict.detail`, every `explanation` panel, `decisions[].body`, `double_check[].body`. Write actual HTML.
 - All other fields are HTML-escaped automatically. Write plain text.
 - `pr_description.body` is HTML-escaped and rendered in a `pre-wrap` block with monospace styling — markdown markers (`##`, lists, fenced code) and any HTML comments survive on screen as the author wrote them. **Do not** rewrite, trim, or summarise the body; the whole point is verbatim authorial intent.
 - Diffs are escaped and coloured by the script's own stylesheet — no external assets. Added lines that have coverage data and zero hits carry an uncovered mark; added lines in files with no coverage data carry none.
+- The Per-file diffs section opens with the composition (`6 files: 4 code · 1 docs · 1 other`) and, when more than one kind is present, groups the diffs under Code, Docs, and Other headings in that order, keeping the JSON order within each group.
 - The three-level explanation renders as CSS-only radio-button tabs in Beginner → Intermediate → Expert order.
 - Important-change cards show a magenta-bordered **Takeaway** callout and a cyan-bordered **Rationale** callout. `rationale_unknown: true` swaps Rationale for a warning-bordered **Open question**. `rationale_inferred: true` appends `(inferred — not stated by the author)`.
 - Findings counts (raised / fixed / skipped) derive from the `status` field.

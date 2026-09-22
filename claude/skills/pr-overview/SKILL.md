@@ -221,7 +221,7 @@ python3 ~/.claude/scripts/blast_radius.py --remote <owner>/<repo> --snapshot "$S
 
 With a clone the script reads both trees from the fetched git objects, never from the working tree, so it works for fork PRs too. `--remote` reads them through the trees and blobs API, capped at 500 blob calls; past the cap the dependents column is marked partial. Both forms write `$INPUTS/diagram.json` and `$INPUTS/diff-tests.json`; reference them by file name and never transcribe them into the JSON.
 
-**Classification** — the change is `docs-only` when every changed file is documentation (`.md`, `.rst`, `.adoc`, anything under a `docs/` directory), a `README`, `CHANGELOG`, `LICENSE`, `CONTRIBUTING`, or `CODEOWNERS` file with any extension, an image, a lockfile, or an editor/VCS dotfile such as `.gitignore`. Anything else — CI workflows, build configuration, dependency manifests, `.txt` files elsewhere — makes it `code`.
+**Classification** — the renderer classifies every `files[]` entry as `code`, `docs` (`.md`, `.rst`, `.adoc` and similar, anything under a `docs/` directory, and `README`, `CHANGELOG`, `LICENSE`, `CONTRIBUTING`, or `CODEOWNERS` files with any extension), or `other` (images, lockfiles, editor/VCS dotfiles such as `.gitignore`); groups the per-file diffs by kind; and treats the change as docs-only when no file is `code`. CI workflows, build configuration, dependency manifests, and `.txt` files outside `docs/` are `code`. Set `files[].kind` to override one file, or `change_classification` (`code` | `docs-only`) to override the whole change; otherwise leave both out.
 
 ### Step 2: Assemble `overview.json`
 
@@ -306,10 +306,10 @@ Schema (every top-level key is optional except `repo` and `files` — empty sect
 
   "files": [
     {"path": "services/foo.go", "badge": "Modified", "stat": "+140 / -22",
-     "diff_file": "diff-services-foo.txt"}
+     "diff_file": "diff-services-foo.txt"}    // optional "kind": code | docs | other (Step 1b)
   ],
 
-  "change_classification": "code",            // from Step 1b: code | docs-only
+  "change_classification": "code",            // optional override (Step 1b): code | docs-only
   "diagram_file": "diagram.json",             // written by blast_radius.py, relative to $INPUTS
 
   "tests": {                                  // from Phase 1b and Step 1b; present for every code change,
@@ -354,7 +354,7 @@ Schema (every top-level key is optional except `repo` and `files` — empty sect
 }
 ```
 
-`no_data_reason: "ci"` tells the renderer to word the no-data card from `ci_state` and `fallback_state` (adding that the workflow must upload a JUnit XML artifact when the state is `no run`, `artifacts absent`, or `artifacts expired`). With `change_classification: "docs-only"` the Tests card, Tests section, and diagram are all omitted, whatever else is present.
+`no_data_reason: "ci"` tells the renderer to word the no-data card from `ci_state` and `fallback_state` (adding that the workflow must upload a JUnit XML artifact when the state is `no run`, `artifacts absent`, or `artifacts expired`). For a docs-only change (derived, or `change_classification: "docs-only"`) the Tests card, Tests section, and diagram are all omitted, whatever else is present.
 
 **Rendering contract** (implemented by the script — informational, you don't enforce it):
 - Pass-through HTML fields: `subtitle`, `at_a_glance` items, `verdict.detail`, every `explanation` panel, `decisions[].body`, `double_check[].body`. Write actual HTML.
@@ -362,6 +362,7 @@ Schema (every top-level key is optional except `repo` and `files` — empty sect
 - `pr_description.body` and `unresolved_comments[].body` are HTML-escaped and rendered in a `pre-wrap` monospace block — markdown markers (`##`, lists, fenced code) survive on screen as the author wrote them. **Do not** rewrite, trim, or summarise. Verbatim is the whole point.
 - Each unresolved comment renders as a warning-bordered card with a type pill (code/review/discussion), author, file:line (if code-level), date, and a "view on GitHub" link. Replies collapse into a `<details>` block.
 - Diffs are escaped and coloured by the script's own stylesheet — no external assets. Added lines that have coverage data and zero hits carry an uncovered mark; added lines in files with no coverage data carry none.
+- The Per-file diffs section opens with the composition (`6 files: 4 code · 1 docs · 1 other`) and, when more than one kind is present, groups the diffs under Code, Docs, and Other headings in that order, keeping the JSON order within each group.
 - The three-level explanation renders as CSS-only radio-button tabs in Beginner → Intermediate → Expert order.
 - Important-change cards show a magenta-bordered **Takeaway** callout and a cyan-bordered **Rationale** callout.
 - Findings counts derive from the `status` field; in this skill every finding is `"raised"`.

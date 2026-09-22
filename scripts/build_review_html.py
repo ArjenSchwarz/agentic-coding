@@ -38,12 +38,15 @@ JSON schema (see SKILL.md "Phase 7" for the contract):
       ],
       "double_check":    [{"title", "body": "<html>"}, ...],
       "files":           [{"path", "badge", "stat",
+                            "kind"?: "code|docs|other",   // derived from path when absent
                             "diff"?: "<text>", "diff_file"?: "name.txt"}, ...],
       "tests":           {...},              // optional; the Tests card and section, see
                                              // specs/review-html-tests-diagram/design.md
       "diagram_file":    "diagram.json",     // optional; written by blast_radius.py, read
                                              // relative to --diff-dir (Blast radius section)
-      "change_classification": "docs-only",  // optional; suppresses Tests and Blast radius
+      "change_classification": "docs-only",  // optional override; derived from files[] kinds
+                                             // when absent. docs-only suppresses Tests and
+                                             // Blast radius
       "publish_metadata": {                  // optional; emits a <script id="review-meta">
         "title":    "...",                   // block in <head> consumable by `pulsar publish`
         "repoUrl":  "https://...",
@@ -59,6 +62,8 @@ Rendering contract:
     explanation panels, decisions[].body, double_check[].body.
   * Everything else is treated as plain text and HTML-escaped.
   * Empty sections are omitted from both the body and the table of contents.
+  * Per-file diffs are grouped Code, Docs, Other (review_html/classify.py)
+    with a composition line; a change with a single kind has no group headings.
 
 The rendering itself lives in the ``review_html`` package next to this file;
 this script only owns the command line.

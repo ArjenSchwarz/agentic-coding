@@ -54,7 +54,7 @@ The skill never parses JUnit, coverage, or the diagram. Every input lives in the
 
 Call order inside `render()`: load fragments → `build_tests` → `render_diagram` → `render_files` with the uncovered sets → template → print the two summary lines last. Page order: description, commits, explanation, important changes, decisions, findings, tests, unresolved comments, blast radius, per-file diffs, double-check.
 
-`change_classification` is a top-level JSON key. With `docs-only` the Tests card, Tests section, and diagram are all omitted without warnings, whether or not a `tests` block or `diagram_file` is present. The diagram renders whenever `diagram_file` is present and the classification is not `docs-only`.
+`change_classification` is a top-level JSON key. With `docs-only` the Tests card, Tests section, and diagram are all omitted without warnings, whether or not a `tests` block or `diagram_file` is present. The diagram renders whenever `diagram_file` is present and the classification is not `docs-only`. Per Q87 the key is an optional override: `review_html/classify.py` classifies each `files[]` entry as `code`, `docs`, or `other` (overridable per entry with `files[].kind`), `render_files` groups the per-file diffs by kind with a composition line, and a change with no `code` entry is docs-only when the key is absent.
 
 ### Skill integration points
 

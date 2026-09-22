@@ -7,8 +7,11 @@ from __future__ import annotations
 import json
 import textwrap
 
+from .classify import KINDS, file_kind
 from .common import escape, file_anchor, severity_pill
 from .diffs import render_diff
+
+KIND_LABELS = {"code": "Code", "docs": "Docs", "other": "Other"}
 
 
 # --- section renderers -----------------------------------------------------
@@ -352,7 +355,7 @@ def render_files(files: list[dict], fragments: dict[str, str],
     """
     if not files:
         return ""
-    blocks = []
+    groups: dict[str, list[str]] = {kind: [] for kind in KINDS}
     for f in files:
         path = f.get("path", "")
         badge = f.get("badge", "Modified")
@@ -360,15 +363,26 @@ def render_files(files: list[dict], fragments: dict[str, str],
         diff = fragments.get(path, "(no diff provided)")
         anchor = file_anchor(path)
         badge_class = "badge-" + "".join(ch for ch in badge.lower() if ch.isalnum())
-        blocks.append(textwrap.dedent(f"""\
+        groups[file_kind(f)].append(textwrap.dedent(f"""\
             <details id="{anchor}" class="file-diff">
               <summary><span class="file-path">{escape(path)}</span> <span class="badge {badge_class}">{escape(badge)}</span> <span class="line-stat">{escape(stat)}</span></summary>
               <pre><code class="diff-block">{render_diff(diff, uncovered.get(path))}</code></pre>
             </details>"""))
+    present = [kind for kind in KINDS if groups[kind]]
+    composition = " · ".join(f"{len(groups[kind])} {kind}" for kind in present)
+    if len(present) == 1:
+        body = "".join(groups[present[0]])
+    else:
+        body = "".join(
+            f'<h3 class="file-group">{KIND_LABELS[kind]} '
+            f'<span class="muted">({len(groups[kind])})</span></h3>'
+            + "".join(groups[kind])
+            for kind in present
+        )
     return f"""<section id="diffs">
     <h2>Per-file diffs</h2>
-    <p class="muted">Click to expand.</p>
-    {"".join(blocks)}
+    <p class="muted">{len(files)} files: {composition}. Click to expand.</p>
+    {body}
     </section>"""
 
 

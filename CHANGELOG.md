@@ -5,6 +5,15 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2026-09-23]
+
+### Added
+- Review pages distinguish code and doc changes: `review_html/classify.py` classifies each `files[]` entry as `code`, `docs` (Markdown and similar, anything under `docs/`, README/CHANGELOG/LICENSE/CONTRIBUTING/CODEOWNERS), or `other` (images, lockfiles, editor and VCS dotfiles), overridable with `files[].kind`. The Per-file diffs section opens with the composition (`6 files: 4 code · 1 docs · 1 other`) and, for a mixed change, groups the diffs under Code, Docs, and Other headings
+
+### Changed
+- `change_classification` is now an optional override: when absent the renderer treats a change with no `code` file as docs-only. The `pr-review-html`, `pr-overview`, and `pre-push-review` skills no longer ask the agent to apply the classification rule by hand (review-html-tests-diagram, Q87)
+- Golden fixture regenerated for the grouped Per-file diffs section; the rest of the body is unchanged
+
 ## [2026-09-08]
 
 ### Changed

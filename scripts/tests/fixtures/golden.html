@@ -176,21 +176,33 @@ code { font-family: ui-monospace, "SF Mono", Menlo, monospace; }
 .callout-rationale { border-left: 3px solid var(--accent); }
 .callout-warning   { border-left: 3px solid var(--warning); }
 
-table.findings {
+table.findings, table.tests {
   width: 100%; border-collapse: collapse;
   margin: 16px 0; background: var(--surface-1);
   border: 1px solid var(--border); border-radius: 12px; overflow: hidden;
 }
-table.findings th, table.findings td {
+table.findings th, table.findings td,
+table.tests th, table.tests td {
   padding: 10px 14px; text-align: left;
   border-bottom: 1px solid var(--border-subtle);
   font-size: 14px; vertical-align: top;
 }
-table.findings th {
+table.findings th, table.tests th {
   background: var(--surface-2); color: var(--text-secondary);
   text-transform: uppercase; font-size: 11px; letter-spacing: 0.08em;
 }
-table.findings tr:last-child td { border-bottom: none; }
+table.findings tr:last-child td, table.tests tr:last-child td { border-bottom: none; }
+table.tests td:last-child { white-space: pre-wrap; word-break: break-word; }
+table.tests a { font-family: ui-monospace, "SF Mono", Menlo, monospace; font-size: 13px; }
+
+.tests-provenance, .tests-availability, .tests-totals, .tests-matching {
+  font-size: 14px; color: var(--text-secondary);
+}
+.tests-nodata {
+  border-left: 3px solid var(--warning);
+  margin: 16px 0;
+}
+.tests-nodata:hover { background: var(--surface-1); }
 
 .pill {
   display: inline-block; padding: 2px 10px; border-radius: 999px;
@@ -258,6 +270,7 @@ table.findings tr:last-child td { border-bottom: none; }
   content: "▸"; color: var(--text-tertiary); font-size: 12px; margin-right: 4px;
 }
 .file-diff[open] > summary::before { content: "▾"; }
+.file-group { margin-top: 24px; }
 .file-path { font-family: ui-monospace, "SF Mono", Menlo, monospace; color: var(--text-primary); }
 .line-stat {
   color: var(--text-tertiary);
@@ -296,6 +309,36 @@ table.findings tr:last-child td { border-bottom: none; }
 .diff-file-header { color: var(--text-tertiary); }
 .diff-meta        { color: var(--text-tertiary); }
 .diff-context     { color: var(--text-secondary); }
+.diff-uncovered {
+  border-left: 3px solid var(--error);
+  padding-left: 13px;
+}
+.diff-uncovered::before {
+  content: "▌"; color: var(--error); margin-right: 6px;
+}
+
+.blast-scroll {
+  overflow-x: auto;
+  background: var(--surface-1); border: 1px solid var(--border);
+  border-radius: 12px; padding: 12px; margin: 12px 0;
+}
+.blast-scroll svg { display: block; }
+.blast-legend {
+  display: flex; flex-wrap: wrap; gap: 8px 18px;
+  margin: 12px 0; font-size: 13px; color: var(--text-secondary);
+}
+.blast-key { display: inline-flex; align-items: center; gap: 6px; }
+.blast-swatch {
+  display: inline-block; width: 14px; height: 14px; border-radius: 3px;
+  background: var(--surface-2); border: 1px solid var(--border);
+}
+.blast-swatch-added    { background: rgba(34,197,94,0.18);   border-color: var(--success); }
+.blast-swatch-modified { background: rgba(228,116,228,0.18); border-color: var(--accent-2); }
+.blast-swatch-deleted  { background: rgba(239,71,111,0.18);  border-color: var(--error); }
+.blast-swatch-renamed  { background: rgba(76,108,188,0.18);  border-color: var(--accent-3); }
+.blast-swatch-collapsed { border-style: dashed; }
+.blast-members, .blast-skipped { font-size: 13px; color: var(--text-secondary); }
+.blast-members code, .blast-skipped code { color: var(--text-primary); font-size: 12px; }
 
 .pr-description {
   background: var(--surface-1);
@@ -469,8 +512,8 @@ The old registry was *slow* &amp; untested.
     </section>
   <section id="diffs">
     <h2>Per-file diffs</h2>
-    <p class="muted">Click to expand.</p>
-    <details id="file-c08d64c2c7" class="file-diff">
+    <p class="muted">6 files: 4 code · 1 docs · 1 other. Click to expand.</p>
+    <h3 class="file-group">Code <span class="muted">(4)</span></h3><details id="file-c08d64c2c7" class="file-diff">
   <summary><span class="file-path">src/widgets/registry.py</span> <span class="badge badge-added">Added</span> <span class="line-stat">+48 / -0</span></summary>
   <pre><code class="diff-block"><span class="diff-line diff-context">diff --git a/src/widgets/registry.py b/src/widgets/registry.py</span><span class="diff-line diff-context">new file mode 100644</span><span class="diff-line diff-file-header">--- /dev/null</span><span class="diff-line diff-file-header">+++ b/src/widgets/registry.py</span><span class="diff-line diff-hunk">@@ -0,0 +1,6 @@</span><span class="diff-line diff-add">+class Registry:</span><span class="diff-line diff-add">+    def __init__(self) -&gt; None:</span><span class="diff-line diff-add">+        self._items: dict[str, object] = {}</span><span class="diff-line diff-add">+</span><span class="diff-line diff-add">+    def register(self, name: str, item: object) -&gt; None:</span><span class="diff-line diff-add">+        self._items[name] = item  # &lt;-- &quot;quoted&quot; &amp; escaped</span></code></pre>
 </details><details id="file-9d982a5230" class="file-diff">
@@ -482,10 +525,10 @@ The old registry was *slow* &amp; untested.
 </details><details id="file-f5affc48ee" class="file-diff">
   <summary><span class="file-path">src/widgets/lookup.py</span> <span class="badge badge-renamed">Renamed</span> <span class="line-stat">+2 / -2</span></summary>
   <pre><code class="diff-block"><span class="diff-line diff-context">(diff fragment &#x27;golden-missing.diff&#x27; missing)</span></code></pre>
-</details><details id="file-667fb7df63" class="file-diff">
+</details><h3 class="file-group">Docs <span class="muted">(1)</span></h3><details id="file-667fb7df63" class="file-diff">
   <summary><span class="file-path">docs/widgets.md</span> <span class="badge badge-modified">Modified</span> <span class="line-stat">+5 / -1</span></summary>
   <pre><code class="diff-block"><span class="diff-line diff-context">(no diff provided)</span></code></pre>
-</details><details id="file-149272c650" class="file-diff">
+</details><h3 class="file-group">Other <span class="muted">(1)</span></h3><details id="file-149272c650" class="file-diff">
   <summary><span class="file-path">assets/logo.png</span> <span class="badge badge-binaryfile">Binary file</span> <span class="line-stat"></span></summary>
   <pre><code class="diff-block"><span class="diff-line diff-context">Binary files a/assets/logo.png and b/assets/logo.png differ</span></code></pre>
 </details>
@@ -496,7 +539,7 @@ The old registry was *slow* &amp; untested.
     </section>
 
   <footer>
-    Generated 2026-09-04 12:14:39 UTC · repo <code>/home/dev/widgets</code> · regenerate with <code>/pre-push-review</code>.
+    Generated 2026-09-22 14:58:51 UTC · repo <code>/home/dev/widgets</code> · regenerate with <code>/pre-push-review</code>.
   </footer>
 </div>
 </body>

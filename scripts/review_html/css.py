@@ -261,6 +261,7 @@ table.tests a { font-family: ui-monospace, "SF Mono", Menlo, monospace; font-siz
   content: "▸"; color: var(--text-tertiary); font-size: 12px; margin-right: 4px;
 }
 .file-diff[open] > summary::before { content: "▾"; }
+.file-group { margin-top: 24px; }
 .file-path { font-family: ui-monospace, "SF Mono", Menlo, monospace; color: var(--text-primary); }
 .line-stat {
   color: var(--text-tertiary);

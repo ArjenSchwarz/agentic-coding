@@ -1,6 +1,6 @@
 ---
 name: smart-blitz
-description: Triage-first batch bug fixing with streaming review and merge. Extends blitz-merge with an upfront triage phase that prioritises open bugs, groups them into conflict-free batches, and assigns each the minimum model tier capable of fixing it (Claude Code sonnet/opus, Kiro and Codex gpt-5.6 luna/terra/sol). Reviews and merges each PR as soon as its fix lands instead of waiting for the whole batch. Use for "smart blitz", "triage and fix all bugs", "fix bugs by priority", "batch-fix with the cheapest model", or any request to blitz bugs with prioritisation or cost awareness.
+description: Triage-first batch bug fixing with streaming review and merge. Extends blitz-merge with an upfront triage phase that prioritises open bugs, groups them into conflict-free batches, and assigns each the minimum model tier capable of fixing it (Claude Code sonnet/opus, Kiro and Codex gpt-6 luna/sol). Reviews and merges each PR as soon as its fix lands instead of waiting for the whole batch. Use for "smart blitz", "triage and fix all bugs", "fix bugs by priority", "batch-fix with the cheapest model", or any request to blitz bugs with prioritisation or cost awareness.
 # model: inherit
 # allowed-tools: Read,Write,Edit,Bash,Grep,Glob,Task
 ---
@@ -21,11 +21,11 @@ Assign every bug one of three tiers during triage. The goal is the *minimum* mod
 
 | Tier | Claude Code | Kiro | Codex | Effort |
 |----------|-------------|-----------------|-----------------|--------|
-| light | sonnet | gpt-5.6-luna | gpt-5.6-luna | max |
-| standard | sonnet | gpt-5.6-terra | gpt-5.6-terra | xhigh |
-| heavy | opus | gpt-5.6-sol | gpt-5.6-sol | high |
+| light | sonnet | gpt-6-luna | gpt-6-luna | xhigh |
+| standard | sonnet | gpt-6-sol | gpt-6-sol | high |
+| heavy | opus | gpt-6-sol | gpt-6-sol | high |
 
-Claude Code has only two usable models, so light and standard both map to sonnet. Keep the three-tier assignment anyway — the tier travels with the bug if it is later re-run in another harness, and escalation (below) needs the distinction.
+Claude Code has only two usable models, so light and standard both map to sonnet. Likewise, gpt-6 has no mid-size model, so in Kiro and Codex standard and heavy both map to gpt-6-sol at high effort. Keep the three-tier assignment anyway — the tier travels with the bug if it is later re-run in another harness, and escalation (below) needs the distinction.
 
 The effort ladder is deliberately inverted: a smaller model compensates with more reasoning effort, while the heavy model needs less. Apply it where the harness supports per-agent effort — Codex `spawn_agent` takes `reasoning_effort` directly; Kiro only honours effort at the session level (`--effort` in the CLI fallback), not in agent configs; Claude Code subagents have no effort control.
 

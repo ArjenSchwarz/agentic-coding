@@ -43,7 +43,7 @@ If a worktree or branch already exists for a bug, skip creation and reuse it.
 
 #### 1.3 Spawn Fix Subagents
 
-Spawn one Task subagent per bug using `subagent_type="general-purpose"`. Run all subagents in parallel (single message, multiple Task tool calls).
+Spawn one Agent subagent per bug using `subagent_type="general-purpose"`. Run all subagents in parallel (single message, multiple Agent tool calls).
 
 Each subagent receives this prompt (fill in the values):
 
@@ -108,7 +108,7 @@ if [ "${POST_REVIEWS:-0}" -le "${PRE_REVIEWS:-0}" ]; then
 fi
 ```
 
-The delta (`POST <= PRE`) catches every empty case — a GH Action that finished `success` without commenting, a review that errored, or a token-less Action — without re-running `local-review` when a review did land. Run the fallback at most once per round. A silent, errored, or skipped GH Action therefore never leaves the loop with nothing to act on. (This is the safeguard `pr-pilot` gained after a zero-review merge slipped through; blitz-merge now has parity.)
+The delta (`POST <= PRE`) catches every empty case — a GH Action that finished `success` without commenting, a review that errored, or a token-less Action — without re-running `local-review` when a review did land. Run the fallback at most once per round. A silent, errored, or skipped GH Action therefore never leaves the loop with nothing to act on.
 
 #### 2.2 Run PR Review Fixer
 
@@ -130,7 +130,7 @@ REVIEW_RESULT: {CLEAN|HAS_ISSUES}
 
 After each review-fixer run:
 
-- **HAS_ISSUES**: The skill already fixed the problems and pushed. Wait 10 minutes, then run the review fixer again (go to step 2.1).
+- **HAS_ISSUES**: The skill already fixed the problems and pushed. Go back to step 2.1, which waits for CI and the next review.
 - **CLEAN**: No blockers, critical, or major issues remain. Mark this PR as review-complete.
 
 Cap the loop at 5 iterations per PR. If still not clean after 5 rounds, flag it for manual review and exclude from the merge phase.
@@ -212,7 +212,9 @@ gh pr merge {pr_number} --squash --delete-branch
 After successful merge, move the Transit ticket to `done`:
 
 ```
-mcp__transit__update_task_status(displayId={id}, status="done", comment="Merged via squash-and-merge — PR #{pr_number}", authorName="claude[bot]")
+# read the task first: mcp__transit__query_tasks(displayId={id}) -> revision
+mcp__transit__update_task_status(displayId={id}, status="done",
+  expectedRevision=<revision>, idempotencyKey=<fresh UUID>, comment="Merged via squash-and-merge — PR #{pr_number}", authorName="claude[bot]")
 ```
 
 #### 3.4 Continue to Next PR

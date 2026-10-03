@@ -25,7 +25,7 @@ Assign every bug one of three tiers during triage. The goal is the *minimum* mod
 | standard | sonnet | gpt-5.6-terra | gpt-5.6-terra | xhigh |
 | heavy | opus | gpt-5.6-sol | gpt-5.6-sol | high |
 
-Claude Code has only two usable models, so light and standard both map to sonnet. Keep the three-tier assignment anyway — the tier travels with the bug if it is later re-run in another harness, and escalation (below) needs the distinction.
+In Claude Code, light and standard both map to sonnet. Keep the three-tier assignment anyway — the tier travels with the bug if it is later re-run in another harness, and escalation (below) needs the distinction.
 
 The effort ladder is deliberately inverted: a smaller model compensates with more reasoning effort, while the heavy model needs less. Apply it where the harness supports per-agent effort — Codex `spawn_agent` takes `reasoning_effort` directly; Kiro only honours effort at the session level (`--effort` in the CLI fallback), not in agent configs; Claude Code subagents have no effort control.
 
@@ -33,7 +33,7 @@ The effort ladder is deliberately inverted: a smaller model compensates with mor
 
 Each harness has a native subagent mechanism — use it rather than launching separate CLI sessions. The difference is where the model is selected: per call (Claude Code, Codex) or per named agent config (Kiro).
 
-- **Claude Code**: Task tool, `subagent_type="general-purpose"`, with the `model` parameter set to the assigned model. Multiple Task calls in a single message run in parallel.
+- **Claude Code**: Agent tool, `subagent_type="general-purpose"`, with the `model` parameter set to the assigned model. Multiple Task calls in a single message run in parallel.
 - **Kiro**: the `use_subagent` tool (`InvokeSubagents`, up to 4 subagents per call — split larger batches across calls). It has no model parameter; model comes from the named agent config. Before the first batch, ensure configs `gpt-light`, `gpt-standard`, and `gpt-heavy` exist in `~/.kiro/agents/` — create each by copying the `kiro` agent config (so tools, MCP servers, and hooks carry over) and setting `name`, `"model"` to the tier's model, and `"effort"` to the tier's effort (the effort field is ignored by current agent-config schemas but documents intent and applies if support lands). Then invoke each bug with the `agent_name` matching its tier.
 
   Effort is session-global in Kiro — subagents inherit the session's effort level, so one parallel wave cannot mix tiers. Split each batch into **effort groups**: bugs sharing a tier's effort, max 4 per group (the `InvokeSubagents` cap), groups ordered by the priority of the bugs they contain. Run the groups sequentially. Before starting each group, check the session's current effort level; if it does not match the group's effort — or you cannot confirm what it is — stop and ask the user to run `/effort {level}`, and wait for their confirmation before invoking the subagents.
@@ -193,7 +193,9 @@ For each PR leaving the queue:
    ```
 5. Move the Transit ticket to done:
    ```
-   mcp__transit__update_task_status(displayId={id}, status="done", comment="Merged via squash-and-merge — PR #{pr_number}", authorName="claude[bot]")
+   # read the task first: mcp__transit__query_tasks(displayId={id}) -> revision
+mcp__transit__update_task_status(displayId={id}, status="done",
+  expectedRevision=<revision>, idempotencyKey=<fresh UUID>, comment="Merged via squash-and-merge — PR #{pr_number}", authorName="claude[bot]")
    ```
 
 When the last bug of the batch reaches a terminal state, start the next batch at 3.1.

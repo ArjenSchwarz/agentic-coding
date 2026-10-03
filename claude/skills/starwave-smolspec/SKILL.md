@@ -151,7 +151,7 @@ The tasks.md file MUST follow the standard task format to be compatible with the
 
 Before critique, the model MUST validate the smolspec by having it explained back from a clean context.
 
-- The model MUST use the Task tool with subagent_type="general-purpose" to run the explain-like skill (invoke the Skill tool with skill="explain-like") against `specs/{feature_name}/smolspec.md`
+- The model MUST use the Agent tool with subagent_type="general-purpose" to run the explain-like skill (invoke the Skill tool with skill="explain-like") against `specs/{feature_name}/smolspec.md`
 - The subagent MUST be given only the path to smolspec.md and access to the codebase. The model MUST NOT summarize the feature, restate decisions made in this conversation, or otherwise supply context the document does not contain. Anything the subagent cannot account for is a self-containment defect in the document — surfacing those is the point of the exercise.
 - All three explanation levels (beginner, intermediate, expert) MUST be produced. The span is the mechanism: the beginner level exposes assumed knowledge, the expert level exposes edge cases and integration concerns.
 - The explanations are a validation device, not a deliverable. The model MUST NOT save `explanation.md` for a smolspec.
@@ -236,7 +236,7 @@ Before presenting to user, the model MUST verify:
 - The model MAY ask targeted questions but should minimize back-and-forth compared to full spec workflow
 
 **Continuous Escalation:**
-The escalation triggers in Scope Assessment are not a one-time gate. Because smolspec is now the default for uncertain cases, the triggers MUST be re-checked whenever new information arrives: during research, during planning, when classifying explanation-validation findings, when incorporating design-critic feedback, and while implementing the resulting tasks. If a trigger fires after the smolspec has been approved, the model MUST stop, name the trigger that fired, and recommend converting to the full spec workflow rather than deciding the question inline. Growth in size alone is not a reason to escalate.
+The escalation triggers in Scope Assessment are not a one-time gate. Because smolspec is the default for uncertain cases, the triggers MUST be re-checked whenever new information arrives: during research, during planning, when classifying explanation-validation findings, when incorporating design-critic feedback, and while implementing the resulting tasks. If a trigger fires after the smolspec has been approved, the model MUST stop, name the trigger that fired, and recommend converting to the full spec workflow rather than deciding the question inline. Growth in size alone is not a reason to escalate.
 
 **Documentation Quality:**
 - All documents MUST be self-contained (assume fresh AI session without conversation history)

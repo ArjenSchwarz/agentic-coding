@@ -57,7 +57,7 @@ From the normalised array:
 ### 3. Determine Working Location
 
 Nothing from this skill is written into the repo. Review reports go out as CR
-comments; the rune task file lives in a system temp directory.
+comments.
 
 **Working directory**: `/tmp/cr-review-${id}/`. Create it before step 1. Never write
 under the repo (no `.claude/reviews/`, no report files beside the code).
@@ -118,31 +118,11 @@ status from step 9 — as a CR comment. Structure:
 
 ### 6. Create Task List
 
-Use rune to create the task file under the temp working directory from step 3 —
-never in the repo:
-
-```bash
-WORK_DIR="/tmp/cr-review-${id}"
-mkdir -p "${WORK_DIR}"
-TASK_FILE="${WORK_DIR}/review-fixes-${N}.md"
-
-rune create "${TASK_FILE}" --title "CR Review Fixes - Iteration ${N}"
-rune batch "${TASK_FILE}" --input '{
-  "operations": [
-    {"type": "add", "title": "Fix: [issue 1]"},
-    {"type": "add", "title": "Fix: [issue 2]"}
-  ]
-}'
-```
+Create one task per validated issue with TaskCreate (`Fix: <issue>`).
 
 ### 7. Fix Issues
 
-Loop through tasks:
-1. `rune next [file]` — get next task
-2. `rune progress [file] [id]` — mark in-progress
-3. Implement the fix, following the project's existing patterns
-4. `rune complete [file] [id]` — mark complete
-5. Repeat until done
+Work through the tasks, marking each in progress and complete with TaskUpdate; implement each fix following the project's existing patterns.
 
 ### 8. Check CI Status
 
@@ -246,5 +226,5 @@ the repo and git ignores them automatically.
 - **Replies in-thread**: outcomes for individual findings go into the originating
   thread (`THREAD_REPLY`) and handled threads get resolved, so the CR's open-thread
   count reflects what actually still needs attention.
-- **No in-repo working files**: rune task files and captured output live under
+- **No in-repo working files**: captured output lives under
   `/tmp/cr-review-${id}/`, not in the repo.

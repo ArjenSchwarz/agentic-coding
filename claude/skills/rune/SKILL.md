@@ -1,6 +1,6 @@
 ---
 name: rune-tasks
-description: Manage hierarchical task lists using the rune CLI tool. Create, update, and organize tasks with phases, subtasks, status tracking, task dependencies, and work streams for multi-agent parallel execution.
+description: Manage hierarchical task lists using the rune CLI tool. Create, update, and organize tasks with phases, subtasks, status tracking, task dependencies, and work streams for multi-agent parallel execution. For persistent project task files (e.g. specs/*/tasks.md); not for the agent's own ephemeral checklist, which uses the harness task tool.
 ---
 
 # Rune Task Management Skill

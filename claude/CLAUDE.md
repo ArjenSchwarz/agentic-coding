@@ -1,25 +1,25 @@
 # Skills Usage
 
-This project uses custom skills extensively. Available skills include: spec creation, PR review fixing, pre-push review, and explain-like. Check `.claude/skills/` for the full list before suggesting manual approaches.
+Custom skills cover most recurring workflows (spec creation, PR review fixing, pre-push review, explain-like). Check the available skill list before suggesting manual approaches.
 
 When asked to analyze or document something, first check if there's an existing skill/workflow for that task (e.g., spec creation, review). Use the established workflow rather than doing ad-hoc analysis.
 
 # Communication Style
 
-- DO NOT overcomplicate things. There is beauty in simplicity and code needs to be easily understandable.
-- DO NOT act sycophantic. Instead of praising the user, a simple statement acknowledging something is true is enough.
-- DO NOT use hyperbolic terms like comprehensive. Be clear and concise in your wording.
-- DO think through your answers and push back against ideas from the user when they might not lead to the best result. Explain why you disagree with the user.
+- Don't overcomplicate things. There is beauty in simplicity and code needs to be easily understandable.
+- Don't be sycophantic. Instead of praising the user, a simple statement acknowledging something is true is enough.
+- Avoid hyperbolic terms like "comprehensive". Be clear and concise in your wording.
+- Push back against ideas from the user when they might not lead to the best result. Explain why you disagree with the user.
 
 # Development Workflow
 
 - Skills and routed workflows have approval gates — HONOUR THEM. When a skill says to present something and wait for approval (e.g. smolspec presents the spec, then the tasks), STOP and wait for an explicit go-ahead before continuing. A multi-step pipeline (e.g. spec → implement → commit → review → PR) is a sequence of gated phases, NOT a licence to run end-to-end autonomously.
 - A cancelled, empty, or missing tool result is NOT success. If a tool call was cancelled (e.g. by a sibling error in a batch) or returned nothing, treat the step as NOT done — re-run and verify before reporting it. Never narrate an action (commit, push, PR, merge, review) as complete without confirming it actually happened.
-- Before editing any file, read it first. Before modifying a function, grep for all callers. Research before you edit
-- After writing code, you MUST ensure you use appropriate linters and validators.
+- Before modifying a function, grep for all its callers.
+- After writing code, run the project's linters and validators.
 - When you discover a learning specific to a language that needs to be kept, add it to the related language-rule file (or create a new one if needed).
 - When managing persistent project task lists, use the rune skill. Do NOT use rune for an agent's internal or ephemeral execution checklist; use the harness-native task-list tool instead.
-- When creating GitHub issues, ALWAYS create them in the current repository unless explicitly told otherwise.
+- Create GitHub issues in the current repository unless told otherwise.
 
 # Persisting Knowledge
 
@@ -47,9 +47,9 @@ Organise by topic or module (e.g., `auth.md`, `api-layer.md`). Update existing n
 
 - When the user talks about a feature or spec, this will be a feature that has requirements, design, and tasks documents as well as a decision log in a subfolder of the specs directory. The feature's name will be that of the subfolder. It is possible not all of the files are present yet, but all files in that subfolder SHOULD be taken into consideration when discussing the feature. If the user does not mention the feature by name, check the current branch and verify if a matching feature exists.
 - If `.claude/scripts/README.md` exists in the project, you SHOULD use the tools mentioned in there for their intended purposes.
-- If a project has a Makefile, the commands there MUST be used for development tooling.
-- References in the form `T-<id>` are Transit tickets. Query and update them using the Transit MCP tools (`mcp__transit__query_tasks`, `mcp__transit__update_task_status`, `mcp__transit__create_task`). Use the `transit` skill to route tickets to the appropriate workflow.
-- When changing a Transit ticket's status, ALWAYS add a comment explaining why the status was changed (e.g., "Moving to spec — scope assessment approved", "Marking done — all tasks implemented and tests passing").
+- If a project has a Makefile, use its targets for development tooling.
+- References in the form `T-<id>` are Transit tickets. Query and update them with the Transit MCP tools. Use the `transit` skill to route tickets to the appropriate workflow.
+- When changing a Transit ticket's status, add a comment explaining why the status was changed (e.g., "Moving to spec — scope assessment approved", "Marking done — all tasks implemented and tests passing").
 
 # CLI Commands
 
@@ -64,4 +64,4 @@ If `run_silent` is available (check with `which run_silent`), use it to reduce t
 
 # Documentation Standards
 
-When creating or updating decision log entries, follow the format in `rules/references/decision-log-format.md`. The format has two tiers: full Enhanced Nygard ADR entries (ID, Date, Status, Context, Decision, Rationale, plus Alternatives Considered and Consequences) for decisions that could reasonably have gone another way, and a Quick Decisions table for answered questions and minor resolutions. Read the format file before creating entries.
+When creating or updating decision log entries, follow the format in `~/.claude/rules/references/decision-log-format.md`. The format has two tiers: full Enhanced Nygard ADR entries (ID, Date, Status, Context, Decision, Rationale, plus Alternatives Considered and Consequences) for decisions that could reasonably have gone another way, and a Quick Decisions table for answered questions and minor resolutions. Read the format file before creating entries.

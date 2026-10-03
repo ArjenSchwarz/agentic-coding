@@ -85,7 +85,7 @@ Gather context first:
 
 ```bash
 # Detect default branch (main, master, etc.)
-BASE=$(git symbolic-ref refs/remotes/origin/HEAD 2>/dev/null | sed 's@^refs/remotes/origin/@@' || echo "main")
+BASE=$(git symbolic-ref --short refs/remotes/origin/HEAD 2>/dev/null || echo origin/main)
 
 # Get commit history
 git log --oneline $BASE..HEAD

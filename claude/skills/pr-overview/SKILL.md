@@ -92,7 +92,7 @@ If the call times out: run `git worktree remove --force "$WT"; git worktree prun
 
 ## Phase 2: Fetch unresolved comments
 
-Use the same GraphQL query as `pr-review-fixer` to pull every code-level thread, PR-level review, and discussion comment:
+Pull every code-level thread, PR-level review, and discussion comment:
 
 ```bash
 gh api graphql -f query='

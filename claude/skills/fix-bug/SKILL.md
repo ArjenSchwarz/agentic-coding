@@ -79,7 +79,7 @@ Evaluate the bug's complexity based on the investigation findings. Consider:
 **Simple bugs** (single clear fix, low risk, few files): proceed to Step 8A.
 **Complex bugs** (multiple possible approaches, higher risk, cross-cutting, or subtle root cause): proceed to Step 8B.
 
-When in doubt, prefer the complex path — the overhead is small and you get better solutions compared to the risk of a naive fix for something subtle.
+Take the complex path when the investigation leaves several plausible fixes or a subtle root cause. It costs three agent runs, so a clear single-cause bug stays on the simple path.
 
 ### 8A. Simple Fix (Direct Implementation)
 
@@ -215,7 +215,8 @@ After integrating, verify everything still works:
 Remove all competition worktrees:
 ```bash
 git worktree remove ../{repo-name}-worktrees/fix-{bug-name}-kiro
-# Agent tool worktrees with isolation: "worktree" are cleaned up automatically
+# Agent worktrees are kept when the agent committed; once the winner is integrated,
+# remove them with `git worktree remove <path>` and delete their branches
 ```
 
 Also delete the temporary branches:

@@ -167,8 +167,9 @@ it.
 If a Transit ticket is being tracked, move it to `done`:
 
 ```
+# read the task first: mcp__transit__query_tasks(displayId={id}) -> revision
 mcp__transit__update_task_status(displayId={id}, status="done",
-  comment="Merged via squash-and-merge — CR {id}", authorName="claude[bot]")
+  expectedRevision=<revision>, idempotencyKey=<fresh UUID>, comment="Merged via squash-and-merge — CR {id}", authorName="claude[bot]")
 ```
 
 If no Transit ticket is tracked, skip this step.

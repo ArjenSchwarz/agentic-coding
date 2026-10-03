@@ -57,7 +57,7 @@ Check against these defect categories:
    - External dependencies (version mismatches, configuration issues)
    - Timing issues (async/await problems, race conditions)
 
-**Think aloud** during this phase. For each section of code:
+For each section of code, record:
 - State what the code is intended to do
 - Identify any discrepancies between intent and implementation
 - Flag assumptions or unclear aspects
@@ -113,12 +113,12 @@ Now propose specific fixes for each identified issue.
 ## Important Guidelines
 
 - **Complete each phase thoroughly** before moving to the next
-- **Think aloud** - verbalise your reasoning throughout
+- **Record intent vs implementation** for each section inspected
 - **State assumptions explicitly** rather than making implicit ones
 - **Flag unclear aspects** rather than guessing - if something is uncertain, say so
 - **Use available tools** - read files, search code, run tests, check logs
 - **Focus on systematic analysis** over quick fixes
-- **Validate flagged aspects** - after completing all phases, revisit any unclear points and use the think tool with "ultra" depth if needed to clarify them
+- **Validate flagged aspects** - after completing all phases, revisit any unclear points and resolve them
 
 ## Final Output
 

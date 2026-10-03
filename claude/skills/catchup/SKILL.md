@@ -22,4 +22,4 @@ You need to help me understand what work has been done on this branch. Please:
    - Notable patterns or themes
    - Any concerns or areas that might need attention
 
-Focus on understanding the "why" behind changes, not just listing what changed. Be concise but thorough.
+Focus on understanding the "why" behind changes, not just listing what changed.

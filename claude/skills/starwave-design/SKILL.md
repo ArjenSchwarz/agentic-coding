@@ -62,7 +62,7 @@ The design document describes the system to be built, in its settled form. It is
   - If PBT is not appropriate for the feature, this should be omitted from the Testing Strategy
 - The model SHOULD include diagrams or visual representations when appropriate (use Mermaid for diagrams if applicable)
 - The model MUST ensure the design addresses all feature requirements identified during the clarification process
-- The model MUST use tools like context7 to retrieve relevant information about the libraries and tools
+- Look up library and tool documentation (e.g. `mcp__devtools__get_library_documentation`) wherever the design depends on library behaviour
 
 **Risks and Assumptions — Only What Building Will Reveal:**
 
@@ -125,7 +125,7 @@ Before triggering skill reviews, the model MUST verify:
 - The model MUST highlight design decisions and their rationales in a decision log document at specs/{feature_name}/decision_log.md, using the two-tier format from the decision log format reference: full ADR entries for genuine trade-offs, Quick Decisions table rows for minor resolutions
 - The model MUST ask the user for input on specific technical decisions during the design process
 - When asking the user questions and offering options, the model MUST use the AskUserQuestion tool.
-- After updating the design document, the model MUST use the Task tool with subagent_type="general-purpose" to run the design-critic skill (invoke the Skill tool with skill="design-critic"), and the Task tool with subagent_type="peer-review-validator" to review the document and provide its questions to the user.
+- After updating the design document, the model MUST use the Agent tool with subagent_type="general-purpose" to run the design-critic skill (invoke the Skill tool with skill="design-critic"), and the Agent tool with subagent_type="peer-review-validator" to review the document and provide its questions to the user.
 - After the review by the skills, the model MUST ask the user "Does the design look good?"
 - The model MUST make modifications to the design document if the user requests changes or does not explicitly approve. Modifications MUST replace the affected text so the document continues to read as a single settled plan; the model MUST NOT record what changed or why inside the design — that goes in decision_log.md.
 - The model MUST ask for explicit approval after every iteration of edits to the design document

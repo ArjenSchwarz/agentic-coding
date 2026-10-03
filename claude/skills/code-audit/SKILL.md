@@ -19,7 +19,7 @@ Parallel codebase quality review that orchestrates the `code-simplifier` and `de
 
 ### Phase 1: Parallel Analysis
 
-Launch two `general-purpose` subagents in parallel using the Task tool:
+Launch two `general-purpose` subagents in parallel using the Agent tool:
 
 **Subagent A — Code Simplifier**
 

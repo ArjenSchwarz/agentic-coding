@@ -32,7 +32,7 @@ Based on the task's `type` field, route to the appropriate workflow:
 | `bug` | Invoke `/fix-bug` and pass the ticket reference (`T-{number}`) and task context (name, description) |
 | `feature` | Invoke `/starwave:creating-spec` and pass the ticket reference (`T-{number}`) and task context (name, description) |
 | `research` | Enter planning mode with the research question from the task description |
-| `chore` | Invoke `/starwave:smolspec` and pass the ticket reference (`T-{number}`) and task context (name, description). Chores are typically refactors, cleanup, or maintenance — they fit the lightweight smolspec workflow. Follow the full chore pipeline: smolspec → implement → commit → pre-push review → pr-pilot |
+| `chore` | Invoke `/starwave:smolspec` and pass the ticket reference (`T-{number}`) and task context (name, description). Chores are typically refactors, cleanup, or maintenance — they fit the lightweight smolspec workflow. Then follow the chore pipeline (smolspec → implement → commit → pre-push review → pr-pilot) as gated phases: stop for explicit approval at each skill's gate before moving to the next phase. |
 | `documentation` | Ask the user to clarify the scope, then route to the appropriate workflow |
 
 ### 4. Handoff

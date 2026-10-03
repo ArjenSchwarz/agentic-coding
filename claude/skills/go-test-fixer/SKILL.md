@@ -17,11 +17,11 @@ This skill can:
 ## Tools Available
 
 ### Test Conversion Tool
-- **Location**: `.claude/scripts/test-conversion/main.go`
+- **Location**: `~/.claude/scripts/test-conversion/main.go`
 - **Purpose**: Converts slice-based table tests to map-based table tests
 - **Usage**:
-  - Single file: `go run .claude/scripts/test-conversion/main.go <test_file.go>`
-  - Directory: `go run .claude/scripts/test-conversion/main.go <directory>`
+  - Single file: `go run ~/.claude/scripts/test-conversion/main.go <test_file.go>`
+  - Directory: `go run ~/.claude/scripts/test-conversion/main.go <directory>`
 - **What it does**:
   - Converts `tests := []struct{...}` to `tests := map[string]struct{...}`
   - Removes `name` field from test structs (becomes map key)
@@ -30,9 +30,9 @@ This skill can:
   - Creates backup files before modifying
 
 ### Code Section Mover
-- **Location**: `.claude/scripts/move_code_section.py`
+- **Location**: `~/.claude/scripts/move_code_section.py`
 - **Purpose**: Moves code sections between files
-- **Usage**: `python .claude/scripts/move_code_section.py <source_file> <start_line> <end_line> <dest_file> [--create-if-missing]`
+- **Usage**: `python ~/.claude/scripts/move_code_section.py <source_file> <start_line> <end_line> <dest_file> [--create-if-missing]`
 - **What it does**:
   - Extracts specified lines from source file
   - Appends to destination file (or creates it with proper package/imports)
@@ -41,7 +41,7 @@ This skill can:
 
 ## Go Testing Rules Reference
 
-Always follow these key principles from `~/.claude/language-rules/go.md`:
+Always follow these key principles from `~/.claude/rules/language-rules/go.md`:
 
 ### Table-Driven Testing (Rules 6-8)
 - **Rule 6**: Prefer map-based tables over slices - Use `map[string]struct` for test cases to ensure unique names and catch interdependencies
@@ -71,7 +71,7 @@ When fixing Go tests, follow this workflow:
 ### 2. Convert to Map-Based Tests
 If the file contains slice-based table tests:
 ```bash
-go run scripts/test-conversion/main.go <test_file.go>
+go run ~/.claude/scripts/test-conversion/main.go <test_file.go>
 ```
 
 ### 3. Split Large Test Files
@@ -82,7 +82,7 @@ b. Determine split points (line numbers for each section)
 c. Create new test files:
 ```bash
 # Example: Move lines 150-300 to a new file
-python scripts/move_code_section.py original_test.go 150 300 new_focused_test.go --create-if-missing
+python ~/.claude/scripts/move_code_section.py original_test.go 150 300 new_focused_test.go --create-if-missing
 ```
 
 d. Name new files descriptively (e.g., `handler_auth_test.go`, `handler_validation_test.go`)

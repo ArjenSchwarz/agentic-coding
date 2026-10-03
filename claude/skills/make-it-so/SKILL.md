@@ -27,7 +27,7 @@ Subagents work in isolated git worktrees so their parallel commits don't race on
 For each ready stream the main agent MUST:
 1. Create a worktree branched from the current working branch:
    - `git worktree add .claude/worktrees/<phase>-stream-<N> -b stream/<phase>-<N>`
-2. Spawn one subagent per worktree, all in a single message so they run in parallel (Task tool, `general-purpose` subagent unless a more specific type fits)
+2. Spawn one subagent per worktree, all in a single message so they run in parallel (Agent tool, `general-purpose` subagent unless a more specific type fits)
 
 Each subagent prompt MUST include:
 - The stream number it owns
@@ -37,7 +37,7 @@ Each subagent prompt MUST include:
 - These instructions:
   - Use `rune next --phase --stream N --format json` to retrieve all tasks for the stream
   - Read all referenced files before implementing
-  - Implement tasks in dependency order. Use tools/skills as needed (context7 for library docs, efficiency-optimizer for verification, etc.)
+  - Implement tasks in dependency order. Use tools/skills as needed (the library-documentation tools for library docs, efficiency-optimizer for verification, etc.)
   - Mark each task complete with `rune complete <task-id>` as it finishes
   - Run all formatting and test commands for the project before committing
   - Stage changes (including any reformatting and the modified `tasks.md`) and commit using the **Subagent Commit Conventions** below
@@ -63,7 +63,7 @@ Each subagent prompt MUST include:
 
 No worktree is needed — there is no parallel commit race when only one subagent is working.
 
-The main agent MUST spawn one subagent (Task tool, `general-purpose` unless a more specific type fits) with a prompt containing:
+The main agent MUST spawn one subagent (Agent tool, `general-purpose` unless a more specific type fits) with a prompt containing:
 - The phase number
 - The stream number if the phase has exactly one ready stream (otherwise note that streams are not defined for this phase)
 - The path to the tasks file
@@ -93,9 +93,8 @@ The main agent waits for the subagent to return and surfaces any failure to the 
 - Commit any overview/decision-log updates
 
 **Compact and Continue (main agent):**
-- If incomplete tasks remain in the spec, run `/compact` with: `/compact Continuing /make-it-so - implement the next phase. Current progress: [brief summary of completed phase]`
-- After compaction completes, immediately continue executing `/make-it-so` to implement the next phase
-- If all tasks are complete, do not compact — report completion to the user and stop
+- If incomplete tasks remain in the spec, continue with the next phase (the harness compacts context when needed)
+- If all tasks are complete, report completion to the user and stop
 
 ---
 

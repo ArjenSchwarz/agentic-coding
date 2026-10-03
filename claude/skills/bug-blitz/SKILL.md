@@ -41,7 +41,7 @@ If a worktree or branch already exists for a bug, skip creation and reuse it.
 
 ### 3. Spawn Subagents
 
-Spawn one Task subagent per bug using `subagent_type="general-purpose"`. Run all subagents in parallel (single message, multiple Task tool calls).
+Spawn one Agent subagent per bug using `subagent_type="general-purpose"`. Run all subagents in parallel (single message, multiple Agent tool calls).
 
 Each subagent receives this prompt (fill in the values):
 

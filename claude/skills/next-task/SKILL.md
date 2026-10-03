@@ -26,13 +26,13 @@ Implement the next unfinished group of tasks from the tasks list. A group of tas
 - The model MUST implement all of the selected tasks, including all subtasks
 - Once a subtask or task is completed, use the rune skill to mark it complete (e.g., `rune complete 1.1`)
 - The model MUST NOT proceed past the selected task. Once a task is done, it needs to be put up for review by the user
-- Use tools and skills as appropriate while implementing the task. For example, if you need to know the capabilities of a library, use context7, and if you want to verify your code is efficient, use the efficiency-optimizer skill
+- Use tools and skills as appropriate while implementing the task. For example, if you need to know the capabilities of a library, use the library-documentation tools, and if you want to verify your code is efficient, use the efficiency-optimizer skill
 
 **Parallel Execution with Multiple Streams:**
 When a phase is pulled in and multiple streams have ready tasks:
 1. The model MUST use `rune streams --available --json` to identify streams with ready work
 2. If there are 2 or more streams with ready tasks:
-   - The model SHOULD spawn subagents (using the Task tool) to handle each stream in parallel
+   - The model SHOULD spawn subagents (using the Agent tool) to handle each stream in parallel
    - Each subagent receives instructions to:
      - Retrieve all phase tasks for their stream using `rune next --phase --stream N --format json`
      - Read all referenced files from front_matter_references
@@ -40,7 +40,6 @@ When a phase is pulled in and multiple streams have ready tasks:
      - Mark tasks complete as they finish using `rune complete <task-id>`
      - Report back when all tasks in the stream are done or blocked
    - The main agent coordinates by:
-     - Monitoring subagent progress
      - Handling any cross-stream dependencies that become unblocked
      - Aggregating results for user review
 3. If there is only 1 stream with ready tasks:
@@ -59,7 +58,7 @@ When spawning a subagent for a stream, provide these instructions:
 **Cross-Stream Coordination:**
 - When a subagent completes a task that unblocks tasks in another stream, that stream's agent will pick up the newly unblocked work on their next `rune next --phase --stream N` call
 - If all streams become blocked waiting on each other, this indicates a circular dependency problem that should be reported to the user
-- The main agent should periodically check `rune streams --json` to monitor overall progress
+- Wait for subagent completion notifications; after each returns, run `rune streams --available --json` once to pick up newly unblocked streams
 
 **Specs Overview Update:**
 - After completing all tasks in the current group, check if `specs/OVERVIEW.md` exists in the project

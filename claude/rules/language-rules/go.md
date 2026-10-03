@@ -6,7 +6,7 @@ paths: **/*.go
 
 ## Go development rules
 
-CRITICAL: Follow these rules when writing Go code to avoid outdated patterns that `modernize` would flag:
+Follow these rules when writing Go code so that `modernize` has nothing to flag:
 
 ### Types and Interfaces
 - Use `any` instead of `interface{}`
@@ -76,10 +76,8 @@ CRITICAL: Follow these rules when writing Go code to avoid outdated patterns tha
 
   12. Call t.Parallel() first - Always place t.Parallel() as the first
   statement in parallel test functions
-  13. Capture loop variables - Always capture range variables before using
-  them in parallel subtests
   14. Use testing/synctest for concurrent code - For time-dependent tests,
-  use the experimental synctest package when available
+  use the testing/synctest package
 
 ### Mocking and Dependencies
 
@@ -108,7 +106,7 @@ CRITICAL: Follow these rules when writing Go code to avoid outdated patterns tha
 
 ### Benchmarking
 
-  23. Use B.Loop() for benchmarks - Prefer the new B.Loop() pattern over for
+  23. Use B.Loop() for benchmarks - Use b.Loop() instead of for
    i := 0; i < b.N; i++
   24. Always use -benchmem - Include memory profiling in benchmark runs
   25. Use benchstat for analysis - Compare benchmark results statistically
@@ -139,8 +137,8 @@ CRITICAL: Follow these rules when writing Go code to avoid outdated patterns tha
 ### Code Quality
 
   33. Run go fmt after modifications - Always format test code
-  34. Run all tests after changes - Execute go test ./... to ensure nothing
-  breaks
+  34. Run all tests after changes - Run the relevant tests (via the
+  project's Makefile targets when present) to ensure nothing breaks
   35. Validate with linters - Use golangci-lint to catch test issues
 
 ### Modern Patterns

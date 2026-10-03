@@ -1,3 +1,7 @@
+---
+paths: "**/decision_log.md"
+---
+
 # Decision Log Format
 
 Decision logs use two tiers. Pick the tier before writing:

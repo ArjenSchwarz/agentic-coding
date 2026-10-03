@@ -41,7 +41,7 @@ Run the setup script from your project directory:
 
 The script:
 - Creates `.claude/settings.json` if it doesn't exist
-- Merges hooks and permissions into existing settings without overwriting
+- Merges permissions into existing settings without overwriting
 - Is idempotent (safe to run multiple times)
 - Requires `jq` for JSON manipulation
 

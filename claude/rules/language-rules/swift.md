@@ -126,7 +126,7 @@ struct ChildView: View {
 - Initialize state with sensible defaults
 
 ### NEVER
-- Use `@State` for reference types—use `@State` with `@Observable` classes
+- Use `@State` for reference types that aren't `@Observable`
 - Declare `@State` without `private` access level
 - Share `@State` between unrelated views—lift to common ancestor or use environment
 

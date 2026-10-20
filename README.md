@@ -57,6 +57,17 @@ Each phase requires explicit user approval before proceeding to ensure quality a
 
 The review tooling — the `local-review` agent and the `pr-pilot` / `pr-review-fixer` skills — works on both GitHub (via `gh`) and GitLab (via `glab`). You don't pick a forge: each workflow detects it from `git remote get-url origin` and adapts.
 
+`pr-pilot` prefers a fresh native reviewer subagent, including Codex subagents;
+Claude Code's `local-review` agent remains available. Both use the shared
+[review brief](claude/skills/pr-pilot/references/review.md), post evidence for the
+reviewed commit, and feed the existing findings/fix loop. If no independent
+reviewer can complete and post a review, the workflow stops before merge.
+
+When copying `pr-pilot` into another host's skills directory, include its
+`references/` directory. The forge adapters and `pr-review-fixer` must also be
+available; this repository's sync script only installs Claude symlinks and does
+not update separate Codex skill copies.
+
 This is kept maintainable with a small adapter layer in `claude/forge-adapters/`:
 
 - **`CONTRACT.md`** - Defines the work in *forge-neutral* terms. It establishes a shared vocabulary (a **CR** is a pull request on GitHub and a merge request on GitLab; a **thread** is a review thread or a discussion; the **CLI** is `gh` or `glab`) and a fixed set of named operations — `PREFLIGHT`, `CR_VIEW`, `CR_DIFF`, `THREADS_FETCH`, `CR_COMMENT`, `CR_MERGE`, and so on. The workflow files describe *what* to do using these operation names and never hard-code a CLI command.

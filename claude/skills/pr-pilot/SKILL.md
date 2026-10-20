@@ -12,9 +12,9 @@ squash-merge.
 
 This skill is **forge-aware**: the repo may be on GitHub (`gh`) or GitLab (`glab`).
 It does not hard-code either CLI — it follows the shared operation contract and the
-adapter for whichever forge the repo uses. The `local-review` agent and
-`/pr-review-fixer` skill it delegates to are themselves forge-aware, so just invoke
-them; they self-detect.
+adapter for whichever forge the repo uses. Local reviews can run in independent
+native subagents; a Claude installation or subscription is not required when that
+route works. `/pr-review-fixer` handles the resulting findings on either forge.
 
 ## Forge setup (do this first)
 
@@ -47,57 +47,61 @@ the returned id as `<id>`.
 
 If an existing CR id was provided, fetch its details with **`CR_VIEW`** instead.
 
-### 1.5 Decide Whether to Run Local Claude Review
+### 1.5 Select a Reviewer
 
-Run `local-review` up front by default. Skip the **up-front** run only when an
-automated reviewer will post the same comment, so the two don't duplicate each other.
+Use an independent reviewer, separate from the agent implementing fixes:
 
-```text
-RUN_LOCAL_REVIEW = (AUTO_REVIEWER_DETECT == 0) ? 1 : 0
-```
+1. **Native subagent (preferred):** start a fresh reviewer using the host's agent
+   tools. In Claude Code, the registered `local-review` agent can fill this role;
+   in Codex or another host, spawn a fresh review-only subagent with the brief in
+   [references/review.md](references/review.md). Supply the repository/worktree,
+   CR id, forge adapter paths, and the head SHA from `CR_VIEW`. Do not seed it with
+   the implementer's conclusions or use an agent that authored the changes.
+2. **Claude fallback:** if independent native subagents are unavailable, use the
+   existing `local-review` agent through an available, authenticated Claude runtime,
+   with the same review brief. Do not require Claude login before trying a working
+   native route. Honour an explicit user choice of reviewer.
+3. If neither route can complete, report the missing capability/authentication and
+   stop before merge. The implementer's own reread cannot satisfy this gate.
 
-`RUN_LOCAL_REVIEW` only decides whether `local-review` runs **up front**:
+Read the review brief before dispatch. Both routes must inspect the full current
+CR diff and project instructions, return a verdict with grounded findings, and post
+one review note via `CR_COMMENT`. A native reviewer may return the complete body to
+its parent to post if it lacks posting tools; preserve its verdict and findings.
+Use the compatibility sentinel `<!-- claude-local-review -->` even for native
+reviews so `/pr-review-fixer` recognises them; state the actual reviewer/runtime in
+visible text rather than claiming every review is Claude.
 
-- `1` — no automated reviewer, so run `local-review` up front as the primary reviewer.
-- `0` — an automated reviewer will post, so do **not** run it up front (avoids a
-  duplicate note).
-
-It is **not** a licence to skip review entirely. An automated reviewer can finish
-`success` yet post nothing — it ran, hit a permission denial, and left no note, so
-`pr-review-fixer` has nothing to act on and the loop could merge with zero review. To
-prevent that, steps 2.1 and 3.3 fall back to `local-review` whenever a round produces
-no new review note, regardless of `RUN_LOCAL_REVIEW`.
-
-To detect an empty round, count the review notes already on the CR. Run
-**`CR_NOTES_LIST`** for `<id>` and count the notes whose `author` matches
-`claude`/`github-actions` (case-insensitive) **or** whose `body` carries the
-`claude-local-review` sentinel — call this value `count_reviews`.
+Run local review up front unless `AUTO_REVIEWER_DETECT == 1`. Detection only avoids
+an up-front duplicate: a successful automated job alone never satisfies review.
 
 ### 2. Review Loop
 
-#### 2.1 Run Local Claude Review and Wait
+#### 2.1 Obtain and Verify Review Evidence
 
-Record the review count before this round so you can tell whether a review actually
-lands: `PRE = count_reviews`.
+Before starting the round, fetch `CR_VIEW` for `HEAD_SHA` and `CR_NOTES_LIST` for the
+baseline note ids. Run the selected local reviewer if no automated reviewer is
+expected. Wait up to 10 minutes for checks/review input when CI exists; when there
+is no CI, proceed as soon as a completed review note is verified.
 
-If `RUN_LOCAL_REVIEW=1`, invoke the `local-review` agent on the CR (pass `<id>`) so
-the Claude review note is posted from your local subscription instead of CI. It
-reads the repo's `CLAUDE.md`, fetches the diff, and posts one comment that
-`pr-review-fixer` absorbs in step 2.2.
+Accept a round only when a **new note id**, absent from the baseline, contains a
+completed independent review of `HEAD_SHA`: an explicit reviewed SHA, verdict, and
+findings (or an explicit no-findings result). For local reviews, verify the sentinel
+and actual reviewer identity too. Automated reviews must also demonstrably cover
+that SHA and the review scope in the brief. Author matches, note counts, job success,
+and fixer overview comments alone are insufficient evidence.
 
-Then wait for review input:
-- **If CI exists** (`CI_STATUS` non-empty): wait up to 10 minutes, polling
-  `CI_STATUS`, for checks and other reviewers.
-- **If `CI_STATUS` is empty** (no CI configured): nothing to wait on — proceed once
-  the local-review note is posted. Allow a brief pause only if human reviewers are
-  expected.
+If no qualifying review landed, run the selected local reviewer as a fallback at
+most once per round, regardless of automated-review detection, then re-fetch notes
+and verify the same evidence. If the selected backend failed (including Claude auth
+failure), use an available independent alternative from step 1.5 for this fallback;
+do not treat failure as a clean review. If posting had an uncertain outcome, inspect
+notes before retrying to avoid duplicates. If evidence is still absent, incomplete,
+or failed, stop and report the blocker. Do not continue to the fixer or merge.
 
-**Fallback — never proceed with no review.** Once the wait ends, re-check
-`POST = count_reviews`. If `POST <= PRE`, no new review landed this round (an
-automated reviewer that errored or posted nothing, or a `local-review` that failed to
-post) — invoke `local-review` on `<id>` exactly as in the `RUN_LOCAL_REVIEW=1` path,
-give it a minute or two to post, then continue to 2.2. Run this fallback at most once
-per round. When a review did land (`POST > PRE`), skip it.
+Re-fetch `CR_VIEW` after the review: if the head changed during review, invalidate
+the round and review the new head within the loop cap. Reviews of an earlier head
+cannot authorise the current one.
 
 #### 2.2 Run PR Review Fixer
 
@@ -105,10 +109,10 @@ Run the `/pr-review-fixer` skill to fetch unresolved threads and any CI failures
 validate them, and fix issues found.
 
 After it completes, evaluate:
-- **CLEAN**: no blockers, critical, or major issues. Minor and nitpick items are
-  acceptable.
-- **HAS_ISSUES**: blockers/critical/major items were fixed and pushed. Another round
-  is needed.
+- **CLEAN**: verified review evidence for the current head, no blockers, critical,
+  or major issues, and no failed checks. Minor and nitpick items are acceptable.
+- **HAS_ISSUES**: fixes or CI repairs were committed and pushed. Any head change
+  requires another independent review, regardless of finding severity.
 
 #### 2.3 Evaluate and Repeat
 
@@ -138,29 +142,29 @@ verify the rebase is clean.
 git push --force-with-lease
 ```
 
-#### 3.3 Run Local Claude Review and Wait
+#### 3.3 Review the Rebased Head and Wait
 
-Capture this round's baseline first — `PRE = count_reviews` — since the rebased
-diff's review hasn't been posted yet.
+Run step 2.1 again with a fresh baseline and the rebased `HEAD_SHA`, using the same
+reviewer selection, evidence checks, and bounded fallback. Even if the rebase was a
+no-op, obtain a fresh review for this phase. Then run `/pr-review-fixer` for new
+findings and CI failures.
 
-If `RUN_LOCAL_REVIEW=1`, invoke `local-review` again so the post-rebase diff gets a
-fresh note. Wait for checks only if `CI_STATUS` is non-empty (poll up to 10 min);
-otherwise proceed.
-
-**Same fallback applies.** After the wait, if `POST = count_reviews` is still
-`<= PRE`, no review landed for the rebased code — invoke `local-review` on `<id>` and
-give it a minute or two to post. Then run `/pr-review-fixer` to check for new threads
-and CI failures.
-
-- **CLEAN**: proceed to merge.
-- **HAS_ISSUES**: fix, push, and repeat (up to 3 iterations). If still not clean,
-  inform the user and stop.
+- **CLEAN**: proceed to the final merge gate.
+- **HAS_ISSUES** or any head change: fix, push, and repeat the review/fixer cycle
+  (up to 3 iterations). If still not clean or review is blocked, inform the user
+  and stop without merging.
 
 #### 3.4 Squash and Merge
 
-Run **`CR_MERGE`** with `<id>`. If branch protection requires a green pipeline before
-merge, the operation will refuse until checks pass — surface that rather than forcing
-it.
+Immediately before merge, re-fetch `CR_VIEW` and `CI_STATUS`. The head must still
+match the verified review, all blockers/critical/major findings must be addressed,
+and required checks must pass. Running, failed, unknown, or unavailable check status
+blocks merge; a confirmed absence of configured checks is allowed. An adapter error
+or suppressed CLI failure is not proof of no CI. If the head changed, return to
+review within the phase cap. If checks time out, stop and report them.
+
+Run **`CR_MERGE`** with `<id>` only after these gates pass and merge is within the
+user's requested scope. Surface branch-protection refusals rather than forcing it.
 
 ### 4. Update Transit Ticket
 

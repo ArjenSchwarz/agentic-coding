@@ -157,11 +157,11 @@ findings and CI failures.
 #### 3.4 Squash and Merge
 
 Immediately before merge, re-fetch `CR_VIEW` and `CI_STATUS`. The head must still
-match the verified review, all blockers/critical/major findings must be addressed,
-and required checks must pass. Running, failed, unknown, or unavailable check status
-blocks merge; a confirmed absence of configured checks is allowed. An adapter error
-or suppressed CLI failure is not proof of no CI. If the head changed, return to
-review within the phase cap. If checks time out, stop and report them.
+match the verified review and all blockers/critical/major findings must be addressed.
+Apply the existing `CI_STATUS` contract: `[]` means no CI to wait on; otherwise
+checks must pass. Running, failed, or `other` states block merge. If the operation
+reports an error, stop and report it. If the head changed, return to review within
+the phase cap. If checks time out, stop and report them.
 
 Run **`CR_MERGE`** with `<id>` only after these gates pass and merge is within the
 user's requested scope. Surface branch-protection refusals rather than forcing it.
